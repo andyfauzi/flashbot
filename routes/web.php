@@ -92,14 +92,17 @@ Route::post('/sa-access', function (\Illuminate\Http\Request $request) {
         'password' => 'required',
     ]);
 
-    if (Auth::attempt($credentials)) {
+    // Verifikasi manual langsung ke landlord DB
+    // Menghindari potensi masalah koneksi dari multi-tenant middleware
+    $user = \Illuminate\Support\Facades\DB::connection('landlord')
+        ->table('users')
+        ->where('email', $credentials['email'])
+        ->first();
+
+    if ($user && $user->is_super_admin && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        Auth::loginUsingId($user->id);
         $request->session()->regenerate();
-        if (Auth::user()->is_super_admin) {
-            return redirect()->route('superadmin.index')->with('sukses', 'Selamat datang, Super Admin!');
-        }
-        // Bukan super admin — tolak dan logout
-        Auth::logout();
-        $request->session()->invalidate();
+        return redirect()->route('superadmin.index')->with('sukses', 'Selamat datang, Super Admin!');
     }
 
     return back()->withErrors(['email' => 'Akses ditolak.'])->onlyInput('email');
