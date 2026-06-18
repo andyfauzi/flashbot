@@ -31,13 +31,14 @@
             <script>
                 function copyAndRedirect() {
                     const pwd = document.getElementById('tempPassword').innerText;
+                    const loginUrl = "{{ $loginUrl }}";
                     navigator.clipboard.writeText(pwd).then(() => {
                         const btn = document.getElementById('btnLanjut');
                         btn.innerText = 'Mengarahkan...';
                         btn.classList.replace('bg-blue-600', 'bg-gray-500');
-                        window.location.href = "{{ request()->getScheme() . '://' . $tenant->subdomain . '.localhost' . (request()->getPort() && request()->getPort() != 80 && request()->getPort() != 443 ? ':' . request()->getPort() : '') . '/login' }}";
+                        window.location.href = loginUrl;
                     }).catch(err => {
-                        window.location.href = "{{ request()->getScheme() . '://' . $tenant->subdomain . '.localhost' . (request()->getPort() && request()->getPort() != 80 && request()->getPort() != 443 ? ':' . request()->getPort() : '') . '/login' }}";
+                        window.location.href = loginUrl;
                     });
                 }
             </script>

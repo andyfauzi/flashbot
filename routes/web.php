@@ -291,7 +291,12 @@ Route::prefix('super-admin')
 Route::get('/auth/google/provisioning', function (\Illuminate\Http\Request $request) {
     \App\Services\TenantManager::switchToLandlord();
     $tenant = \App\Models\Tenant::findOrFail($request->tenant_id);
-    return view('auth.provisioning', compact('tenant'));
+    $appHost = parse_url(config('app.url'), PHP_URL_HOST) ?? $request->getHost();
+    $scheme  = $request->getScheme();
+    $port    = $request->getPort();
+    $portStr = ($port && $port != 80 && $port != 443) ? ':' . $port : '';
+    $loginUrl = $scheme . '://' . $tenant->subdomain . '.' . $appHost . $portStr . '/login';
+    return view('auth.provisioning', compact('tenant', 'loginUrl'));
 })->name('auth.google.provisioning');
 
 Route::get('/migrate-broadcast', function() {
