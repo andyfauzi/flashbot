@@ -40,7 +40,7 @@ trait EnforcesLimits
      */
     public function checkLimits()
     {
-        $tenantId = app('current_tenant')->id ?? null;
+        $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : null;
         if (!$tenantId) {
             return; // Not in tenant context
         }

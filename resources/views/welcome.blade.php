@@ -224,17 +224,17 @@
                         <a class="nav-link fw-medium" href="#contact">Kontak</a>
                     </li>
                 </ul>
-                <div class="d-flex">
+                <div class="d-flex gap-2">
                     @auth
                         @if(Auth::user()->is_super_admin)
-                            <a href="{{ route('superadmin.index') }}" class="btn btn-outline-dark rounded-pill px-4 me-2">Dashboard</a>
+                            <a href="{{ route('superadmin.index') }}" class="btn btn-custom">Dashboard Admin</a>
                         @else
-                            <a href="{{ route('pos.index') }}" class="btn btn-outline-dark rounded-pill px-4 me-2">Kasir POS</a>
+                            <a href="{{ route('pos.index') }}" class="btn btn-outline-dark rounded-pill px-4">Kasir POS</a>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-outline-dark rounded-pill px-4 me-2">Login</a>
+                        <a href="#pricing" class="btn btn-outline-dark rounded-pill px-4">Lihat Paket</a>
+                        <a href="{{ route('auth.google') }}" class="btn btn-custom">Daftar Gratis</a>
                     @endauth
-                    <a href="{{ $settings['cta_link'] ?? '#pricing' }}" class="btn btn-custom">{{ $settings['cta_text'] ?? 'Mulai Sekarang' }}</a>
                 </div>
             </div>
         </div>

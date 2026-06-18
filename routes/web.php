@@ -50,11 +50,9 @@ if (app()->environment('local')) {
 
 use Illuminate\Support\Facades\Auth;
 
+// Tenant login — hanya untuk subdomain (namatoko.tenanta.id/login)
 Route::get('/login', function () {
     if (Auth::check()) {
-        if (Auth::user()->is_super_admin) {
-            return redirect()->route('superadmin.index');
-        }
         return redirect()->route('dashboard.transaksi.index');
     }
     return view('auth.login');
@@ -63,14 +61,11 @@ Route::get('/login', function () {
 Route::post('/login', function (\Illuminate\Http\Request $request) {
     $credentials = $request->validate([
         'email'    => 'required|email',
-        'password' => 'required', // Hanya validasi required saat login agar user dengan password lama yang pendek tidak diblokir di pintu masuk
+        'password' => 'required',
     ]);
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        if (Auth::user()->is_super_admin) {
-            return redirect()->intended('/super-admin')->with('sukses', 'Login berhasil sebagai Super Admin!');
-        }
         return redirect()->intended('/dashboard/transaksi')->with('sukses', 'Login berhasil!');
     }
 
@@ -79,10 +74,45 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     ])->onlyInput('email');
 })->middleware('throttle:5,1');
 
+// =============================================
+// SUPER ADMIN SECRET LOGIN (/sa-access)
+// URL ini tidak ada tautannya di halaman manapun
+// =============================================
+Route::get('/sa-access', function () {
+    if (Auth::check() && Auth::user()->is_super_admin) {
+        return redirect()->route('superadmin.index');
+    }
+    Auth::logout();
+    return view('auth.sa-login');
+})->name('sa.login');
+
+Route::post('/sa-access', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        if (Auth::user()->is_super_admin) {
+            return redirect()->route('superadmin.index')->with('sukses', 'Selamat datang, Super Admin!');
+        }
+        // Bukan super admin — tolak dan logout
+        Auth::logout();
+        $request->session()->invalidate();
+    }
+
+    return back()->withErrors(['email' => 'Akses ditolak.'])->onlyInput('email');
+})->middleware('throttle:5,1')->name('sa.login.post');
+
 Route::get('/logout', function (\Illuminate\Http\Request $request) {
+    $isSuperAdmin = Auth::check() && Auth::user()->is_super_admin;
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
+    if ($isSuperAdmin) {
+        return redirect('/sa-access')->with('sukses', 'Logout berhasil!');
+    }
     return redirect('/login')->with('sukses', 'Logout berhasil!');
 })->name('logout');
 
