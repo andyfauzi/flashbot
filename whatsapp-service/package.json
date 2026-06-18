@@ -7,7 +7,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "@whiskeysockets/baileys": "^6.7.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
