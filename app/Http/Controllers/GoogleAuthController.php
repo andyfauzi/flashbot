@@ -49,9 +49,11 @@ class GoogleAuthController extends Controller
 
         if ($existingTenant) {
             // Already registered, redirect to their subdomain dashboard login
-            $port = request()->getPort();
-            $portStr = ($port && $port != 80 && $port != 443) ? ':' . $port : '';
-            $url = request()->getScheme() . '://' . $existingTenant->subdomain . '.localhost' . $portStr . '/login';
+            $appHost = parse_url(config('app.url'), PHP_URL_HOST) ?? request()->getHost();
+            $scheme   = request()->getScheme();
+            $port     = request()->getPort();
+            $portStr  = ($port && $port != 80 && $port != 443) ? ':' . $port : '';
+            $url      = $scheme . '://' . $existingTenant->subdomain . '.' . $appHost . $portStr . '/login';
             return redirect($url)->with('sukses', 'Silakan login menggunakan akun Google Anda.');
         }
 
