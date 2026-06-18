@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddAddonsToChatbotOrderSessions extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('chatbot_order_sessions', function (Blueprint $table) {
+            $table->json('addons')->nullable()->after('produk_varian_id');
+        });
+    }
+
+    public function down()
+    {
+        Schema::table('chatbot_order_sessions', function (Blueprint $table) {
+            $table->dropColumn('addons');
+        });
+    }
+}

@@ -1,0 +1,350 @@
+/* CSS Kustom - Tema Dashboard Premium Chatbot WA */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    
+    --bg-app: #FFFFFF; /* Background White */
+    --bg-card: #F8FAFC; /* Surface Light Gray */
+    --border-card: #E2E8F0; /* Border Gray */
+    
+    --text-primary: #0F172A; /* Text Dark Slate */
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    
+    --clr-brand: #2563EB; /* Primary Slate Blue */
+    --clr-secondary: #4F46E5; /* Secondary Indigo */
+    --clr-brand-glow: rgba(37, 99, 235, 0.1);
+    
+    --clr-success: #10B981; 
+    --clr-success-glow: rgba(16, 185, 129, 0.1);
+    
+    --clr-warning: #F59E0B; /* Kuning Emas */
+    --clr-warning-glow: rgba(245, 158, 11, 0.1);
+    
+    --clr-danger: #EF4444; 
+    --clr-danger-glow: rgba(239, 68, 68, 0.1);
+    
+    --sidebar-bg: #FFFFFF;
+    --sidebar-hover: #F8FAFC;
+    --sidebar-active: #2563EB; /* Biru Utama */
+}
+
+/* Base resets */
+body {
+    background-color: var(--bg-app);
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: var(--font-heading);
+    font-weight: 600; /* SemiBold as requested */
+}
+
+/* Unified Border Radius Strategy */
+.card-premium, .card {
+    border-radius: 16px !important;
+}
+
+.btn, .btn-premium {
+    border-radius: 10px !important;
+}
+
+.form-control, .form-control-premium, .input-group, .input-group-text {
+    border-radius: 10px !important;
+}
+
+.badge, .status-badge {
+    border-radius: 999px !important;
+}
+
+/* Clean Soft Cards */
+.card-premium {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Stat Cards Glowing Styles */
+.stat-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.stat-card.brand::before { background-color: var(--clr-brand); }
+.stat-card.success::before { background-color: var(--clr-success); }
+.stat-card.warning::before { background-color: var(--clr-warning); }
+.stat-card.danger::before { background-color: var(--clr-danger); }
+
+/* Premium Sidebar */
+.sidebar-premium {
+    min-height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-card);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+}
+
+.sidebar-premium a {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 12px 24px;
+    margin: 4px 16px;
+    border-radius: 10px; /* Standar tombol */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-premium a:hover {
+    color: var(--text-primary);
+    background: var(--sidebar-hover);
+}
+
+.sidebar-premium a.active {
+    color: #fff;
+    background: var(--sidebar-active);
+    box-shadow: 0 4px 12px var(--clr-brand-glow);
+}
+
+.sidebar-premium .menu-section {
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 24px 24px 8px 36px;
+}
+
+/* Premium Navbar */
+.navbar-premium {
+    background-color: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-card);
+    padding: 16px 24px;
+}
+
+/* Status Badge Pulse Animation */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-badge.online {
+    background: var(--clr-success-glow);
+    color: var(--clr-success);
+    border: 1px solid rgba(124, 191, 142, 0.2);
+}
+
+.status-badge.offline {
+    background: var(--clr-danger-glow);
+    color: var(--clr-danger);
+    border: 1px solid rgba(232, 126, 126, 0.2);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    position: relative;
+}
+
+.status-badge.online .pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: currentColor;
+    opacity: 0.4;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Modern inputs & forms */
+.form-control-premium {
+    background-color: #fff;
+    border: 1px solid var(--border-card);
+    padding: 12px 16px;
+    min-height: 48px; /* Lebih nyaman ditekan */
+    font-size: 16px !important; /* Mencegah iOS Safari auto-zoom */
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.form-control-premium:focus {
+    border-color: var(--clr-brand);
+    box-shadow: 0 0 0 4px var(--clr-brand-glow);
+    outline: none;
+}
+
+.btn-premium {
+    padding: 12px 24px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.btn-premium-brand {
+    background-color: var(--clr-brand);
+    color: #fff;
+    border: none;
+}
+
+.btn-premium-brand:hover {
+    background-color: hsl(210, 100%, 43%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -8px var(--clr-brand-glow);
+}
+
+.btn-premium-success {
+    background-color: var(--clr-success);
+    color: #fff;
+    border: none;
+}
+
+.btn-premium-success:hover {
+    background-color: hsl(150, 80%, 32%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -8px var(--clr-success-glow);
+}
+
+/* Modern tables */
+.table-premium {
+    margin-bottom: 0;
+}
+
+.table-premium th {
+    background-color: hsla(220, 20%, 90%, 0.3) !important;
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.8px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-card) !important;
+}
+
+.table-premium td {
+    padding: 18px 24px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-card);
+    color: var(--text-primary);
+}
+
+.table-premium tr:hover td {
+    background-color: hsla(220, 20%, 90%, 0.15) !important;
+}
+
+/* Icons box styling */
+.icon-box-premium {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.icon-box-premium.brand { background-color: var(--clr-brand-glow); color: var(--clr-brand); }
+.icon-box-premium.success { background-color: var(--clr-success-glow); color: var(--clr-success); }
+.icon-box-premium.warning { background-color: var(--clr-warning-glow); color: var(--clr-warning); }
+.icon-box-premium.danger { background-color: var(--clr-danger-glow); color: var(--clr-danger); }
+
+/* QR Code styling */
+.qr-container-premium {
+    background: #fff;
+    border: 2px dashed var(--border-card);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-image {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Grid Mode Menu Layout */
+.grid-mode-menu {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px 15px;
+    gap: 10px;
+}
+.grid-mode-menu .menu-section {
+    width: 100%;
+    margin-bottom: 0px;
+    padding: 15px 10px 5px 10px !important;
+    border-bottom: 1px solid var(--border-card);
+}
+.grid-mode-menu a {
+    width: calc(33.333% - 7px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 15px 5px !important;
+    margin: 0 !important;
+    border: 1px solid var(--border-card);
+    border-radius: 12px !important;
+    background: var(--bg-card);
+    gap: 8px !important;
+}
+.grid-mode-menu a i {
+    margin: 0 !important;
+    width: 24px;
+    height: 24px;
+}
+.grid-mode-menu a span {
+    font-size: 0.65rem !important;
+    line-height: 1.2;
+    white-space: normal;
+}
+
+/* Mobile PWA Enhancements */
+.bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom); /* Fix for iOS Home Indicator */
+}

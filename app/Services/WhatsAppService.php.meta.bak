@@ -1,0 +1,354 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\ChatbotDevice;
+use App\Models\ChatbotMenu;
+use App\Models\ChatbotPesan;
+use App\Models\ChatbotUser;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class WhatsAppService
+{
+    protected string $metaPhoneNumberId = '';
+    protected string $metaAccessToken   = '';
+    protected string $metaApiVersion    = 'v20.0';
+
+    public function __construct()
+    {
+        $this->metaPhoneNumberId = env('META_PHONE_NUMBER_ID', '');
+        $this->metaAccessToken   = env('META_ACCESS_TOKEN', '');
+        $this->metaApiVersion    = env('META_API_VERSION', 'v20.0');
+    }
+
+    protected function normalisasiNomor(string $nomor): string
+    {
+        $nomor = preg_replace('/\D/', '', $nomor);
+        if (str_starts_with($nomor, '0')) {
+            $nomor = '62' . substr($nomor, 1);
+        }
+        if (!str_starts_with($nomor, '62') && !str_contains($nomor, '-')) {
+            $nomor = '62' . $nomor;
+        }
+        return $nomor;
+    }
+
+    /**
+     * Kirim pesan via Meta WhatsApp Cloud API
+     */
+    public function kirimPesan(
+        string  $nomor,
+        string  $teks,
+        ?string $mediaUrl         = null,
+        ?string $mediaType        = null,
+        ?string $deviceId         = null,
+        ?string $interactiveType  = null,
+        ?array  $interactiveOptions = null
+    ): bool {
+        // Normalisasi nomor (harus format internasional, tanpa +)
+        if (!str_contains($nomor, '@')) {
+            $nomor = $this->normalisasiNomor($nomor);
+        }
+
+        return $this->kirimPesanMeta($nomor, $teks, $mediaUrl, $mediaType, $interactiveType, $interactiveOptions);
+    }
+
+    /**
+     * Kirim pesan menggunakan Meta WhatsApp Cloud API
+     */
+    protected function kirimPesanMeta(
+        string  $nomor,
+        string  $teks,
+        ?string $mediaUrl         = null,
+        ?string $mediaType        = null,
+        ?string $interactiveType  = null,
+        ?array  $interactiveOptions = null
+    ): bool {
+        try {
+            if (empty($this->metaPhoneNumberId) || empty($this->metaAccessToken)) {
+                Log::error('❌ Meta API: META_PHONE_NUMBER_ID atau META_ACCESS_TOKEN belum diisi di .env');
+                return false;
+            }
+
+            $apiUrl = "https://graph.facebook.com/{$this->metaApiVersion}/{$this->metaPhoneNumberId}/messages";
+
+            // Interactive Buttons
+            if ($interactiveType === 'button' && !empty($interactiveOptions)) {
+                $buttons = [];
+                foreach (array_slice($interactiveOptions, 0, 3) as $i => $opt) {
+                    $buttons[] = [
+                        'type'  => 'reply',
+                        'reply' => [
+                            'id'    => $opt['id'] ?? (string)($i + 1),
+                            'title' => mb_substr($opt['text'] ?? "Pilihan " . ($i + 1), 0, 20),
+                        ]
+                    ];
+                }
+
+                $payload = [
+                    'messaging_product' => 'whatsapp',
+                    'recipient_type'    => 'individual',
+                    'to'                => $nomor,
+                    'type'              => 'interactive',
+                    'interactive'       => [
+                        'type' => 'button',
+                        'body' => ['text' => $teks],
+                        'action' => ['buttons' => $buttons]
+                    ]
+                ];
+
+                if ($mediaUrl) {
+                    $payload['interactive']['header'] = [
+                        'type'  => 'image',
+                        'image' => ['link' => $mediaUrl]
+                    ];
+                }
+
+                $response = Http::withToken($this->metaAccessToken)
+                    ->timeout(10)
+                    ->post($apiUrl, $payload);
+
+                Log::info("Meta API Buttons [{$nomor}]: " . $response->body());
+
+                if ($response->successful()) {
+                    ChatbotPesan::simpanKeluar($nomor, $teks, $mediaUrl, $mediaType);
+                    return true;
+                }
+
+                Log::warning("⚠️ Meta Buttons gagal: " . $response->body());
+                return false;
+            }
+
+            // Interactive List
+            if ($interactiveType === 'list' && !empty($interactiveOptions)) {
+                $rows = [];
+                foreach ($interactiveOptions as $i => $opt) {
+                    $rows[] = [
+                        'id'          => $opt['id'] ?? (string)($i + 1),
+                        'title'       => mb_substr($opt['text'] ?? "Pilihan " . ($i + 1), 0, 24),
+                        'description' => mb_substr($opt['desc'] ?? '', 0, 72),
+                    ];
+                }
+
+                $payload = [
+                    'messaging_product' => 'whatsapp',
+                    'recipient_type'    => 'individual',
+                    'to'                => $nomor,
+                    'type'              => 'interactive',
+                    'interactive'       => [
+                        'type' => 'list',
+                        'body' => ['text' => $teks],
+                        'action' => [
+                            'button'   => 'Pilih Menu',
+                            'sections' => [
+                                ['title' => 'Menu', 'rows' => $rows]
+                            ]
+                        ]
+                    ]
+                ];
+
+                $response = Http::withToken($this->metaAccessToken)
+                    ->timeout(10)
+                    ->post($apiUrl, $payload);
+
+                Log::info("Meta API List [{$nomor}]: " . $response->body());
+
+                if ($response->successful()) {
+                    ChatbotPesan::simpanKeluar($nomor, $teks, $mediaUrl, $mediaType);
+                    return true;
+                }
+
+                Log::warning("⚠️ Meta List gagal: " . $response->body());
+                return false;
+            }
+
+            // Pesan dengan media
+            if ($mediaUrl) {
+                if ($mediaType === 'document') {
+                    $payload = [
+                        'messaging_product' => 'whatsapp',
+                        'to'                => $nomor,
+                        'type'              => 'document',
+                        'document'          => [
+                            'link'     => $mediaUrl,
+                            'caption'  => $teks,
+                            'filename' => basename(parse_url($mediaUrl, PHP_URL_PATH)) ?: 'document.pdf',
+                        ]
+                    ];
+                } else {
+                    $payload = [
+                        'messaging_product' => 'whatsapp',
+                        'to'                => $nomor,
+                        'type'              => 'image',
+                        'image'             => [
+                            'link'    => $mediaUrl,
+                            'caption' => $teks,
+                        ]
+                    ];
+                }
+
+                $response = Http::withToken($this->metaAccessToken)
+                    ->timeout(10)
+                    ->post($apiUrl, $payload);
+
+                Log::info("Meta API Media [{$nomor}]: " . $response->body());
+
+                if ($response->successful()) {
+                    ChatbotPesan::simpanKeluar($nomor, $teks, $mediaUrl, $mediaType);
+                    return true;
+                }
+
+                return false;
+            }
+
+            // Pesan teks biasa
+            $payload = [
+                'messaging_product' => 'whatsapp',
+                'recipient_type'    => 'individual',
+                'to'                => $nomor,
+                'type'              => 'text',
+                'text'              => [
+                    'preview_url' => false,
+                    'body'        => $teks,
+                ]
+            ];
+
+            $response = Http::withToken($this->metaAccessToken)
+                ->timeout(10)
+                ->post($apiUrl, $payload);
+
+            Log::info("Meta API Text [{$nomor}]: " . $response->body());
+
+            if ($response->successful()) {
+                ChatbotPesan::simpanKeluar($nomor, $teks, $mediaUrl, $mediaType);
+                return true;
+            }
+
+            Log::warning("⚠️ Meta Text gagal [{$nomor}]: " . $response->body());
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error("❌ Meta Exception [{$nomor}]: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Proses pesan masuk dan balas otomatis
+     */
+    public function prosesPesan(string $nomor, string $pesan, ?string $mediaUrl = null, ?string $mediaType = null, ?string $deviceId = null): void
+    {
+        $pesan = trim($pesan);
+        $teks  = strtolower($pesan);
+
+        $user = ChatbotUser::ambilAtauBuat($nomor);
+        ChatbotPesan::simpanMasuk($nomor, $pesan, $mediaUrl, $mediaType);
+
+        Log::info("📩 Pesan dari {$nomor}: {$pesan}");
+
+        $deviceObj = \App\Models\ChatbotDevice::where('session_id', $deviceId)->first();
+
+        // Ambil semua menu aktif
+        $menus = ChatbotMenu::where('aktif', true)
+            ->where(function ($q) use ($deviceObj) {
+                if ($deviceObj) {
+                    $q->where('device_id', $deviceObj->id)->orWhereNull('device_id');
+                } else {
+                    $q->whereNull('device_id');
+                }
+            })
+            ->orderByRaw('device_id IS NULL, device_id DESC')
+            ->orderBy('urutan')
+            ->get();
+
+        $matchedMenu  = null;
+        $fallbackMenu = null;
+
+        foreach ($menus as $m) {
+            $kodes = array_map('trim', explode(',', strtolower($m->kode)));
+
+            if (in_array($teks, $kodes) || strtolower($m->judul) === $teks) {
+                $matchedMenu = $m;
+                break;
+            }
+
+            if (in_array('default', $kodes) || in_array('fallback', $kodes)) {
+                $fallbackMenu = $m;
+            }
+        }
+
+        $menuToExecute = $matchedMenu ?? $fallbackMenu;
+
+        if ($menuToExecute) {
+            $user->update(['langkah' => $teks]);
+
+            $options         = is_string($menuToExecute->pilihan_interaktif)
+                ? json_decode($menuToExecute->pilihan_interaktif, true)
+                : $menuToExecute->pilihan_interaktif;
+            $interactiveType = $menuToExecute->tipe_pesan !== 'text' ? $menuToExecute->tipe_pesan : null;
+
+            $this->kirimPesan($nomor, $menuToExecute->isi, $menuToExecute->media_url, $menuToExecute->media_type, $deviceId, $interactiveType, $options);
+            return;
+        }
+
+        if (str_starts_with($teks, 'order-')) {
+            $nomorOrder = strtoupper($pesan);
+            $this->kirimPesan($nomor,
+                "🔍 Mencari pesanan *{$nomorOrder}*...\n\n" .
+                "Status: *Sedang diproses* 📦\n" .
+                "Estimasi tiba: 2-3 hari kerja\n\n" .
+                "Ketik *0* untuk kembali ke menu."
+            );
+            return;
+        }
+
+        $this->kirimPesan($nomor,
+            "Maaf, saya tidak mengerti pesan kamu. 😅\n\n" .
+            ChatbotMenu::buildMenuUtama()
+        );
+    }
+
+    /**
+     * Cek status koneksi Meta API
+     */
+    public function statusGateway(): array
+    {
+        if (empty($this->metaPhoneNumberId) || empty($this->metaAccessToken)) {
+            return [
+                'status'  => 'disconnected',
+                'gateway' => 'meta',
+                'message' => 'META_PHONE_NUMBER_ID atau META_ACCESS_TOKEN belum diisi di .env'
+            ];
+        }
+
+        try {
+            $response = Http::withToken($this->metaAccessToken)
+                ->timeout(5)
+                ->get("https://graph.facebook.com/{$this->metaApiVersion}/{$this->metaPhoneNumberId}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return [
+                    'status'       => 'connected',
+                    'gateway'      => 'meta',
+                    'phone_number' => $data['display_phone_number'] ?? $data['id'] ?? 'Meta Cloud API',
+                    'verified_name'=> $data['verified_name'] ?? 'WhatsApp Business',
+                ];
+            }
+
+            $err = $response->json()['error']['message'] ?? $response->body();
+            return [
+                'status'  => 'disconnected',
+                'gateway' => 'meta',
+                'message' => 'Token tidak valid: ' . $err
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status'  => 'disconnected',
+                'gateway' => 'meta',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+}
