@@ -14,3 +14,4 @@ yarn-error.log
 /.idea
 /.vscode
 /storage/logs/*.log
+cloudflared-windows-amd64.exe
