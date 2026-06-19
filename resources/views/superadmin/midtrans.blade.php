@@ -62,7 +62,7 @@
                 <div class="alert alert-info border-0 rounded-3">
                     <h6 class="fw-bold mb-1"><i class="fa-solid fa-bell me-2"></i>Pengaturan Webhook Midtrans</h6>
                     <p class="mb-0 small">Pastikan Anda telah mengatur Notification URL di dashboard Midtrans (Settings > Notification) mengarah ke:</p>
-                    <code class="d-block mt-2 bg-white p-2 rounded text-dark font-monospace border">{{ url('/api/midtrans/webhook') }}</code>
+                    <code class="d-block mt-2 bg-white p-2 rounded text-dark font-monospace border">{{ url('/api/webhook/midtrans') }}</code>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100 fw-bold py-3"><i class="fa-solid fa-save me-2"></i>Simpan Konfigurasi Midtrans</button>

@@ -173,7 +173,9 @@ class PaymentController extends Controller
 
         $payment = TenantPayment::where('order_id', $order_id)->first();
         if (!$payment) {
-            return response()->json(['status' => 'error', 'message' => 'Order not found'], 404);
+            Log::warning("Midtrans Webhook: Order tidak ditemukan.", ['order_id' => $order_id]);
+            // Midtrans mewajibkan response 200 OK agar tidak melakukan retry berkali-kali.
+            return response()->json(['status' => 'ignored', 'message' => 'Order not found, but acknowledged'], 200);
         }
 
         if ($transaction == 'capture' || $transaction == 'settlement') {
