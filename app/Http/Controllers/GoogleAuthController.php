@@ -15,11 +15,15 @@ use App\Jobs\ProvisionTenantDatabaseJob;
 
 class GoogleAuthController extends Controller
 {
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
         TenantManager::switchToLandlord();
         $state = Str::random(40);
-        session(['oauth_state' => $state]);
+        session([
+            'oauth_state' => $state,
+            'google_reg_plan' => $request->query('plan', 'starter'),
+            'google_reg_trial' => $request->query('trial', '0')
+        ]);
         
         // Menggunakan stateless(false) default Socialite + custom state validation
         return Socialite::driver('google')->with([
@@ -99,15 +103,28 @@ class GoogleAuthController extends Controller
         $dbName = 'tenant_' . $subdomain;
 
         try {
-            // 1. Create landlord tenant record but mark it as NOT active yet
+            // 1. Determine Plan Expiration
+            $plan = session('google_reg_plan', 'starter');
+            $isTrial = session('google_reg_trial', '0') === '1';
+            
+            if ($isTrial) {
+                $days = $plan === 'pro' ? 30 : 15;
+                $expiresAt = now()->addDays($days);
+            } else {
+                // If not trial, it expires immediately (subDay) so they must pay
+                $expiresAt = now()->subDay();
+            }
+
+            // 2. Create landlord tenant record but mark it as NOT active yet
             TenantManager::switchToLandlord();
             $tenant = Tenant::create([
                 'name' => $request->store_name,
                 'owner_email' => $email,
                 'subdomain' => $subdomain,
                 'database_name' => $dbName,
-                'plan' => 'starter',
+                'plan' => $plan,
                 'is_active' => false, // Will be true after provisioning
+                'plan_expires_at' => $expiresAt,
             ]);
 
             AuditLogger::record('tenant.registered_via_google', "tenant:{$tenant->id}", [
@@ -117,7 +134,7 @@ class GoogleAuthController extends Controller
             ]);
 
             // Clear registration session
-            session()->forget(['google_reg_email', 'google_reg_name', 'google_reg_id']);
+            session()->forget(['google_reg_email', 'google_reg_name', 'google_reg_id', 'google_reg_plan', 'google_reg_trial']);
 
             // 2. Dispatch the Provisioning Job
             ProvisionTenantDatabaseJob::dispatch(

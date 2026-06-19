@@ -81,5 +81,6 @@ class Kernel extends HttpKernel
         // Webhook Authentication
         'verify.webhook' => \App\Http\Middleware\VerifyWebhookSignature::class,
         'portal.active' => \App\Http\Middleware\EnsurePortalTenant::class,
+        'active.subscription' => \App\Http\Middleware\EnsureActiveSubscription::class,
     ];
 }

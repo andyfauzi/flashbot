@@ -131,7 +131,7 @@ Route::middleware(['auth'])->group(function () {
 // =============================================
 // POS (Point of Sale) KASIR
 // =============================================
-Route::middleware(['auth', 'permission:akses_pos'])->prefix('pos')->group(function () {
+Route::middleware(['auth', 'active.subscription', 'permission:akses_pos'])->prefix('pos')->group(function () {
     Route::get('/', [\App\Http\Controllers\PosController::class, 'index'])->name('pos.index');
     Route::post('/store', [\App\Http\Controllers\PosController::class, 'store'])->name('pos.store');
     Route::get('/print/{pesanan}', [\App\Http\Controllers\PosController::class, 'printReceipt'])->name('pos.print');
@@ -140,7 +140,7 @@ Route::middleware(['auth', 'permission:akses_pos'])->prefix('pos')->group(functi
 // =============================================
 // JADWAL PESANAN (PRE-ORDER)
 // =============================================
-Route::middleware(['auth', 'permission:akses_pos'])->prefix('dashboard/preorder')->group(function () {
+Route::middleware(['auth', 'active.subscription', 'permission:akses_pos'])->prefix('dashboard/preorder')->group(function () {
     Route::get('/', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'index'])->name('dashboard.preorder.index');
     Route::put('/{pesanan}/ongkir', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'setOngkir'])->name('dashboard.preorder.ongkir');
     Route::put('/{pesanan}/dp', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'setDp'])->name('dashboard.preorder.dp');
@@ -154,7 +154,7 @@ Route::middleware(['auth', 'permission:akses_pos'])->prefix('dashboard/preorder'
 // =============================================
 // PRODUKSI / MANUFAKTUR
 // =============================================
-Route::middleware(['auth', 'permission:akses_hpp'])->prefix('dashboard/produksi')->group(function () {
+Route::middleware(['auth', 'active.subscription', 'permission:akses_hpp'])->prefix('dashboard/produksi')->group(function () {
     Route::get('/', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'index'])->name('dashboard.produksi.index');
     Route::post('/store', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'store'])->name('dashboard.produksi.store');
     Route::post('/validasi', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'validasiSelesai'])->name('dashboard.produksi.validasi');
@@ -163,7 +163,7 @@ Route::middleware(['auth', 'permission:akses_hpp'])->prefix('dashboard/produksi'
 // =============================================
 // KALKULATOR HPP & RESEP
 // =============================================
-Route::middleware(['auth', 'permission:akses_hpp'])->prefix('dashboard/hpp')->group(function () {
+Route::middleware(['auth', 'active.subscription', 'permission:akses_hpp'])->prefix('dashboard/hpp')->group(function () {
     // Bahan Baku
     Route::get('/bahan', [\App\Http\Controllers\Dashboard\HppController::class, 'indexBahanBaku'])->name('dashboard.hpp.bahan.index');
     Route::post('/bahan', [\App\Http\Controllers\Dashboard\HppController::class, 'storeBahanBaku'])->name('dashboard.hpp.bahan.store');
@@ -184,7 +184,7 @@ Route::middleware(['auth', 'permission:akses_hpp'])->prefix('dashboard/hpp')->gr
 // =============================================
 // ARUS KAS & SHIFT
 // =============================================
-Route::middleware(['auth'])->prefix('dashboard')->group(function () {
+Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(function () {
     // Shift (Untuk Kasir)
     Route::post('/shift/buka', [\App\Http\Controllers\Dashboard\ShiftController::class, 'buka'])->name('dashboard.shift.buka');
     Route::post('/shift/tutup', [\App\Http\Controllers\Dashboard\ShiftController::class, 'tutup'])->name('dashboard.shift.tutup');

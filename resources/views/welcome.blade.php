@@ -232,8 +232,7 @@
                             <a href="{{ route('pos.index') }}" class="btn btn-outline-dark rounded-pill px-4">Kasir POS</a>
                         @endif
                     @else
-                        <a href="#pricing" class="btn btn-outline-dark rounded-pill px-4">Lihat Paket</a>
-                        <a href="{{ route('auth.google') }}" class="btn btn-custom">Daftar Gratis</a>
+                        <a href="#pricing" class="btn btn-custom rounded-pill px-4">Lihat Pilihan Paket</a>
                     @endauth
                 </div>
             </div>
@@ -286,7 +285,10 @@
                                 @endif
                             @endforeach
                         </ul>
-                        <a href="{{ route('auth.google') }}" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
+                        <div class="d-flex flex-column gap-2 mt-3">
+                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
+                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '1']) }}" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 15 Hari</a>
+                        </div>
                     </div>
                 </div>
 
@@ -304,7 +306,10 @@
                                 @endif
                             @endforeach
                         </ul>
-                        <a href="{{ route('auth.google') }}" class="btn btn-custom w-100 py-2">Daftar Pro</a>
+                        <div class="d-flex flex-column gap-2 mt-3">
+                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro</a>
+                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '1']) }}" class="btn btn-outline-primary w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 30 Hari</a>
+                        </div>
                     </div>
                 </div>
 
