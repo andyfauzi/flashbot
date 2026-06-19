@@ -52,7 +52,7 @@ class SuperAdminOnly
         $allowedIps    = array_map('trim', explode(',', $allowedIpsRaw));
         $clientIp      = $request->ip();
 
-        if (!in_array($clientIp, $allowedIps)) {
+        if (!in_array('*', $allowedIps) && !in_array($clientIp, $allowedIps)) {
             Log::warning('[SuperAdmin] Access blocked: IP not whitelisted.', [
                 'user_id'    => $userId,
                 'email'      => Auth::user()->email,
