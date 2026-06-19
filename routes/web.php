@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/debug-php', function () {
+    return phpinfo();
+});
+
 Route::get('/', function () {
     if (app()->has('current_tenant')) {
         return redirect()->route('dashboard.transaksi.index');
