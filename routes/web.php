@@ -228,8 +228,10 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
     
     // UI Mode Toggle
     Route::post('/toggle-ui-mode', [\App\Http\Controllers\Dashboard\UserController::class, 'toggleUiMode'])->name('dashboard.ui_mode.toggle');
+});
 
-    // Billing & Checkout
+// Billing & Checkout — HARUS di luar active.subscription agar bisa diakses walau belum aktif
+Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/billing', [\App\Http\Controllers\PaymentController::class, 'index'])->name('dashboard.billing.index');
     Route::post('/billing/checkout', [\App\Http\Controllers\PaymentController::class, 'checkout'])->name('dashboard.billing.checkout');
 });
