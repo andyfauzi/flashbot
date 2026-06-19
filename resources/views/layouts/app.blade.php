@@ -131,7 +131,7 @@
     <div class="row">
 
         <!-- Sidebar Container (Desktop) -->
-        <div class="col-md-2 px-0 d-none d-md-block sidebar-premium">
+        <div class="col-md-2 px-0 d-none d-md-block sidebar-premium sidebar-sticky">
             <div class="pt-4 px-0 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
                 
                 @include('layouts.sidebar_menu', ['prefix' => 'Desktop'])

@@ -97,13 +97,18 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 /* Premium Sidebar */
 .sidebar-premium {
     min-height: 100vh;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    overflow-y: auto;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border-card);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+}
+
+/* Modifier khusus untuk sidebar sticky (desktop) */
+.sidebar-sticky {
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    align-self: flex-start !important; /* Mencegah kolom ter-stretch oleh Bootstrap grid */
 }
 
 /* Custom scrollbar for sidebar */

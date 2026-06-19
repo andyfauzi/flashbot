@@ -104,7 +104,7 @@
 
 @section('content')
 <div class="header-panel">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <h2 class="fw-bold mb-1 fs-4">Dashboard Landlord</h2>
             <p class="text-white-50 mb-0 small">Kelola tenant, alokasi database, dan konfigurasi platform SaaS Tenanta.id</p>
@@ -194,7 +194,7 @@
 
 <div class="row">
     <!-- Form Tambah Tenant Card -->
-    <div class="col-lg-4">
+    <div class="col-lg-4 mb-4 mb-lg-0">
         <div class="custom-card">
             <h5 class="fw-bold mb-4"><i class="fa-solid fa-circle-plus text-primary me-2"></i>Daftarkan Tenant Baru</h5>
             <form action="{{ route('superadmin.store') }}" method="POST">
