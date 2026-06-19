@@ -159,6 +159,11 @@ class PaymentController extends Controller
         \Midtrans\Config::$serverKey    = $serverKey;
         \Midtrans\Config::$isProduction = $isProduction;
 
+        // Handle fitur "Tes URL Notifikasi" dari Dasbor Midtrans
+        if ($request->order_id == 'test-1234') {
+            return response()->json(['status' => 'ok', 'message' => 'Test notification received successfully'], 200);
+        }
+
         try {
             $notif = new \Midtrans\Notification();
         } catch (\Exception $e) {

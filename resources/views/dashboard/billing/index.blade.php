@@ -67,7 +67,7 @@
                                         <li><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
                                         @endforeach
                                     </ul>
-                                    <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade" data-plan="starter" {{ $tenant->plan == 'starter' && $tenant->is_active ? 'disabled' : '' }}>
+                                    <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade" data-plan="starter">
                                         {{ $tenant->plan == 'starter' ? 'Perpanjang' : 'Pilih Starter' }}
                                     </button>
                                 </div>
@@ -85,7 +85,7 @@
                                         <li><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
                                         @endforeach
                                     </ul>
-                                    <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro" {{ $tenant->plan == 'pro' && $tenant->is_active ? 'disabled' : '' }}>
+                                    <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro">
                                         {{ $tenant->plan == 'pro' ? 'Perpanjang' : 'Upgrade ke Pro' }}
                                     </button>
                                 </div>
@@ -102,7 +102,7 @@
                                         <li><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
                                         @endforeach
                                     </ul>
-                                    <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business" {{ $tenant->plan == 'business' && $tenant->is_active ? 'disabled' : '' }}>
+                                    <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business">
                                         {{ $tenant->plan == 'business' ? 'Perpanjang' : 'Upgrade Business' }}
                                     </button>
                                 </div>
