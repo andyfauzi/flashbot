@@ -128,15 +128,23 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 
 .sidebar-premium a {
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    padding: 12px 24px;
-    margin: 4px 16px;
+    padding: 12px 16px;
+    margin: 4px 12px;
     border-radius: 10px; /* Standar tombol */
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-premium a span {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-premium a:hover {
