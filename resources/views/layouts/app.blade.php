@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', $identitasToko->nama_toko ?? 'NINSKY') | Panel Admin</title>
+    <title>@yield('title', isset($identitasToko) ? $identitasToko->nama_toko : 'NINSKY') | Panel Admin</title>
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#D97757">
@@ -43,7 +43,7 @@
                     <i class="fa-solid fa-store" style="font-size: 14px;"></i>
                 </div>
             @endif
-            <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko ?? 'TENANTA.ID') }}</span>
+            <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}</span>
         </a>
     </div>
     
@@ -78,7 +78,14 @@
 
         @auth
             @php
-                $activeShift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+                $activeShift = null;
+                if (app()->has('current_tenant') && auth()->check()) {
+                    try {
+                        $activeShift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+                    } catch (\Exception $e) {
+                        // Ignore if model not available
+                    }
+                }
             @endphp
             
             @if($activeShift)
@@ -111,7 +118,7 @@
             @else
                 <i class="fa-solid fa-store text-primary"></i>
             @endif
-            {{ strtoupper($identitasToko->nama_toko ?? 'TENANTA.ID') }}
+            {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>

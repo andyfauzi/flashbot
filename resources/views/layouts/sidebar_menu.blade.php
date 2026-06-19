@@ -1,5 +1,6 @@
 <div class="accordion accordion-flush bg-transparent" id="accordion{{ $prefix }}">
     
+    @if(!auth()->user() || !auth()->user()->is_super_admin)
     <!-- ============================================== -->
     <!-- 🛒 KASIR & PENJUALAN -->
     <!-- ============================================== -->
@@ -215,6 +216,7 @@
             </div>
         </div>
     </div>
+    @endif
     @endif
 
     <!-- ============================================== -->
