@@ -22,7 +22,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
+    @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show shadow-sm">
+            <i class="fa-solid fa-info-circle me-2"></i>{{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    
     <div class="row">
         <!-- Current Plan Info -->
         <div class="col-lg-4 mb-4">
@@ -31,20 +37,35 @@
                     <h5 class="fw-bold text-muted mb-4">Paket Anda Saat Ini</h5>
                     <div class="d-flex align-items-center mb-3">
                         <div class="display-5 fw-bold text-primary text-capitalize me-3">{{ $tenant->plan ?? 'Starter' }}</div>
-                        @if($tenant->is_active)
+                        @php
+                            $isExpired = $tenant->plan_expires_at && $tenant->plan_expires_at < now();
+                            $isNew = $tenant->created_at && $tenant->created_at->diffInDays(now()) < 1;
+                        @endphp
+                        
+                        @if($isExpired && $isNew)
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">Menunggu Pembayaran</span>
+                        @elseif($isExpired)
+                            <span class="badge bg-danger rounded-pill px-3 py-2">Kedaluwarsa</span>
+                        @elseif($tenant->is_active)
                             <span class="badge bg-success rounded-pill px-3 py-2">Aktif</span>
                         @else
-                            <span class="badge bg-danger rounded-pill px-3 py-2">Nonaktif / Kedaluwarsa</span>
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">Nonaktif</span>
                         @endif
                     </div>
                     <hr>
                     <p class="mb-1"><strong>Berlaku hingga:</strong></p>
-                    <p class="text-dark fs-5">{{ $tenant->plan_expires_at ? $tenant->plan_expires_at->format('d M Y') : 'Tidak terbatas' }}</p>
+                    <p class="text-dark fs-5">{{ $tenant->plan_expires_at && !$isExpired ? $tenant->plan_expires_at->format('d M Y') : '-' }}</p>
                     
-                    @if($tenant->plan_expires_at && $tenant->plan_expires_at < now())
-                        <div class="alert alert-danger mt-3 mb-0">
-                            <i class="fa-solid fa-triangle-exclamation me-2"></i>Paket Anda telah kedaluwarsa. Silakan perpanjang untuk terus menggunakan layanan.
-                        </div>
+                    @if($isExpired)
+                        @if($isNew)
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="fa-solid fa-info-circle me-2"></i>Silakan selesaikan pembayaran untuk mulai menggunakan layanan Flashbot.
+                            </div>
+                        @else
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Paket Anda telah kedaluwarsa. Silakan perpanjang untuk terus menggunakan layanan.
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>
