@@ -15,6 +15,15 @@ class PaymentController extends Controller
     {
         $tenantId = app('current_tenant')->id ?? null;
         if (!$tenantId) {
+            if (auth()->check()) {
+                $tenant = Tenant::where('owner_email', auth()->user()->email)->first();
+                if ($tenant) {
+                    $tenantId = $tenant->id;
+                }
+            }
+        }
+        
+        if (!$tenantId) {
             abort(403, 'Unauthorized');
         }
         $tenant = Tenant::find($tenantId);
@@ -31,11 +40,16 @@ class PaymentController extends Controller
         // Let's rely on the current tenant in the session or app context
         $tenantId = app('current_tenant')->id ?? null;
         if (!$tenantId) {
-            // Find tenant by subdomain
-            $host = $request->getHost();
-            $subdomain = explode('.', $host)[0];
-            $tenant = Tenant::where('subdomain', $subdomain)->firstOrFail();
-            $tenantId = $tenant->id;
+            if (auth()->check()) {
+                $tenant = Tenant::where('owner_email', auth()->user()->email)->firstOrFail();
+                $tenantId = $tenant->id;
+            } else {
+                // Find tenant by subdomain
+                $host = $request->getHost();
+                $subdomain = explode('.', $host)[0];
+                $tenant = Tenant::where('subdomain', $subdomain)->firstOrFail();
+                $tenantId = $tenant->id;
+            }
         } else {
             $tenant = Tenant::find($tenantId);
         }
@@ -134,6 +148,16 @@ class PaymentController extends Controller
                             ? $tenant->plan_expires_at->addDays(30) 
                             : now()->addDays(30),
                     ]);
+                    
+                    // Send Email Notification
+                    try {
+                        if (!empty($tenant->owner_email)) {
+                            \Illuminate\Support\Facades\Mail::to($tenant->owner_email)
+                                ->send(new \App\Mail\PaymentSuccessMail($payment, $tenant));
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Gagal mengirim email konfirmasi: ' . $e->getMessage());
+                    }
                 }
             }
         } else if ($transaction == 'cancel' || $transaction == 'deny' || $transaction == 'expire') {
