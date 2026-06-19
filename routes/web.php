@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/debug-php', function () {
-    return phpinfo();
+    return response()->json(get_loaded_extensions());
 });
 
 Route::get('/', function () {
