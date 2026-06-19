@@ -39,7 +39,11 @@ class SuperAdminController extends Controller
         $metaPhoneNumberId = \App\Models\LandlordSetting::get('meta_phone_number_id');
         $metaAccessToken = \App\Models\LandlordSetting::get('meta_access_token');
 
-        return view('superadmin.index', compact('tenants', 'metaPhoneNumberId', 'metaAccessToken'));
+        $midtransServerKey = \App\Models\LandlordSetting::get('midtrans_server_key');
+        $midtransClientKey = \App\Models\LandlordSetting::get('midtrans_client_key');
+        $midtransIsProduction = \App\Models\LandlordSetting::get('midtrans_is_production', '0');
+
+        return view('superadmin.index', compact('tenants', 'metaPhoneNumberId', 'metaAccessToken', 'midtransServerKey', 'midtransClientKey', 'midtransIsProduction'));
     }
 
     public function updateMetaSettings(Request $request)
@@ -54,6 +58,21 @@ class SuperAdminController extends Controller
         \App\Models\LandlordSetting::set('meta_access_token', $request->meta_access_token);
 
         return redirect()->route('superadmin.dashboard')->with('success', 'Pengaturan Meta WhatsApp Pusat berhasil disimpan.');
+    }
+
+    public function updateMidtransSettings(Request $request)
+    {
+        TenantManager::switchToLandlord();
+        $request->validate([
+            'midtrans_server_key' => 'nullable|string',
+            'midtrans_client_key' => 'nullable|string',
+        ]);
+
+        \App\Models\LandlordSetting::set('midtrans_server_key', $request->midtrans_server_key);
+        \App\Models\LandlordSetting::set('midtrans_client_key', $request->midtrans_client_key);
+        \App\Models\LandlordSetting::set('midtrans_is_production', $request->has('midtrans_is_production') ? '1' : '0');
+
+        return redirect()->route('superadmin.index')->with('success', 'Pengaturan Midtrans berhasil disimpan.');
     }
 
     public function store(Request $request)

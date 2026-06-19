@@ -12,40 +12,87 @@
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             --accent-color: #4f46e5;
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
             --accent-hover: #4338ca;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            --border-radius: 16px;
+            --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+            --border-radius: 20px;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            background-color: #f1f5f9;
+            color: #0f172a;
             min-vh: 100vh;
         }
 
         .header-panel {
             background: var(--bg-gradient);
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+            padding: 50px 20px;
             color: #fff;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1);
             margin-bottom: 30px;
+        }
+
+        .header-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(79,70,229,0.4) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
         }
 
         .custom-card {
             background: #fff;
-            border: none;
+            border: 1px solid rgba(226, 232, 240, 0.6);
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            padding: 24px;
+            padding: 28px;
             margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .custom-card:hover {
+            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.1);
         }
 
         .form-label {
             font-weight: 600;
             color: #475569;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn-primary {
+            background: var(--accent-gradient);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(79, 70, 229, 0.4);
         }
     </style>
 </head>

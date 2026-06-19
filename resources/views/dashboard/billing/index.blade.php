@@ -160,8 +160,13 @@
 @endsection
 
 @section('scripts')
-<!-- Sandbox Midtrans Snap JS -->
-<script src="{{ env('MIDTRANS_IS_PRODUCTION', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<!-- Midtrans Snap JS -->
+@php
+    $midtransIsProduction = \App\Models\LandlordSetting::get('midtrans_is_production', env('MIDTRANS_IS_PRODUCTION', false)) == '1';
+    $midtransClientKey = \App\Models\LandlordSetting::get('midtrans_client_key', env('MIDTRANS_CLIENT_KEY'));
+    $snapUrl = $midtransIsProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js';
+@endphp
+<script src="{{ $snapUrl }}" data-client-key="{{ $midtransClientKey }}"></script>
 <script>
     document.querySelectorAll('.btn-upgrade').forEach(button => {
         button.addEventListener('click', function() {

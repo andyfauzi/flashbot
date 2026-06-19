@@ -64,8 +64,8 @@ class PaymentController extends Controller
         ]);
 
         // Config Midtrans
-        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        \Midtrans\Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        \Midtrans\Config::$serverKey = \App\Models\LandlordSetting::get('midtrans_server_key', env('MIDTRANS_SERVER_KEY'));
+        \Midtrans\Config::$isProduction = \App\Models\LandlordSetting::get('midtrans_is_production', env('MIDTRANS_IS_PRODUCTION', false)) == '1';
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
@@ -94,8 +94,8 @@ class PaymentController extends Controller
     {
         TenantManager::switchToLandlord();
 
-        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        \Midtrans\Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        \Midtrans\Config::$serverKey = \App\Models\LandlordSetting::get('midtrans_server_key', env('MIDTRANS_SERVER_KEY'));
+        \Midtrans\Config::$isProduction = \App\Models\LandlordSetting::get('midtrans_is_production', env('MIDTRANS_IS_PRODUCTION', false)) == '1';
         
         try {
             $notif = new \Midtrans\Notification();

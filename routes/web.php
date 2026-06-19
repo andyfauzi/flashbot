@@ -277,6 +277,9 @@ Route::prefix('super-admin')
 
         // Pengaturan Meta WhatsApp Landlord
         Route::post('/meta-settings', [\App\Http\Controllers\SuperAdminController::class, 'updateMetaSettings'])->name('superadmin.meta.update');
+        
+        // Pengaturan Midtrans Landlord
+        Route::post('/midtrans-settings', [\App\Http\Controllers\SuperAdminController::class, 'updateMidtransSettings'])->name('superadmin.midtrans.update');
     });
 
 
