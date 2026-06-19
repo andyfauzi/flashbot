@@ -24,13 +24,10 @@ class PaymentController extends Controller
 
     public function checkout(Request $request)
     {
-        TenantManager::switchToLandlord();
-        
         $request->validate([
             'plan' => 'required|in:starter,pro,business',
         ]);
 
-        $tenant = auth()->user()->tenant; // Assuming user is tied to tenant via subdomain or tenant_id, but wait, this is landlord context.
         // Let's rely on the current tenant in the session or app context
         $tenantId = app('current_tenant')->id ?? null;
         if (!$tenantId) {
@@ -42,6 +39,8 @@ class PaymentController extends Controller
         } else {
             $tenant = Tenant::find($tenantId);
         }
+
+        TenantManager::switchToLandlord();
 
         // Determine price
         $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
