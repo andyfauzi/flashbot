@@ -62,7 +62,16 @@ class PaymentController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('dashboard.billing.index', compact('tenant', 'payments'));
+        $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
+        $priceStarter = (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000');
+        $pricePro = (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
+        $priceBusiness = (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
+
+        $featuresStarter = array_filter(array_map('trim', explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nMaks 50 Produk\nMaks 3 Kasir")));
+        $featuresPro = array_filter(array_map('trim', explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nMaks 500 Produk\nMaks 10 Kasir")));
+        $featuresBusiness = array_filter(array_map('trim', explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nUnlimited Produk\nUnlimited Kasir")));
+
+        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
     }
 
     public function checkout(Request $request)

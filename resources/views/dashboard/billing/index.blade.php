@@ -61,11 +61,11 @@
                             <div class="card border-2 border-light hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-success">Starter</h4>
-                                    <h5 class="mb-3">Rp 99.000<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">Rp {{ number_format($priceStarter, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        <li><i class="fa-solid fa-check text-success me-2"></i>1 Cabang Toko</li>
-                                        <li><i class="fa-solid fa-check text-success me-2"></i>Maks 50 Produk</li>
-                                        <li><i class="fa-solid fa-check text-success me-2"></i>Maks 3 Kasir</li>
+                                        @foreach($featuresStarter as $feature)
+                                        <li><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
+                                        @endforeach
                                     </ul>
                                     <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade" data-plan="starter" {{ $tenant->plan == 'starter' && $tenant->is_active ? 'disabled' : '' }}>
                                         {{ $tenant->plan == 'starter' ? 'Perpanjang' : 'Pilih Starter' }}
@@ -79,11 +79,11 @@
                                 <div class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">Populer</div>
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-primary">Pro</h4>
-                                    <h5 class="mb-3">Rp 199.000<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">Rp {{ number_format($pricePro, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        <li><i class="fa-solid fa-check text-primary me-2"></i>5 Cabang Toko</li>
-                                        <li><i class="fa-solid fa-check text-primary me-2"></i>Maks 500 Produk</li>
-                                        <li><i class="fa-solid fa-check text-primary me-2"></i>Maks 10 Kasir</li>
+                                        @foreach($featuresPro as $feature)
+                                        <li><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
+                                        @endforeach
                                     </ul>
                                     <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro" {{ $tenant->plan == 'pro' && $tenant->is_active ? 'disabled' : '' }}>
                                         {{ $tenant->plan == 'pro' ? 'Perpanjang' : 'Upgrade ke Pro' }}
@@ -96,11 +96,11 @@
                             <div class="card border-2 border-dark hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-dark">Business</h4>
-                                    <h5 class="mb-3">Rp 499.000<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">Rp {{ number_format($priceBusiness, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        <li><i class="fa-solid fa-check text-dark me-2"></i>Unlimited Cabang</li>
-                                        <li><i class="fa-solid fa-check text-dark me-2"></i>Unlimited Produk</li>
-                                        <li><i class="fa-solid fa-check text-dark me-2"></i>Unlimited Kasir</li>
+                                        @foreach($featuresBusiness as $feature)
+                                        <li><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
+                                        @endforeach
                                     </ul>
                                     <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business" {{ $tenant->plan == 'business' && $tenant->is_active ? 'disabled' : '' }}>
                                         {{ $tenant->plan == 'business' ? 'Perpanjang' : 'Upgrade Business' }}
