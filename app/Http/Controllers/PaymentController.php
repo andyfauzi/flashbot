@@ -74,6 +74,26 @@ class PaymentController extends Controller
         return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
     }
 
+    public function startTrial(Request $request)
+    {
+        TenantManager::switchToLandlord();
+        $tenant = $this->resolveTenant($request);
+        if (!$tenant) {
+            return back()->with('error', 'Toko tidak ditemukan.');
+        }
+
+        if ($tenant->is_active) {
+            return back()->with('error', 'Anda sudah pernah mengaktifkan layanan atau masa percobaan.');
+        }
+
+        $tenant->update([
+            'is_active' => true,
+            'plan_expires_at' => now()->addDays(30),
+        ]);
+
+        return redirect()->route('dashboard.billing.index')->with('sukses', 'Masa percobaan gratis 30 hari berhasil diaktifkan!');
+    }
+
     public function checkout(Request $request)
     {
         $request->validate([

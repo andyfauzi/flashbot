@@ -3,111 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Administrator Access | Flashbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #0f172a;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ambient glowing orbs in background */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.5;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+
+        body::before {
+            background: #4f46e5;
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            background: #e11d48;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 30px); }
         }
 
         .login-card {
-            background: #1e293b;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 16px;
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 48px 40px;
             width: 100%;
-            max-width: 380px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            max-width: 420px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 1;
         }
 
-        .lock-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(79, 70, 229, 0.15);
-            border-radius: 12px;
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
-            font-size: 22px;
+            margin-bottom: 32px;
+            font-size: 28px;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            transform: rotate(-5deg);
         }
 
         h2 {
-            color: #f1f5f9;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 6px;
+            color: #ffffff;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
         p.subtitle {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-bottom: 28px;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            font-weight: 300;
+            margin-bottom: 36px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
         }
 
         label {
             display: block;
-            color: #94a3b8;
-            font-size: 0.8rem;
+            color: #cbd5e1;
+            font-size: 0.85rem;
             font-weight: 500;
-            margin-bottom: 6px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            margin-bottom: 8px;
         }
 
         input {
             width: 100%;
-            background: #0f172a;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 12px 14px;
-            color: #f1f5f9;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
             outline: none;
-            transition: border-color 0.2s;
-            margin-bottom: 18px;
+            transition: all 0.3s ease;
         }
 
         input:focus {
-            border-color: #4f46e5;
+            background: rgba(15, 23, 42, 0.8);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
         .error-msg {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #fca5a5;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
         }
 
         button[type="submit"] {
             width: 100%;
-            background: #4f46e5;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 13px;
-            font-size: 0.95rem;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1.05rem;
             font-weight: 600;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            margin-top: 4px;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
         }
 
         button[type="submit"]:hover {
-            background: #4338ca;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(79, 70, 229, 0.3);
         }
 
         button[type="submit"]:active {
@@ -115,55 +163,68 @@
         }
 
         .footer-note {
-            margin-top: 24px;
+            margin-top: 32px;
             text-align: center;
-            color: #334155;
-            font-size: 0.75rem;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 300;
         }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <div class="lock-icon">🔐</div>
-        <h2>Administrator Access</h2>
-        <p class="subtitle">Restricted area. Authorized personnel only.</p>
+        <div class="icon-container">🛡️</div>
+        <h2>Admin Portal</h2>
+        <p class="subtitle">Secure access for authorized personnel.</p>
 
         @if($errors->any())
         <div class="error-msg">
-            {{ $errors->first() }}
+            ⚠️ &nbsp; {{ $errors->first() }}
         </div>
         @endif
 
         @if(session('error'))
         <div class="error-msg">
-            {{ session('error') }}
+            ⚠️ &nbsp; {{ session('error') }}
+        </div>
+        @endif
+
+        @if(session('sukses'))
+        <div class="error-msg" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #86efac;">
+            ✅ &nbsp; {{ session('sukses') }}
         </div>
         @endif
 
         <form method="POST" action="/sa-access">
             @csrf
 
-            <label for="sa_email">Email</label>
-            <input
-                type="email"
-                id="sa_email"
-                name="email"
-                value="{{ old('email') }}"
-                autocomplete="off"
-                autofocus
-                required
-            >
+            <div class="input-group">
+                <label for="sa_email">Email Address</label>
+                <input
+                    type="email"
+                    id="sa_email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    autocomplete="off"
+                    autofocus
+                    required
+                    placeholder="Enter your email"
+                >
+            </div>
 
-            <label for="sa_password">Password</label>
-            <input
-                type="password"
-                id="sa_password"
-                name="password"
-                autocomplete="off"
-                required
-            >
+            <div class="input-group">
+                <label for="sa_password">Password</label>
+                <input
+                    type="password"
+                    id="sa_password"
+                    name="password"
+                    autocomplete="off"
+                    required
+                    placeholder="Enter your password"
+                >
+            </div>
 
-            <button type="submit">Masuk</button>
+            <button type="submit">Secure Login</button>
         </form>
 
         <div class="footer-note">

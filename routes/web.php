@@ -243,6 +243,7 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
 Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/billing', [\App\Http\Controllers\PaymentController::class, 'index'])->name('dashboard.billing.index');
     Route::post('/billing/checkout', [\App\Http\Controllers\PaymentController::class, 'checkout'])->name('dashboard.billing.checkout');
+    Route::post('/billing/trial', [\App\Http\Controllers\PaymentController::class, 'startTrial'])->name('dashboard.billing.trial');
 });
 
 

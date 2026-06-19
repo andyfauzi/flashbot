@@ -109,6 +109,17 @@
                                     <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro">
                                         {{ $tenant->plan == 'pro' ? 'Perpanjang' : 'Upgrade ke Pro' }}
                                     </button>
+                                    @php
+                                        $isNewUser = $tenant->created_at && $tenant->created_at->diffInDays(now()) < 1;
+                                    @endphp
+                                    @if(!$tenant->is_active && $isNewUser)
+                                    <form action="{{ route('dashboard.billing.trial') }}" method="POST" class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-primary w-100 rounded-pill fw-bold" onclick="return confirm('Mulai masa coba gratis 30 hari sekarang?')">
+                                            <i class="fa-solid fa-gift me-1"></i> Coba Gratis 30 Hari
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>
