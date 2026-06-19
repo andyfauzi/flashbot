@@ -32,8 +32,18 @@ class EnsureActiveSubscription
         if ($tenant) {
             // Check if plan has expired
             if ($tenant->plan_expires_at && $tenant->plan_expires_at < now()) {
+                $isNew = $tenant->created_at && $tenant->created_at->diffInDays(now()) < 1;
+                
+                if ($isNew) {
+                    $message = "Terima kasih telah memilih paket " . ucfirst($tenant->plan) . ". Silakan selesaikan pembayaran untuk mengaktifkan akun dan mulai menggunakan Flashbot.";
+                    $type = 'info';
+                } else {
+                    $message = 'Masa aktif atau masa uji coba paket Anda telah berakhir. Silakan lakukan pembayaran untuk melanjutkan penggunaan aplikasi.';
+                    $type = 'error';
+                }
+
                 return redirect()->route('dashboard.billing.index')
-                    ->with('error', 'Masa aktif atau masa uji coba paket Anda telah berakhir. Silakan lakukan pembayaran untuk melanjutkan penggunaan aplikasi.');
+                    ->with($type, $message);
             }
         }
 
