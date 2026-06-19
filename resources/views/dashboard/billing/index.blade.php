@@ -111,8 +111,9 @@
                                     </button>
                                     @php
                                         $isNewUser = $tenant->created_at && $tenant->created_at->diffInDays(now()) < 1;
+                                        $isExpired = $tenant->plan_expires_at && $tenant->plan_expires_at < now();
                                     @endphp
-                                    @if(!$tenant->is_active && $isNewUser)
+                                    @if($isExpired && $isNewUser)
                                     <form action="{{ route('dashboard.billing.trial') }}" method="POST" class="mt-2">
                                         @csrf
                                         <button type="submit" class="btn btn-outline-primary w-100 rounded-pill fw-bold" onclick="return confirm('Mulai masa coba gratis 30 hari sekarang?')">

@@ -82,7 +82,7 @@ class PaymentController extends Controller
             return back()->with('error', 'Toko tidak ditemukan.');
         }
 
-        if ($tenant->is_active) {
+        if ($tenant->plan_expires_at && $tenant->plan_expires_at > now()) {
             return back()->with('error', 'Anda sudah pernah mengaktifkan layanan atau masa percobaan.');
         }
 
