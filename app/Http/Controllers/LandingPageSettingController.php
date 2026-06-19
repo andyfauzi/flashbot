@@ -23,7 +23,17 @@ class LandingPageSettingController extends Controller
      */
     public function update(Request $request)
     {
-        $data = $request->except(['_token', '_method']);
+        $data = $request->except(['_token', '_method', 'hero_image']);
+
+        // Handle image upload
+        if ($request->hasFile('hero_image')) {
+            $request->validate([
+                'hero_image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+
+            $path = $request->file('hero_image')->store('landing', 'public');
+            LandlordSetting::set('hero_image', $path);
+        }
 
         foreach ($data as $key => $value) {
             LandlordSetting::set($key, $value);

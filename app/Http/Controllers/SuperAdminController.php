@@ -28,22 +28,36 @@ class SuperAdminController extends Controller
                 $identitas = DB::connection('tenant')->table('identitas_tokos')->first();
                 $tenant->is_broadcast_approved = $identitas ? (bool)$identitas->is_broadcast_approved : false;
                 $tenant->whatsapp_gateway = $identitas ? $identitas->whatsapp_gateway : 'baileys';
+                $tenant->is_payment_gateway_active = $identitas ? (bool)$identitas->is_payment_gateway_active : false;
             } catch (\Exception $e) {
                 $tenant->is_broadcast_approved = false;
                 $tenant->whatsapp_gateway = 'baileys';
+                $tenant->is_payment_gateway_active = false;
             }
         }
         
         TenantManager::switchToLandlord();
 
+        return view('superadmin.index', compact('tenants'));
+    }
+
+    public function showMetaSettings()
+    {
+        TenantManager::switchToLandlord();
         $metaPhoneNumberId = \App\Models\LandlordSetting::get('meta_phone_number_id');
         $metaAccessToken = \App\Models\LandlordSetting::get('meta_access_token');
+        
+        return view('superadmin.meta', compact('metaPhoneNumberId', 'metaAccessToken'));
+    }
 
+    public function showMidtransSettings()
+    {
+        TenantManager::switchToLandlord();
         $midtransServerKey = \App\Models\LandlordSetting::get('midtrans_server_key');
         $midtransClientKey = \App\Models\LandlordSetting::get('midtrans_client_key');
         $midtransIsProduction = \App\Models\LandlordSetting::get('midtrans_is_production', '0');
-
-        return view('superadmin.index', compact('tenants', 'metaPhoneNumberId', 'metaAccessToken', 'midtransServerKey', 'midtransClientKey', 'midtransIsProduction'));
+        
+        return view('superadmin.midtrans', compact('midtransServerKey', 'midtransClientKey', 'midtransIsProduction'));
     }
 
     public function updateMetaSettings(Request $request)
@@ -57,7 +71,7 @@ class SuperAdminController extends Controller
         \App\Models\LandlordSetting::set('meta_phone_number_id', $request->meta_phone_number_id);
         \App\Models\LandlordSetting::set('meta_access_token', $request->meta_access_token);
 
-        return redirect()->route('superadmin.dashboard')->with('success', 'Pengaturan Meta WhatsApp Pusat berhasil disimpan.');
+        return redirect()->route('superadmin.meta')->with('success', 'Pengaturan Meta WhatsApp Pusat berhasil disimpan.');
     }
 
     public function updateMidtransSettings(Request $request)
@@ -72,7 +86,7 @@ class SuperAdminController extends Controller
         \App\Models\LandlordSetting::set('midtrans_client_key', $request->midtrans_client_key);
         \App\Models\LandlordSetting::set('midtrans_is_production', $request->has('midtrans_is_production') ? '1' : '0');
 
-        return redirect()->route('superadmin.index')->with('success', 'Pengaturan Midtrans berhasil disimpan.');
+        return redirect()->route('superadmin.midtrans')->with('success', 'Pengaturan Midtrans berhasil disimpan.');
     }
 
     public function store(Request $request)
@@ -204,6 +218,38 @@ class SuperAdminController extends Controller
         } catch (\Exception $e) {
             TenantManager::switchToLandlord();
             return redirect()->back()->withErrors(['error' => 'Gagal mengubah status broadcast: ' . $e->getMessage()]);
+        }
+    }
+
+    public function togglePaymentGateway($id)
+    {
+        TenantManager::switchToLandlord();
+        $tenant = Tenant::findOrFail($id);
+
+        try {
+            $dbName = 'tenant_' . strtolower($tenant->subdomain);
+            config(['database.connections.tenant.database' => $dbName]);
+            DB::purge('tenant');
+
+            $identitas = DB::connection('tenant')->table('identitas_tokos')->first();
+            if ($identitas) {
+                $newValue = !$identitas->is_payment_gateway_active;
+                DB::connection('tenant')->table('identitas_tokos')->update(['is_payment_gateway_active' => $newValue]);
+                
+                AuditLogger::record('tenant.payment_gateway_toggled', "tenant:{$tenant->id}", [
+                    'is_payment_gateway_active' => $newValue
+                ]);
+                
+                TenantManager::switchToLandlord();
+                $status = $newValue ? 'diaktifkan' : 'dinonaktifkan';
+                return redirect()->back()->with('success', "Fitur Payment Gateway untuk Tenant {$tenant->name} berhasil {$status}.");
+            }
+            
+            TenantManager::switchToLandlord();
+            return redirect()->back()->withErrors(['error' => 'Identitas toko tidak ditemukan di database tenant.']);
+        } catch (\Exception $e) {
+            TenantManager::switchToLandlord();
+            return redirect()->back()->withErrors(['error' => 'Gagal mengubah status payment gateway: ' . $e->getMessage()]);
         }
     }
 

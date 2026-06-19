@@ -255,8 +255,12 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="hero-image-wrapper">
-                        <!-- Placeholder Image Generated to look like a POS Dashboard -->
-                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1000" alt="Dashboard Preview" class="img-fluid hero-image">
+                        <!-- Dashboard Image -->
+                        @php
+                            $heroImage = $settings['hero_image'] ?? null;
+                            $imageUrl = $heroImage ? asset('storage/' . $heroImage) : 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1000';
+                        @endphp
+                        <img src="{{ $imageUrl }}" alt="Dashboard Preview" class="img-fluid hero-image">
                     </div>
                 </div>
             </div>

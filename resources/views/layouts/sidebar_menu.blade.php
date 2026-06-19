@@ -216,6 +216,36 @@
         </div>
     </div>
     @endif
+
+    <!-- ============================================== -->
+    <!-- 👑 SUPER ADMIN (Landlord) -->
+    <!-- ============================================== -->
+    @if(auth()->user() && auth()->user()->is_super_admin)
+    @php $superAdminActive = request()->routeIs('superadmin.*'); @endphp
+    <div class="accordion-item bg-transparent border-0 mb-1 mt-3">
+        <h2 class="accordion-header" id="headingSuperAdmin{{ $prefix }}">
+            <button class="accordion-button bg-transparent shadow-none px-3 py-2 fw-bold text-danger {{ $superAdminActive ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSuperAdmin{{ $prefix }}" aria-expanded="{{ $superAdminActive ? 'true' : 'false' }}" aria-controls="collapseSuperAdmin{{ $prefix }}">
+                <i data-lucide="crown" class="me-2 text-danger"></i> Super Admin
+            </button>
+        </h2>
+        <div id="collapseSuperAdmin{{ $prefix }}" class="accordion-collapse collapse {{ $superAdminActive ? 'show' : '' }}" aria-labelledby="headingSuperAdmin{{ $prefix }}" data-bs-parent="#accordion{{ $prefix }}">
+            <div class="accordion-body p-0 pt-1 pb-2">
+                <a href="{{ route('superadmin.index') }}" class="{{ request()->routeIs('superadmin.index') ? 'active' : '' }}">
+                    <i data-lucide="users-gear"></i><span>Daftar Tenant</span>
+                </a>
+                <a href="{{ route('superadmin.landing_page') }}" class="{{ request()->routeIs('superadmin.landing_page') ? 'active' : '' }}">
+                    <i data-lucide="monitor-play"></i><span>Pengaturan Landing</span>
+                </a>
+                <a href="/superadmin/meta" class="{{ request()->routeIs('superadmin.meta*') ? 'active' : '' }}">
+                    <i data-lucide="message-circle"></i><span>Meta API Pusat</span>
+                </a>
+                <a href="/superadmin/midtrans" class="{{ request()->routeIs('superadmin.midtrans*') ? 'active' : '' }}">
+                    <i data-lucide="credit-card"></i><span>Midtrans Landlord</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 <style>

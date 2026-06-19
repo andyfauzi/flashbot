@@ -55,10 +55,17 @@ if (app()->environment('local')) {
 use Illuminate\Support\Facades\Auth;
 
 // Tenant login — hanya untuk subdomain (namatoko.tenanta.id/login)
-Route::get('/login', function () {
+Route::get('/login', function (\Illuminate\Http\Request $request) {
     if (Auth::check()) {
         return redirect()->route('dashboard.transaksi.index');
     }
+    
+    // Jika login diakses melalui domain utama (bukan subdomain tenant) dan tidak ada konteks tenant
+    if (!app()->has('current_tenant')) {
+        // Alihkan ke landing page atau sa-access
+        return redirect('/');
+    }
+    
     return view('auth.login');
 })->name('login');
 
@@ -120,7 +127,9 @@ Route::get('/logout', function (\Illuminate\Http\Request $request) {
     if ($isSuperAdmin) {
         return redirect('/sa-access')->with('sukses', 'Logout berhasil!');
     }
-    return redirect('/login')->with('sukses', 'Logout berhasil!');
+    
+    // Redirect ke landing page utama jika logout
+    return redirect('/')->with('sukses', 'Logout berhasil!');
 })->name('logout');
 
 require __DIR__.'/chatbot.php';
@@ -282,10 +291,15 @@ Route::prefix('super-admin')
         Route::post('/landing-page', [\App\Http\Controllers\LandingPageSettingController::class, 'update'])->name('superadmin.landing_page.update');
 
         // Pengaturan Meta WhatsApp Landlord
+        Route::get('/meta', [\App\Http\Controllers\SuperAdminController::class, 'showMetaSettings'])->name('superadmin.meta');
         Route::post('/meta-settings', [\App\Http\Controllers\SuperAdminController::class, 'updateMetaSettings'])->name('superadmin.meta.update');
         
         // Pengaturan Midtrans Landlord
+        Route::get('/midtrans', [\App\Http\Controllers\SuperAdminController::class, 'showMidtransSettings'])->name('superadmin.midtrans');
         Route::post('/midtrans-settings', [\App\Http\Controllers\SuperAdminController::class, 'updateMidtransSettings'])->name('superadmin.midtrans.update');
+        
+        // Toggle Payment Gateway (Per-tenant)
+        Route::post('/{id}/toggle-payment-gateway', [\App\Http\Controllers\SuperAdminController::class, 'togglePaymentGateway'])->name('superadmin.toggle_payment_gateway');
     });
 
 
