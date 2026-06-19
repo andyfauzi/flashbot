@@ -238,10 +238,10 @@
                 <a href="{{ route('superadmin.landing_page') }}" class="{{ request()->routeIs('superadmin.landing_page') ? 'active' : '' }}">
                     <i data-lucide="monitor-play"></i><span>Pengaturan Landing</span>
                 </a>
-                <a href="/superadmin/meta" class="{{ request()->routeIs('superadmin.meta*') ? 'active' : '' }}">
+                <a href="{{ route('superadmin.meta') }}" class="{{ request()->routeIs('superadmin.meta*') ? 'active' : '' }}">
                     <i data-lucide="message-circle"></i><span>Meta API Pusat</span>
                 </a>
-                <a href="/superadmin/midtrans" class="{{ request()->routeIs('superadmin.midtrans*') ? 'active' : '' }}">
+                <a href="{{ route('superadmin.midtrans') }}" class="{{ request()->routeIs('superadmin.midtrans*') ? 'active' : '' }}">
                     <i data-lucide="credit-card"></i><span>Midtrans Landlord</span>
                 </a>
             </div>
