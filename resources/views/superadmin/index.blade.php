@@ -8,11 +8,11 @@
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         position: relative;
         overflow: hidden;
-        border-radius: 20px;
-        padding: 40px 30px;
+        border-radius: 16px;
+        padding: 20px 24px;
         color: #fff;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
     .header-panel::before {
         content: '';
@@ -106,8 +106,8 @@
 <div class="header-panel">
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="fw-bold mb-1">Dashboard Landlord</h2>
-            <p class="text-white-50 mb-0">Kelola tenant, alokasi database, dan konfigurasi platform SaaS Tenanta.id</p>
+            <h2 class="fw-bold mb-1 fs-4">Dashboard Landlord</h2>
+            <p class="text-white-50 mb-0 small">Kelola tenant, alokasi database, dan konfigurasi platform SaaS Tenanta.id</p>
         </div>
         <div>
             <div class="badge bg-light text-dark fw-bold rounded-pill px-3 py-2 border"><i class="fa-solid fa-crown text-warning me-1"></i> Super Admin</div>

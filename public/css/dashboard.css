@@ -97,9 +97,28 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 /* Premium Sidebar */
 .sidebar-premium {
     min-height: 100vh;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border-card);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-premium::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-premium::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-premium::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.sidebar-premium:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-premium a {
