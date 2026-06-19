@@ -188,8 +188,11 @@ class PreOrderController extends Controller
                     // Cek Xendit
                     if ($identitas && $identitas->is_payment_gateway_active && $identitas->xendit_api_key && in_array($metode, ['qris', 'transfer'])) {
                         $xenditService = new \App\Services\XenditService($identitas->xendit_api_key);
+                        // Prefix tenant ID agar webhook bisa mengidentifikasi tenant
+                        $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : null;
+                        $externalId = $tenantId ? "{$tenantId}-{$pesanan->nomor_order}" : $pesanan->nomor_order;
                         $invoiceUrl = $xenditService->createInvoice(
-                            $pesanan->nomor_order,
+                            $externalId,
                             $pesanan->total_biaya,
                             "Pembayaran Tagihan {$pesanan->nomor_order}",
                             ['name' => $pesanan->nama_penerima, 'phone' => $pesanan->nomor_wa]

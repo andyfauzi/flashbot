@@ -184,7 +184,12 @@
                 },
                 body: JSON.stringify({ plan: plan })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Server error ' + response.status); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.snap_token) {
                     // Buka popup Snap Midtrans
@@ -212,8 +217,8 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan pada sistem.');
+                console.error('Billing Error:', error);
+                alert('❌ Gagal memproses pembayaran:\n' + error.message + '\n\nSilakan coba refresh halaman dan ulangi.');
                 button.innerHTML = btnOriginalText;
                 button.disabled = false;
             });

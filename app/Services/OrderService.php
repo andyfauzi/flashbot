@@ -1066,8 +1066,12 @@ class OrderService
             $namaPelanggan = $pesanan->nama_penerima ?? 'Pelanggan';
             $deskripsi = "Pembayaran Tagihan {$pesanan->nomor_order}";
             
+            // Prefix tenant ID ke external_id agar webhook bisa mengidentifikasi tenant
+            $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : null;
+            $externalId = $tenantId ? "{$tenantId}-{$pesanan->nomor_order}" : $pesanan->nomor_order;
+            
             $invoiceUrl = $xenditService->createInvoice(
-                $pesanan->nomor_order,
+                $externalId,
                 $pesanan->total_biaya,
                 $deskripsi,
                 ['name' => $namaPelanggan, 'phone' => $nomor]
