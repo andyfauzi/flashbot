@@ -41,7 +41,7 @@
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
             @else
                 <div class="bg-primary bg-opacity-10 rounded text-primary d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                    <i class="fa-solid fa-store" style="font-size: 14px;"></i>
+                    <i data-lucide="store" style="width: 16px; height: 16px;"></i>
                 </div>
             @endif
             <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}</span>
@@ -90,21 +90,21 @@
             @endphp
             
             @if($activeShift)
-                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2" data-bs-toggle="modal" data-bs-target="#pengeluaranModal">
-                    <i class="fa-solid fa-money-bill-transfer"></i> Pengeluaran
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#pengeluaranModal">
+                    <i data-lucide="banknote" style="width: 16px; height: 16px;"></i> Pengeluaran
                 </button>
-                <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 me-2" data-bs-toggle="modal" data-bs-target="#tutupShiftModal">
-                    <i class="fa-solid fa-lock"></i> Tutup Shift
+                <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 me-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#tutupShiftModal">
+                    <i data-lucide="lock" style="width: 16px; height: 16px;"></i> Tutup Shift
                 </button>
             @endif
 
             <div class="vr bg-secondary mx-2 my-1" style="width: 1px; height: 20px; opacity: 0.3;"></div>
             <div class="d-flex align-items-center gap-2">
-                <i class="fa-regular fa-circle-user text-secondary fs-5"></i>
+                <i data-lucide="user-circle" class="text-secondary" style="width: 20px; height: 20px;"></i>
                 <small class="text-secondary fw-semibold">{{ auth()->user()->name ?? auth()->user()->email }}</small>
             </div>
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">
-                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Logout
+            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-secondary px-3 rounded-pill d-flex align-items-center gap-1">
+                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Logout
             </a>
         @endauth
     </div>
@@ -462,7 +462,13 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-      lucide.createIcons();
+      lucide.createIcons({
+          attrs: {
+              'stroke-width': 1.5,
+              'width': 20,
+              'height': 20
+          }
+      });
     </script>
     @yield('scripts')
 </body>

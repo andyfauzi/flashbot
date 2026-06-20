@@ -1,34 +1,34 @@
 /* CSS Kustom - Tema Dashboard Premium Chatbot WA */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    --font-heading: 'Inter', sans-serif;
     --font-body: 'Inter', sans-serif;
     
-    --bg-app: #FFFFFF; /* Background White */
-    --bg-card: #F8FAFC; /* Surface Light Gray */
-    --border-card: #E2E8F0; /* Border Gray */
+    --bg-app: #F8FAFC; /* Slate 50 */
+    --bg-card: #FFFFFF; /* Pure White */
+    --border-card: #E2E8F0; /* Slate 200 */
     
-    --text-primary: #0F172A; /* Text Dark Slate */
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
+    --text-primary: #1E293B; /* Slate 800 */
+    --text-secondary: #64748B; /* Slate 500 */
+    --text-muted: #94A3B8; /* Slate 400 */
     
-    --clr-brand: #2563EB; /* Primary Slate Blue */
-    --clr-secondary: #4F46E5; /* Secondary Indigo */
-    --clr-brand-glow: rgba(37, 99, 235, 0.1);
+    --clr-brand: #4F46E5; /* Indigo 600 */
+    --clr-secondary: #4338CA; /* Indigo 700 */
+    --clr-brand-glow: rgba(79, 70, 229, 0.15);
     
-    --clr-success: #10B981; 
+    --clr-success: #10B981; /* Emerald 500 */
     --clr-success-glow: rgba(16, 185, 129, 0.1);
     
-    --clr-warning: #F59E0B; /* Kuning Emas */
+    --clr-warning: #F59E0B; /* Amber 500 */
     --clr-warning-glow: rgba(245, 158, 11, 0.1);
     
-    --clr-danger: #EF4444; 
+    --clr-danger: #EF4444; /* Red 500 */
     --clr-danger-glow: rgba(239, 68, 68, 0.1);
     
     --sidebar-bg: #FFFFFF;
-    --sidebar-hover: #F8FAFC;
-    --sidebar-active: #2563EB; /* Biru Utama */
+    --sidebar-hover: #F1F5F9; /* Slate 100 */
+    --sidebar-active: #4F46E5; /* Indigo 600 */
 }
 
 /* Base resets */
@@ -46,15 +46,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 
 /* Unified Border Radius Strategy */
 .card-premium, .card {
-    border-radius: 16px !important;
+    border-radius: 12px !important;
 }
 
 .btn, .btn-premium {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
 }
 
 .form-control, .form-control-premium, .input-group, .input-group-text {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
 }
 
 .badge, .status-badge {
@@ -64,14 +64,14 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 /* Clean Soft Cards */
 .card-premium {
     background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-premium:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
 }
 
 /* Stat Cards Glowing Styles */
@@ -129,10 +129,10 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .sidebar-premium a {
     color: var(--text-secondary);
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 400; /* Tidak bold */
     padding: 12px 16px;
     margin: 4px 12px;
-    border-radius: 10px; /* Standar tombol */
+    border-radius: 8px; /* Standar tombol */
     display: flex;
     align-items: center;
     gap: 10px;
@@ -199,8 +199,8 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .pulse-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background-color: currentColor;
     position: relative;
@@ -209,8 +209,8 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .status-badge.online .pulse-dot::after {
     content: '';
     position: absolute;
-    top: -2px;
-    left: -2px;
+    top: -3px;
+    left: -3px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -298,6 +298,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     vertical-align: middle;
     border-bottom: 1px solid var(--border-card);
     color: var(--text-primary);
+    font-size: 14px;
 }
 
 .table-premium tr:hover td {
@@ -320,11 +321,10 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .icon-box-premium.warning { background-color: var(--clr-warning-glow); color: var(--clr-warning); }
 .icon-box-premium.danger { background-color: var(--clr-danger-glow); color: var(--clr-danger); }
 
-/* QR Code styling */
 .qr-container-premium {
-    background: #fff;
-    border: 2px dashed var(--border-card);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-card);
+    border-radius: 12px;
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -360,9 +360,10 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     text-align: center;
     padding: 15px 5px !important;
     margin: 0 !important;
-    border: 1px solid var(--border-card);
-    border-radius: 12px !important;
+    border: 1px solid rgba(0,0,0,0.03);
+    border-radius: 8px !important;
     background: var(--bg-card);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     gap: 8px !important;
 }
 .grid-mode-menu a i {
