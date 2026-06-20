@@ -299,6 +299,18 @@
                                     </li>
                                 @endforeach
                             @endif
+                            <li>
+                                <i class="fa-solid fa-users text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_karyawan_starter'] ?? 2) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_starter'] ?? 2) }} Akun Karyawan
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-robot text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_wa_starter'] ?? 1000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_starter'] ?? 1000), 0, ',', '.') }} Pesan Bot WA/bln
+                                </span>
+                            </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
@@ -331,6 +343,18 @@
                                     </li>
                                 @endforeach
                             @endif
+                            <li>
+                                <i class="fa-solid fa-users text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_karyawan_pro'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_pro'] ?? 10) }} Akun Karyawan
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-robot text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_wa_pro'] ?? 5000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_pro'] ?? 5000), 0, ',', '.') }} Pesan Bot WA/bln
+                                </span>
+                            </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro</a>
@@ -362,6 +386,18 @@
                                     </li>
                                 @endforeach
                             @endif
+                            <li>
+                                <i class="fa-solid fa-users text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_karyawan_business'] ?? 999) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_business'] ?? 999) }} Akun Karyawan
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-robot text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_wa_business'] ?? 999999) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_business'] ?? 999999), 0, ',', '.') }} Pesan Bot WA/bln
+                                </span>
+                            </li>
                         </ul>
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings['contact_phone'] ?? '6281234567890') }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Hubungi Sales</a>
                     </div>
