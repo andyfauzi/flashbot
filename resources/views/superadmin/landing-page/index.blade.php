@@ -65,9 +65,15 @@
             <!-- Hero Section -->
             <div class="custom-card">
                 <h5 class="fw-bold mb-4"><i class="fa-solid fa-heading text-primary me-2"></i>Bagian Utama (Hero)</h5>
-                <div class="mb-3">
-                    <label class="form-label">Judul Besar (Hero Title)</label>
-                    <input type="text" class="form-control" name="hero_title" value="{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}" required>
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Judul Besar (Hero Title)</label>
+                        <input type="text" class="form-control" name="hero_title" value="{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ukuran Font Judul</label>
+                        <input type="text" class="form-control" name="hero_title_size" value="{{ $settings['hero_title_size'] ?? '4rem' }}" placeholder="Contoh: 4rem, 48px">
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Subjudul (Hero Subtitle)</label>

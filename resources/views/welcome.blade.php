@@ -250,7 +250,7 @@
                     <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 fw-semibold">
                         #1 Aplikasi Kasir Cloud Terbaik
                     </div>
-                    <h1 class="hero-title">{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}</h1>
+                    <h1 class="hero-title" style="font-size: {{ $settings['hero_title_size'] ?? '4rem' }};">{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}</h1>
                     <p class="hero-subtitle">{{ $settings['hero_subtitle'] ?? 'Kelola puluhan cabang toko Anda dalam satu pintu dengan teknologi cerdas.' }}</p>
                     <div class="d-flex gap-3">
                         <a href="{{ $settings['cta_link'] ?? '#pricing' }}" class="btn btn-custom btn-lg px-5">{{ $settings['cta_text'] ?? 'Mulai Sekarang' }}</a>
