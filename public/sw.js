@@ -1,7 +1,7 @@
-const CACHE_NAME = 'ninsky-pwa-v2';
+const CACHE_NAME = 'tenanta-pwa-v1';
 const urlsToCache = [
   '/css/dashboard.css',
-  '/img/ninsky.png'
+  '/img/tenanta.png'
 ];
 
 // Install Event
