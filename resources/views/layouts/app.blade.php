@@ -12,8 +12,8 @@
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#D97757">
-    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=3">
-    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=3">
+    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=4">
+    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ninsky">

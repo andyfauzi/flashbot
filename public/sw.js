@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tenanta-pwa-v2';
+const CACHE_NAME = 'tenanta-pwa-v3';
 const urlsToCache = [
   '/css/dashboard.css',
   '/img/tenanta.png'
