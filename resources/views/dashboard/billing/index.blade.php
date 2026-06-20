@@ -78,7 +78,7 @@
                     <h5 class="fw-bold text-muted mb-4">Pilihan Paket & Perpanjangan</h5>
 
                     <div class="mb-4">
-                        <label for="voucher_code" class="form-label fw-bold">Kode Voucher Sales (Opsional)</label>
+                        <label for="voucher_code" class="form-label fw-bold">Kode Voucher Diskon</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-ticket text-muted"></i></span>
                             <input type="text" id="voucher_code" class="form-control border-start-0" placeholder="Masukkan kode voucher..." style="text-transform: uppercase;">
