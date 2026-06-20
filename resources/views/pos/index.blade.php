@@ -65,9 +65,10 @@
 
 @if(!$activeShift)
 <!-- OVERLAY BLOKIR POS KARENA BELUM BUKA SHIFT -->
-<div class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 z-3 d-flex align-items-center justify-content-center" style="z-index: 1050 !important;">
-    <div class="card p-4 text-center shadow-lg" style="max-width: 400px;">
-        <i class="fa-solid fa-lock fa-3x text-warning mb-3"></i>
+<div id="shiftOverlay" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 z-3 d-flex align-items-center justify-content-center" style="z-index: 1050 !important;">
+    <div class="card p-4 text-center shadow-lg position-relative" style="max-width: 400px;">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" onclick="document.getElementById('shiftOverlay').style.display='none'" aria-label="Close"></button>
+        <i class="fa-solid fa-lock fa-3x text-warning mb-3 mt-2"></i>
         <h4 class="fw-bold">Kasir Terkunci</h4>
         <p class="text-muted">Anda belum membuka shift kasir. Silakan masukkan modal awal laci untuk memulai transaksi.</p>
         <form action="{{ route('dashboard.shift.buka') }}" method="POST">
@@ -76,9 +77,12 @@
                 <label class="form-label">Modal Awal / Uang Kembalian (Rp)</label>
                 <input type="number" name="modal_awal" class="form-control" placeholder="Contoh: 100000" min="0" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100 fw-bold">
-                <i class="fa-solid fa-key me-2"></i> Buka Shift & Mulai POS
-            </button>
+            <div class="d-flex gap-2">
+                <a href="{{ route('dashboard.transaksi.index') }}" class="btn btn-light w-50 fw-bold border">Batal</a>
+                <button type="submit" class="btn btn-primary w-50 fw-bold">
+                    <i class="fa-solid fa-key me-1"></i> Buka Shift
+                </button>
+            </div>
         </form>
     </div>
 </div>
