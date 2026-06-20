@@ -326,6 +326,12 @@
                 <a href="{{ route('superadmin.broadcast') }}" class="{{ request()->routeIs('superadmin.broadcast*') ? 'active' : '' }}">
                     <i data-lucide="send"></i><span>Broadcast & Pesan</span>
                 </a>
+                <a href="{{ route('superadmin.vouchers.index') }}" class="{{ request()->routeIs('superadmin.vouchers*') ? 'active' : '' }}">
+                    <i data-lucide="ticket"></i><span>Voucher Sales</span>
+                </a>
+                <a href="{{ route('superadmin.finance.index') }}" class="{{ request()->routeIs('superadmin.finance*') ? 'active' : '' }}">
+                    <i data-lucide="wallet"></i><span>Laporan Keuangan</span>
+                </a>
                 <a href="{{ route('superadmin.logs') }}" class="{{ request()->routeIs('superadmin.logs*') ? 'active' : '' }}">
                     <i data-lucide="terminal"></i><span>System Error Logs</span>
                 </a>

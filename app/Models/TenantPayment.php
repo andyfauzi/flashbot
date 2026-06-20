@@ -15,10 +15,18 @@ class TenantPayment extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'gross_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'commission_amount' => 'decimal:2',
     ];
 
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function salesVoucher()
+    {
+        return $this->belongsTo(SalesVoucher::class, 'sales_voucher_id', 'id');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tenant;
 use App\Models\TenantPayment;
+use App\Models\SalesVoucher;
 use App\Services\TenantManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -94,6 +95,44 @@ class PaymentController extends Controller
         return redirect()->route('dashboard.billing.index')->with('sukses', 'Masa percobaan gratis 30 hari berhasil diaktifkan!');
     }
 
+    public function checkVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_code' => 'required|string',
+            'plan' => 'required|in:starter,pro,business',
+        ]);
+
+        TenantManager::switchToLandlord();
+
+        $voucher = SalesVoucher::where('kode_voucher', strtoupper($request->voucher_code))
+            ->where('is_active', true)
+            ->first();
+
+        if (!$voucher) {
+            return response()->json(['error' => 'Kode voucher tidak valid atau sudah tidak aktif.'], 404);
+        }
+
+        $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
+        $priceMap = [
+            'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000'),
+            'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000'),
+            'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000'),
+        ];
+
+        $amount = $priceMap[$request->plan];
+        $discountAmount = ($voucher->diskon_persen / 100) * $amount;
+        $finalAmount = max(0, $amount - $discountAmount);
+
+        return response()->json([
+            'valid' => true,
+            'discount_percent' => $voucher->diskon_persen,
+            'discount_amount' => $discountAmount,
+            'original_price' => $amount,
+            'final_price' => $finalAmount,
+            'message' => "Voucher berhasil! Anda mendapat diskon {$voucher->diskon_persen}%"
+        ]);
+    }
+
     public function checkout(Request $request)
     {
         $request->validate([
@@ -122,6 +161,24 @@ class PaymentController extends Controller
         ];
 
         $amount  = $priceMap[$request->plan];
+        
+        // Handle Voucher
+        $voucher = null;
+        $discountAmount = 0;
+        $commissionAmount = 0;
+
+        if ($request->filled('voucher_code')) {
+            $voucher = SalesVoucher::where('kode_voucher', strtoupper($request->voucher_code))
+                ->where('is_active', true)
+                ->first();
+
+            if ($voucher) {
+                $discountAmount = ($voucher->diskon_persen / 100) * $amount;
+                $amount = max(0, $amount - $discountAmount);
+                $commissionAmount = ($voucher->komisi_persen / 100) * $amount;
+            }
+        }
+
         $orderId = 'TRX-' . $tenant->id . '-' . time();
 
         // Create Payment Record
@@ -131,6 +188,9 @@ class PaymentController extends Controller
             'plan_name'    => $request->plan,
             'gross_amount' => $amount,
             'status'       => 'pending',
+            'sales_voucher_id'  => $voucher ? $voucher->id : null,
+            'discount_amount'   => $discountAmount,
+            'commission_amount' => $commissionAmount,
         ]);
 
         // Config Midtrans

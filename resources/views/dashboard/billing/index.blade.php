@@ -76,6 +76,17 @@
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-muted mb-4">Pilihan Paket & Perpanjangan</h5>
+
+                    <div class="mb-4">
+                        <label for="voucher_code" class="form-label fw-bold">Kode Voucher Sales (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-ticket text-muted"></i></span>
+                            <input type="text" id="voucher_code" class="form-control border-start-0" placeholder="Masukkan kode voucher..." style="text-transform: uppercase;">
+                            <button class="btn btn-outline-secondary" type="button" id="btn-check-voucher">Cek Voucher</button>
+                        </div>
+                        <div id="voucher-message" class="mt-2 small fw-bold"></div>
+                        <input type="hidden" id="applied_voucher" value="">
+                    </div>
                     
                     <div class="row g-3">
                         <div class="col-md-4">
@@ -201,6 +212,61 @@
 @endphp
 <script src="{{ $snapUrl }}" data-client-key="{{ $midtransClientKey }}"></script>
 <script>
+    let currentVoucher = '';
+
+    document.getElementById('btn-check-voucher').addEventListener('click', function() {
+        const code = document.getElementById('voucher_code').value.trim();
+        const messageEl = document.getElementById('voucher-message');
+        
+        if (!code) {
+            messageEl.innerHTML = '<span class="text-danger">Silakan masukkan kode voucher.</span>';
+            return;
+        }
+
+        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengecek...';
+        this.disabled = true;
+
+        fetch('{{ route("dashboard.billing.check_voucher") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ 
+                voucher_code: code,
+                plan: 'starter' // default check against starter just to see validity
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Server error'); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            messageEl.innerHTML = `<span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> ${data.message}</span>`;
+            document.getElementById('applied_voucher').value = code;
+            currentVoucher = code;
+            
+            // Highlight the fact that prices will be discounted
+            document.querySelectorAll('.btn-upgrade').forEach(btn => {
+                if(!btn.classList.contains('voucher-applied')) {
+                    btn.classList.add('voucher-applied');
+                    btn.innerHTML += ` <span class="badge bg-warning text-dark ms-1">Diskon ${data.discount_percent}%</span>`;
+                }
+            });
+        })
+        .catch(error => {
+            messageEl.innerHTML = `<span class="text-danger"><i class="fa-solid fa-times-circle me-1"></i> ${error.message}</span>`;
+            document.getElementById('applied_voucher').value = '';
+            currentVoucher = '';
+        })
+        .finally(() => {
+            this.innerHTML = 'Cek Voucher';
+            this.disabled = false;
+        });
+    });
+
     document.querySelectorAll('.btn-upgrade').forEach(button => {
         button.addEventListener('click', function() {
             const plan = this.getAttribute('data-plan');
@@ -215,7 +281,10 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ plan: plan })
+                body: JSON.stringify({ 
+                    plan: plan,
+                    voucher_code: currentVoucher
+                })
             })
             .then(response => {
                 if (!response.ok) {

@@ -253,6 +253,7 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
 Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/billing', [\App\Http\Controllers\PaymentController::class, 'index'])->name('dashboard.billing.index');
     Route::post('/billing/checkout', [\App\Http\Controllers\PaymentController::class, 'checkout'])->name('dashboard.billing.checkout');
+    Route::post('/billing/check-voucher', [\App\Http\Controllers\PaymentController::class, 'checkVoucher'])->name('dashboard.billing.check_voucher');
     Route::post('/billing/trial', [\App\Http\Controllers\PaymentController::class, 'startTrial'])->name('dashboard.billing.trial');
 });
 
@@ -327,6 +328,17 @@ Route::prefix('super-admin')
         Route::get('/midtrans', [\App\Http\Controllers\SuperAdminController::class, 'showMidtransSettings'])->name('superadmin.midtrans');
         Route::post('/midtrans-settings', [\App\Http\Controllers\SuperAdminController::class, 'updateMidtransSettings'])->name('superadmin.midtrans.update');
         
+        // Manajemen Voucher Sales
+        Route::get('/vouchers', [\App\Http\Controllers\SuperAdmin\SalesVoucherController::class, 'index'])->name('superadmin.vouchers.index');
+        Route::post('/vouchers', [\App\Http\Controllers\SuperAdmin\SalesVoucherController::class, 'store'])->name('superadmin.vouchers.store');
+        Route::post('/vouchers/{voucher}/toggle', [\App\Http\Controllers\SuperAdmin\SalesVoucherController::class, 'toggle'])->name('superadmin.vouchers.toggle');
+        Route::delete('/vouchers/{voucher}', [\App\Http\Controllers\SuperAdmin\SalesVoucherController::class, 'destroy'])->name('superadmin.vouchers.destroy');
+
+        // Laporan Keuangan
+        Route::get('/keuangan', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'index'])->name('superadmin.finance.index');
+        Route::post('/keuangan', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'store'])->name('superadmin.finance.store');
+        Route::delete('/keuangan/{expense}', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'destroy'])->name('superadmin.finance.destroy');
+
         // Toggle Payment Gateway (Per-tenant)
         Route::post('/{id}/toggle-payment-gateway', [\App\Http\Controllers\SuperAdminController::class, 'togglePaymentGateway'])->name('superadmin.toggle_payment_gateway');
     });
