@@ -26,9 +26,9 @@ class SuperAdminController extends Controller
         $monthlyRevenue = 0;
         if (DB::connection('landlord')->getSchemaBuilder()->hasTable('tenant_payments')) {
             $monthlyRevenue = DB::connection('landlord')->table('tenant_payments')
-                ->where('status', 'paid')
+                ->whereIn('status', ['settlement', 'capture'])
                 ->whereMonth('created_at', now()->month)
-                ->sum('amount');
+                ->sum('gross_amount');
         }
         
         // Cek status broadcast dan gateway untuk setiap tenant
