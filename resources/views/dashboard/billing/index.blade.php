@@ -110,8 +110,37 @@
                                     </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresStarter as $feature)
-                                        <li><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
+                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
                                         @endforeach
+                                        @if(isset($packageMenus))
+                                            @foreach($packageMenus as $menu)
+                                                <li class="mb-2">
+                                                    @if($menu->starter_enabled)
+                                                        <i class="fa-solid fa-check text-success me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                    @else
+                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        @endif
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-users text-success me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_karyawan_starter'] ?? 2) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_starter'] ?? 2) }} Akun Karyawan
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-robot text-success me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_wa_starter'] ?? 1000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_starter'] ?? 1000), 0, ',', '.') }} Pesan Bot WA/bln
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-mobile-screen text-success me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_device_starter'] ?? 1) >= 999 ? 'Unlimited' : ($settings['limit_device_starter'] ?? 1) }} Device WA
+                                            </span>
+                                        </li>
                                     </ul>
                                     <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade" data-plan="starter">
                                         {{ $tenant->plan == 'starter' ? 'Perpanjang' : 'Pilih Starter' }}
@@ -131,8 +160,37 @@
                                     </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresPro as $feature)
-                                        <li><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
+                                        <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
                                         @endforeach
+                                        @if(isset($packageMenus))
+                                            @foreach($packageMenus as $menu)
+                                                <li class="mb-2">
+                                                    @if($menu->pro_enabled)
+                                                        <i class="fa-solid fa-check text-primary me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                    @else
+                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        @endif
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-users text-primary me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_karyawan_pro'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_pro'] ?? 10) }} Akun Karyawan
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-robot text-primary me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_wa_pro'] ?? 5000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_pro'] ?? 5000), 0, ',', '.') }} Pesan Bot WA/bln
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-mobile-screen text-primary me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_device_pro'] ?? 3) >= 999 ? 'Unlimited' : ($settings['limit_device_pro'] ?? 3) }} Device WA
+                                            </span>
+                                        </li>
                                     </ul>
                                     <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro">
                                         {{ $tenant->plan == 'pro' ? 'Perpanjang' : 'Upgrade ke Pro' }}
@@ -163,8 +221,37 @@
                                     </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresBusiness as $feature)
-                                        <li><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
+                                        <li class="mb-2"><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
                                         @endforeach
+                                        @if(isset($packageMenus))
+                                            @foreach($packageMenus as $menu)
+                                                <li class="mb-2">
+                                                    @if($menu->business_enabled)
+                                                        <i class="fa-solid fa-check text-dark me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                    @else
+                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        @endif
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-users text-dark me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_karyawan_business'] ?? 999) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_business'] ?? 999) }} Akun Karyawan
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-robot text-dark me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_wa_business'] ?? 999999) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_business'] ?? 999999), 0, ',', '.') }} Pesan Bot WA/bln
+                                            </span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa-solid fa-mobile-screen text-dark me-2"></i> 
+                                            <span class="text-dark">
+                                                {{ ($settings['limit_device_business'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_device_business'] ?? 10) }} Device WA
+                                            </span>
+                                        </li>
                                     </ul>
                                     <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business">
                                         {{ $tenant->plan == 'business' ? 'Perpanjang' : 'Upgrade Business' }}

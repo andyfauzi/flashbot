@@ -79,7 +79,9 @@ class PaymentController extends Controller
         $featuresPro = array_filter(array_map('trim', explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nMaks 500 Produk\nMaks 10 Kasir")));
         $featuresBusiness = array_filter(array_map('trim', explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nUnlimited Produk\nUnlimited Kasir")));
 
-        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'discountPercent', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
+        $packageMenus = \App\Models\PackageMenu::all();
+
+        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'discountPercent', 'featuresStarter', 'featuresPro', 'featuresBusiness', 'settings', 'packageMenus'));
     }
 
     public function startTrial(Request $request)
