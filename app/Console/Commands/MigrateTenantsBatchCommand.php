@@ -41,10 +41,13 @@ class MigrateTenantsBatchCommand extends Command
                 $this->info("Migrasi Tenant: {$tenant->id} ({$tenant->subdomain})");
                 
                 try {
-                    // Karena menggunakan stancl/tenancy, perintahnya biasanya:
-                    Artisan::call('tenants:run', [
-                        'commandname' => 'migrate',
-                        '--tenants' => [$tenant->id],
+                    $dbName = 'tenant_' . strtolower($tenant->subdomain);
+                    config(['database.connections.tenant.database' => $dbName]);
+                    \Illuminate\Support\Facades\DB::purge('tenant');
+
+                    Artisan::call('migrate', [
+                        '--database' => 'tenant',
+                        '--path' => 'database/migrations',
                         '--force' => true
                     ]);
                     
