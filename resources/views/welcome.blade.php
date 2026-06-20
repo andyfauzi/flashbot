@@ -399,7 +399,10 @@
                                 </span>
                             </li>
                         </ul>
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings['contact_phone'] ?? '6281234567890') }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Hubungi Sales</a>
+                        <div class="d-flex flex-column gap-2 mt-3">
+                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0']) }}" class="btn btn-dark w-100 rounded-pill fw-bold py-2">Daftar Business</a>
+                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 30 Hari</a>
+                        </div>
                     </div>
                 </div>
             </div>
