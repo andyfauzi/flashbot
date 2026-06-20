@@ -12,6 +12,7 @@ class SalesVoucher extends Model
     protected $connection = 'landlord';
 
     protected $fillable = [
+        'user_id',
         'kode_voucher',
         'nama_sales',
         'no_wa_sales',
@@ -28,5 +29,10 @@ class SalesVoucher extends Model
     public function payments()
     {
         return $this->hasMany(TenantPayment::class, 'sales_voucher_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

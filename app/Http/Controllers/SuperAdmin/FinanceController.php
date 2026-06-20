@@ -46,6 +46,32 @@ class FinanceController extends Controller
         // Riwayat Pengeluaran (Terbaru di atas)
         $expenses = LandlordExpense::orderBy('tanggal', 'desc')->orderBy('id', 'desc')->get();
 
+        // ---------------------------------------------
+        // TAMBAHAN: Detail Penjualan Paket & Rekap Sales
+        // ---------------------------------------------
+        
+        // 1. Detail Penjualan Paket (Riwayat Transaksi)
+        $salesPayments = TenantPayment::with(['tenant', 'salesVoucher'])
+            ->whereIn('status', ['settlement', 'capture'])
+            ->orderBy('paid_at', 'desc')
+            ->get();
+
+        // 2. Rekap Komisi Sales
+        // Mengelompokkan berdasarkan sales_voucher_id
+        $rekapSales = $salesPayments->filter(function($payment) {
+            return $payment->sales_voucher_id != null;
+        })->groupBy('sales_voucher_id')->map(function ($payments, $voucherId) {
+            $voucher = $payments->first()->salesVoucher;
+            return [
+                'nama_sales' => $voucher ? $voucher->nama_sales : 'Tanpa Nama',
+                'no_wa_sales' => $voucher ? $voucher->no_wa_sales : '-',
+                'kode_voucher' => $voucher ? $voucher->kode_voucher : '-',
+                'total_penjualan' => $payments->sum('gross_amount'),
+                'total_komisi' => $payments->sum('commission_amount'),
+                'jumlah_transaksi' => $payments->count()
+            ];
+        })->values();
+
         return view('superadmin.finance.index', compact(
             'totalOmsetKeseluruhan',
             'totalKomisiKeseluruhan',
@@ -55,7 +81,9 @@ class FinanceController extends Controller
             'komisiBulanIni',
             'pengeluaranBulanIni',
             'labaBersihBulanIni',
-            'expenses'
+            'expenses',
+            'salesPayments',
+            'rekapSales'
         ));
     }
 

@@ -38,6 +38,7 @@ class User extends Authenticatable
         'role',
         'device_id',
         'google_id',
+        'is_sales',
     ];
 
     /**
@@ -57,6 +58,11 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin' || $this->role === 'owner';
+    }
+
+    public function isSales()
+    {
+        return $this->is_sales == true;
     }
 
     public function isUser()

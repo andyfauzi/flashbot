@@ -121,13 +121,52 @@ Route::post('/sa-access', function (\Illuminate\Http\Request $request) {
     return back()->withErrors(['email' => 'Akses ditolak.'])->onlyInput('email');
 })->middleware('throttle:5,1')->name('sa.login.post');
 
+// =============================================
+// SALES / MITRA LOGIN & DASHBOARD
+// =============================================
+Route::get('/mitra-login', function () {
+    if (Auth::check() && Auth::user()->isSales()) {
+        return redirect()->route('sales.dashboard');
+    }
+    Auth::logout();
+    return view('auth.mitra-login');
+})->name('sales.login');
+
+Route::post('/mitra-login', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $user = \Illuminate\Support\Facades\DB::connection('landlord')
+        ->table('users')
+        ->where('email', $credentials['email'])
+        ->first();
+
+    if ($user && $user->is_sales && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        Auth::loginUsingId($user->id);
+        $request->session()->regenerate();
+        return redirect()->route('sales.dashboard')->with('sukses', 'Selamat datang, Mitra Sales!');
+    }
+
+    return back()->withErrors(['email' => 'Akses ditolak. Email atau password salah.'])->onlyInput('email');
+})->middleware('throttle:5,1')->name('sales.login.post');
+
+Route::middleware(['auth', 'sales.agent'])->prefix('mitra')->group(function () {
+    Route::get('/', [\App\Http\Controllers\SalesDashboardController::class, 'index'])->name('sales.dashboard');
+});
+
 Route::get('/logout', function (\Illuminate\Http\Request $request) {
     $isSuperAdmin = Auth::check() && Auth::user()->is_super_admin;
+    $isSales = Auth::check() && Auth::user()->isSales();
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
     if ($isSuperAdmin) {
         return redirect('/sa-access')->with('sukses', 'Logout berhasil!');
+    }
+    if ($isSales) {
+        return redirect('/mitra-login')->with('sukses', 'Logout berhasil!');
     }
     
     // Redirect ke landing page utama jika logout

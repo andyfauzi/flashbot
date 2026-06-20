@@ -24,12 +24,30 @@ class SalesVoucherController extends Controller
             'kode_voucher' => 'required|string|unique:landlord.sales_vouchers,kode_voucher',
             'nama_sales' => 'required|string|max:255',
             'no_wa_sales' => 'nullable|string|max:20',
+            'email_sales' => 'required|email|max:255',
             'diskon_persen' => 'required|integer|min:0|max:100',
             'komisi_persen' => 'required|integer|min:0|max:100',
             'target_paket' => 'required|in:semua,starter,pro,business',
         ]);
 
+        // Cek atau buat user sales
+        $user = \App\Models\User::firstOrCreate(
+            ['email' => $request->email_sales],
+            [
+                'name' => $request->nama_sales,
+                'password' => \Illuminate\Support\Facades\Hash::make('flashbot123'),
+                'is_sales' => true,
+                'role' => 'user'
+            ]
+        );
+
+        // Pastikan user tersebut memiliki hak akses sales (jika sudah ada sebelumnya tapi bukan sales)
+        if (!$user->is_sales) {
+            $user->update(['is_sales' => true]);
+        }
+
         SalesVoucher::create([
+            'user_id' => $user->id,
             'kode_voucher' => strtoupper($request->kode_voucher),
             'nama_sales' => $request->nama_sales,
             'no_wa_sales' => $request->no_wa_sales,
@@ -39,7 +57,7 @@ class SalesVoucherController extends Controller
             'is_active' => true,
         ]);
 
-        return redirect()->route('superadmin.vouchers.index')->with('sukses', 'Voucher berhasil ditambahkan.');
+        return redirect()->route('superadmin.vouchers.index')->with('sukses', 'Voucher berhasil ditambahkan. Akun sales dapat login dengan email tersebut dan password default: flashbot123');
     }
 
     public function toggle(SalesVoucher $voucher)

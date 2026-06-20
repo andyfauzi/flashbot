@@ -160,16 +160,24 @@
                 <div class="mb-3">
                     <label class="form-label fw-bold">Kode Voucher</label>
                     <input type="text" name="kode_voucher" class="form-control" placeholder="Contoh: FLASH2026" required style="text-transform: uppercase;">
-                    <div class="form-text">Gunakan huruf dan angka tanpa spasi.</div>
+                    <div class="form-text mb-3">Gunakan huruf dan angka tanpa spasi.</div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Nama Sales</label>
+                            <input type="text" name="nama_sales" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Email Akun Sales</label>
+                            <input type="email" name="email_sales" class="form-control" placeholder="sales@flashbot.id" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">No WA (Opsional)</label>
+                            <input type="text" name="no_wa_sales" class="form-control">
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Nama Sales / Mitra</label>
-                    <input type="text" name="nama_sales" class="form-control" placeholder="Contoh: Budi Santoso" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">No WhatsApp Sales (Opsional)</label>
-                    <input type="text" name="no_wa_sales" class="form-control" placeholder="Contoh: 628123456789">
-                </div>
+                
                 <div class="mb-3">
                     <label class="form-label fw-bold">Peruntukan Paket</label>
                     <select name="target_paket" class="form-select" required>
