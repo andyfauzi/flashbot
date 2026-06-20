@@ -303,7 +303,7 @@
                                     </ul>
                                 </div>
                                 <div class="text-center mb-3">
-                                    <a data-bs-toggle="collapse" href="#collapseStarterMenusHome" role="button" aria-expanded="false" aria-controls="collapseStarterMenusHome" class="text-success text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                    <a data-bs-toggle="collapse" href="#collapseStarterMenusHome" role="button" aria-expanded="false" aria-controls="collapseStarterMenusHome" class="text-success text-decoration-none fw-bold small collapse-toggle-btn">
                                         Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                     </a>
                                 </div>
@@ -362,7 +362,7 @@
                                     </ul>
                                 </div>
                                 <div class="text-center mb-3">
-                                    <a data-bs-toggle="collapse" href="#collapseProMenusHome" role="button" aria-expanded="false" aria-controls="collapseProMenusHome" class="text-primary text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                    <a data-bs-toggle="collapse" href="#collapseProMenusHome" role="button" aria-expanded="false" aria-controls="collapseProMenusHome" class="text-primary text-decoration-none fw-bold small collapse-toggle-btn">
                                         Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                     </a>
                                 </div>
@@ -420,7 +420,7 @@
                                     </ul>
                                 </div>
                                 <div class="text-center mb-3">
-                                    <a data-bs-toggle="collapse" href="#collapseBusinessMenusHome" role="button" aria-expanded="false" aria-controls="collapseBusinessMenusHome" class="text-dark text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                    <a data-bs-toggle="collapse" href="#collapseBusinessMenusHome" role="button" aria-expanded="false" aria-controls="collapseBusinessMenusHome" class="text-dark text-decoration-none fw-bold small collapse-toggle-btn">
                                         Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                     </a>
                                 </div>
@@ -594,5 +594,19 @@
     @endif
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.collapse-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setTimeout(() => {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    if(isExpanded) {
+                        this.innerHTML = 'Sembunyikan Fitur <i class="fa-solid fa-chevron-up"></i>';
+                    } else {
+                        this.innerHTML = 'Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>';
+                    }
+                }, 50);
+            });
+        });
+    </script>
 </body>
 </html>

@@ -77,16 +77,7 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-muted mb-4">Pilihan Paket & Perpanjangan</h5>
 
-                    <!-- Toggle Durasi Langganan -->
-                    <div class="mb-4 d-flex justify-content-center">
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="plan_duration" id="duration_monthly" value="monthly" autocomplete="off" checked>
-                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_monthly">Bulanan</label>
-
-                            <input type="radio" class="btn-check" name="plan_duration" id="duration_yearly" value="yearly" autocomplete="off">
-                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_yearly">Tahunan (Hemat {{ $discountPercent }}%)</label>
-                        </div>
-                    </div>
+                    <!-- Toggle Durasi Langganan Dihapus, diganti tombol masing-masing -->
 
                     <div class="mb-4">
                         <label for="voucher_code" class="form-label fw-bold">Kode Voucher Diskon</label>
@@ -104,10 +95,13 @@
                             <div class="card border-2 border-light hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-success">Starter</h4>
-                                    <h5 class="mb-3">
-                                        <span class="price-display" data-monthly="{{ $priceStarter }}" data-yearly="{{ $priceStarterYearly }}">Rp {{ number_format($priceStarter, 0, ',', '.') }}</span>
+                                    <h5 class="mb-1">
+                                        <span class="price-display">Rp {{ number_format($priceStarter, 0, ',', '.') }}</span>
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
+                                    <div class="small text-success fw-bold mb-3">
+                                        Tahunan: Rp {{ number_format($priceStarterYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                    </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresStarter as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
@@ -127,7 +121,7 @@
                                                 </ul>
                                             </div>
                                             <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseStarterMenus" role="button" aria-expanded="false" aria-controls="collapseStarterMenus" class="text-success text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                <a data-bs-toggle="collapse" href="#collapseStarterMenus" role="button" aria-expanded="false" aria-controls="collapseStarterMenus" class="text-success text-decoration-none fw-bold small collapse-toggle-btn">
                                                     Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                                 </a>
                                             </div>
@@ -151,9 +145,14 @@
                                             </span>
                                         </li>
                                     </ul>
-                                    <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade" data-plan="starter">
-                                        {{ $tenant->plan == 'starter' ? 'Perpanjang' : 'Pilih Starter' }}
-                                    </button>
+                                    <div class="d-flex flex-column gap-2 mt-auto pt-3">
+                                        <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade fw-bold" data-plan="starter" data-duration="monthly">
+                                            {{ $tenant->plan == 'starter' ? 'Perpanjang Bulanan' : 'Pilih Bulanan' }}
+                                        </button>
+                                        <button class="btn btn-success w-100 rounded-pill btn-upgrade fw-bold shadow-sm" data-plan="starter" data-duration="yearly">
+                                            {{ $tenant->plan == 'starter' ? 'Perpanjang Tahunan' : 'Pilih Tahunan' }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -163,10 +162,13 @@
                                 <div class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">Populer</div>
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-primary">Pro</h4>
-                                    <h5 class="mb-3">
-                                        <span class="price-display" data-monthly="{{ $pricePro }}" data-yearly="{{ $priceProYearly }}">Rp {{ number_format($pricePro, 0, ',', '.') }}</span>
+                                    <h5 class="mb-1">
+                                        <span class="price-display">Rp {{ number_format($pricePro, 0, ',', '.') }}</span>
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
+                                    <div class="small text-primary fw-bold mb-3">
+                                        Tahunan: Rp {{ number_format($priceProYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                    </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresPro as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
@@ -186,7 +188,7 @@
                                                 </ul>
                                             </div>
                                             <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseProMenus" role="button" aria-expanded="false" aria-controls="collapseProMenus" class="text-primary text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                <a data-bs-toggle="collapse" href="#collapseProMenus" role="button" aria-expanded="false" aria-controls="collapseProMenus" class="text-primary text-decoration-none fw-bold small collapse-toggle-btn">
                                                     Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                                 </a>
                                             </div>
@@ -210,9 +212,14 @@
                                             </span>
                                         </li>
                                     </ul>
-                                    <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro">
-                                        {{ $tenant->plan == 'pro' ? 'Perpanjang' : 'Upgrade ke Pro' }}
-                                    </button>
+                                    <div class="d-flex flex-column gap-2 mt-auto pt-3">
+                                        <button class="btn btn-outline-primary w-100 rounded-pill btn-upgrade fw-bold" data-plan="pro" data-duration="monthly">
+                                            {{ $tenant->plan == 'pro' ? 'Perpanjang Bulanan' : 'Pilih Bulanan' }}
+                                        </button>
+                                        <button class="btn btn-primary w-100 rounded-pill btn-upgrade text-white fw-bold shadow-sm" data-plan="pro" data-duration="yearly">
+                                            {{ $tenant->plan == 'pro' ? 'Perpanjang Tahunan' : 'Pilih Tahunan' }}
+                                        </button>
+                                    </div>
                                     @php
                                         $isNewUser = $tenant->created_at && $tenant->created_at->diffInDays(now()) < 1;
                                         $isExpired = $tenant->plan_expires_at && $tenant->plan_expires_at < now();
@@ -233,10 +240,13 @@
                             <div class="card border-2 border-dark hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-dark">Business</h4>
-                                    <h5 class="mb-3">
-                                        <span class="price-display" data-monthly="{{ $priceBusiness }}" data-yearly="{{ $priceBusinessYearly }}">Rp {{ number_format($priceBusiness, 0, ',', '.') }}</span>
+                                    <h5 class="mb-1">
+                                        <span class="price-display">Rp {{ number_format($priceBusiness, 0, ',', '.') }}</span>
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
+                                    <div class="small text-dark fw-bold mb-3">
+                                        Tahunan: Rp {{ number_format($priceBusinessYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                    </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresBusiness as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
@@ -256,7 +266,7 @@
                                                 </ul>
                                             </div>
                                             <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseBusinessMenus" role="button" aria-expanded="false" aria-controls="collapseBusinessMenus" class="text-dark text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                <a data-bs-toggle="collapse" href="#collapseBusinessMenus" role="button" aria-expanded="false" aria-controls="collapseBusinessMenus" class="text-dark text-decoration-none fw-bold small collapse-toggle-btn">
                                                     Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
                                                 </a>
                                             </div>
@@ -280,9 +290,14 @@
                                             </span>
                                         </li>
                                     </ul>
-                                    <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business">
-                                        {{ $tenant->plan == 'business' ? 'Perpanjang' : 'Upgrade Business' }}
-                                    </button>
+                                    <div class="d-flex flex-column gap-2 mt-auto pt-3">
+                                        <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business" data-duration="monthly">
+                                            {{ $tenant->plan == 'business' ? 'Perpanjang Bulanan' : 'Pilih Bulanan' }}
+                                        </button>
+                                        <button class="btn btn-dark w-100 rounded-pill btn-upgrade fw-bold shadow-sm" data-plan="business" data-duration="yearly">
+                                            {{ $tenant->plan == 'business' ? 'Perpanjang Tahunan' : 'Pilih Tahunan' }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -381,17 +396,17 @@
 @endphp
 <script src="{{ $snapUrl }}" data-client-key="{{ $midtransClientKey }}"></script>
 <script>
-    // Toggle Durasi
-    document.querySelectorAll('input[name="plan_duration"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const duration = this.value; // 'monthly' or 'yearly'
-            document.querySelectorAll('.price-display').forEach(el => {
-                const amount = el.getAttribute('data-' + duration);
-                el.innerText = 'Rp ' + parseInt(amount).toLocaleString('id-ID');
-            });
-            document.querySelectorAll('.duration-label').forEach(el => {
-                el.innerText = duration === 'yearly' ? '/thn' : '/bln';
-            });
+    // Handle Collapse Toggle Text Correctly
+    document.querySelectorAll('.collapse-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                if(isExpanded) {
+                    this.innerHTML = 'Sembunyikan Fitur <i class="fa-solid fa-chevron-up"></i>';
+                } else {
+                    this.innerHTML = 'Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>';
+                }
+            }, 50); // delay slighty to ensure aria-expanded is updated by bootstrap
         });
     });
 
@@ -466,7 +481,7 @@
                 },
                 body: JSON.stringify({ 
                     plan: plan,
-                    duration: document.querySelector('input[name="plan_duration"]:checked').value,
+                    duration: this.getAttribute('data-duration'),
                     voucher_code: currentVoucher
                 })
             })
