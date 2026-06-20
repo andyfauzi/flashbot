@@ -39,12 +39,10 @@
         <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="{{ route('chatbot.dashboard') }}">
             @if(isset($identitasToko) && $identitasToko->logo_path)
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
+                <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko) }}</span>
             @else
-                <div class="bg-primary bg-opacity-10 rounded text-primary d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                    <i data-lucide="store" style="width: 16px; height: 16px;"></i>
-                </div>
+                <img src="{{ asset('img/tenanta.png') }}" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
             @endif
-            <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}</span>
         </a>
     </div>
     
