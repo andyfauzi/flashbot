@@ -8,12 +8,12 @@
   "theme_color": "#D97757",
   "icons": [
     {
-      "src": "/img/ninsky.png",
+      "src": "/img/tenanta.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/img/ninsky.png",
+      "src": "/img/tenanta.png",
       "sizes": "512x512",
       "type": "image/png"
     }

@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tenanta.id SaaS Platform</title>
+    
+    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
