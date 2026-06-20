@@ -29,7 +29,7 @@ Route::get('/', function () {
         }
         
         if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('package_menus')) {
-            $packageMenus = \Illuminate\Support\Facades\DB::connection('landlord')->table('package_menus')->orderBy('order')->get();
+            $packageMenus = \App\Models\PackageMenu::all();
         }
     } catch (\Exception $e) {
         // Abaikan jika migrasi belum dijalankan
