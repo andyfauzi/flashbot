@@ -412,6 +412,20 @@ class SuperAdminController extends Controller
             \App\Models\LandlordSetting::set('limit_wa_business', $request->limit_wa_business);
         }
 
+        // Save Device Limits
+        if ($request->has('limit_device_gratis')) {
+            \App\Models\LandlordSetting::set('limit_device_gratis', $request->limit_device_gratis);
+        }
+        if ($request->has('limit_device_starter')) {
+            \App\Models\LandlordSetting::set('limit_device_starter', $request->limit_device_starter);
+        }
+        if ($request->has('limit_device_pro')) {
+            \App\Models\LandlordSetting::set('limit_device_pro', $request->limit_device_pro);
+        }
+        if ($request->has('limit_device_business')) {
+            \App\Models\LandlordSetting::set('limit_device_business', $request->limit_device_business);
+        }
+
         return redirect()->back()->with('success', 'Konfigurasi menu paket dan batasan fitur berhasil diperbarui.');
     }
 

@@ -53,14 +53,10 @@ class DeviceController extends Controller
         ]);
 
         $tenant = app('current_tenant');
-        $plan = $tenant ? strtolower($tenant->plan) : 'basic';
+        $plan = $tenant ? strtolower($tenant->plan) : 'gratis';
         
-        $deviceLimit = 1;
-        if (in_array($plan, ['pro', 'premium'])) {
-            $deviceLimit = 3;
-        } elseif (in_array($plan, ['enterprise', 'unlimited'])) {
-            $deviceLimit = 10;
-        }
+        // Ambil limit dari LandlordSetting
+        $deviceLimit = \App\Models\LandlordSetting::get('limit_device_' . $plan, 1);
 
         if (ChatbotDevice::count() >= $deviceLimit) {
             return back()->with('error', "Gagal menambah device! Paket Anda (" . ucfirst($plan) . ") maksimal hanya mengizinkan {$deviceLimit} device. Silakan hubungi admin untuk upgrade paket.");

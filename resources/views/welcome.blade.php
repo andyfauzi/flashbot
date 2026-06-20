@@ -311,6 +311,12 @@
                                     {{ ($settings['limit_wa_starter'] ?? 1000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_starter'] ?? 1000), 0, ',', '.') }} Pesan Bot WA/bln
                                 </span>
                             </li>
+                            <li>
+                                <i class="fa-solid fa-mobile-screen text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_device_starter'] ?? 1) >= 999 ? 'Unlimited' : ($settings['limit_device_starter'] ?? 1) }} Device WA
+                                </span>
+                            </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
@@ -355,6 +361,12 @@
                                     {{ ($settings['limit_wa_pro'] ?? 5000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_pro'] ?? 5000), 0, ',', '.') }} Pesan Bot WA/bln
                                 </span>
                             </li>
+                            <li>
+                                <i class="fa-solid fa-mobile-screen text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_device_pro'] ?? 3) >= 999 ? 'Unlimited' : ($settings['limit_device_pro'] ?? 3) }} Device WA
+                                </span>
+                            </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro</a>
@@ -396,6 +408,12 @@
                                 <i class="fa-solid fa-robot text-primary"></i> 
                                 <span class="text-dark">
                                     {{ ($settings['limit_wa_business'] ?? 999999) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_business'] ?? 999999), 0, ',', '.') }} Pesan Bot WA/bln
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-mobile-screen text-primary"></i> 
+                                <span class="text-dark">
+                                    {{ ($settings['limit_device_business'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_device_business'] ?? 10) }} Device WA
                                 </span>
                             </li>
                         </ul>
