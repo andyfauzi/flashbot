@@ -138,18 +138,18 @@ Route::post('/mitra-login', function (\Illuminate\Http\Request $request) {
         'password' => 'required',
     ]);
 
-    $user = \Illuminate\Support\Facades\DB::connection('landlord')
-        ->table('users')
-        ->where('email', $credentials['email'])
-        ->first();
-
-    if ($user && $user->is_sales && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-        Auth::loginUsingId($user->id);
-        $request->session()->regenerate();
-        return redirect()->route('sales.dashboard')->with('sukses', 'Selamat datang, Mitra Sales!');
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        if ($user->isSales()) {
+            $request->session()->regenerate();
+            return redirect()->route('sales.dashboard')->with('sukses', 'Selamat datang, Mitra Sales!');
+        }
+        // Jika bukan sales, logout kembali
+        Auth::logout();
+        return redirect()->route('sales.login')->withErrors(['email' => 'Akses ditolak. Anda bukan Mitra Sales.'])->onlyInput('email');
     }
 
-    return back()->withErrors(['email' => 'Akses ditolak. Email atau password salah.'])->onlyInput('email');
+    return redirect()->route('sales.login')->withErrors(['email' => 'Akses ditolak. Email atau password salah.'])->onlyInput('email');
 })->middleware('throttle:5,1')->name('sales.login.post');
 
 Route::middleware(['auth', 'sales.agent'])->prefix('mitra')->group(function () {
