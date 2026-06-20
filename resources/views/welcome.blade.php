@@ -210,7 +210,15 @@
     <nav class="navbar navbar-expand-lg fixed-top py-3">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <img src="{{ asset('img/tenanta.png') }}?v=2" alt="Tenanta.id" style="height: 32px; object-fit: contain;">
+                @php
+                    $logoPath = public_path('img/tenanta.png');
+                    $logoData = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
+                @endphp
+                @if($logoData)
+                    <img src="data:image/png;base64,{{ $logoData }}" alt="Tenanta.id" style="height: 32px; object-fit: contain;">
+                @else
+                    <i class="fa-solid fa-bolt me-2"></i>Tenanta.id
+                @endif
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>

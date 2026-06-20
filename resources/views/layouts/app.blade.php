@@ -41,7 +41,18 @@
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
                 <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko) }}</span>
             @else
-                <img src="{{ asset('img/tenanta.png') }}?v=2" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
+                @php
+                    $logoPath = public_path('img/tenanta.png');
+                    $logoData = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
+                @endphp
+                @if($logoData)
+                    <img src="data:image/png;base64,{{ $logoData }}" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
+                @else
+                    <div class="bg-primary bg-opacity-10 rounded text-primary d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                        <i data-lucide="store" style="width: 16px; height: 16px;"></i>
+                    </div>
+                    <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">TENANTA.ID</span>
+                @endif
             @endif
         </a>
     </div>
