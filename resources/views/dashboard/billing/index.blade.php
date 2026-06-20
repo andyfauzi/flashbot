@@ -112,16 +112,25 @@
                                         @foreach($featuresStarter as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(isset($packageMenus))
-                                            @foreach($packageMenus as $menu)
-                                                <li class="mb-2">
-                                                    @if($menu->starter_enabled)
-                                                        <i class="fa-solid fa-check text-success me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                    @else
-                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                    @endif
-                                                </li>
-                                            @endforeach
+                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                            <div class="collapse" id="collapseStarterMenus">
+                                                <ul class="list-unstyled text-start small mb-2">
+                                                @foreach($packageMenus as $menu)
+                                                    <li class="mb-2">
+                                                        @if($menu->starter_enabled)
+                                                            <i class="fa-solid fa-check text-success me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                        @else
+                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="text-center mb-3">
+                                                <a data-bs-toggle="collapse" href="#collapseStarterMenus" role="button" aria-expanded="false" aria-controls="collapseStarterMenus" class="text-success text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                                </a>
+                                            </div>
                                         @endif
                                         <li class="mb-2">
                                             <i class="fa-solid fa-users text-success me-2"></i> 
@@ -162,16 +171,25 @@
                                         @foreach($featuresPro as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(isset($packageMenus))
-                                            @foreach($packageMenus as $menu)
-                                                <li class="mb-2">
-                                                    @if($menu->pro_enabled)
-                                                        <i class="fa-solid fa-check text-primary me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                    @else
-                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                    @endif
-                                                </li>
-                                            @endforeach
+                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                            <div class="collapse" id="collapseProMenus">
+                                                <ul class="list-unstyled text-start small mb-2">
+                                                @foreach($packageMenus as $menu)
+                                                    <li class="mb-2">
+                                                        @if($menu->pro_enabled)
+                                                            <i class="fa-solid fa-check text-primary me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                        @else
+                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="text-center mb-3">
+                                                <a data-bs-toggle="collapse" href="#collapseProMenus" role="button" aria-expanded="false" aria-controls="collapseProMenus" class="text-primary text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                                </a>
+                                            </div>
                                         @endif
                                         <li class="mb-2">
                                             <i class="fa-solid fa-users text-primary me-2"></i> 
@@ -223,16 +241,25 @@
                                         @foreach($featuresBusiness as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(isset($packageMenus))
-                                            @foreach($packageMenus as $menu)
-                                                <li class="mb-2">
-                                                    @if($menu->business_enabled)
-                                                        <i class="fa-solid fa-check text-dark me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                    @else
-                                                        <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                    @endif
-                                                </li>
-                                            @endforeach
+                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                            <div class="collapse" id="collapseBusinessMenus">
+                                                <ul class="list-unstyled text-start small mb-2">
+                                                @foreach($packageMenus as $menu)
+                                                    <li class="mb-2">
+                                                        @if($menu->business_enabled)
+                                                            <i class="fa-solid fa-check text-dark me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                                        @else
+                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="text-center mb-3">
+                                                <a data-bs-toggle="collapse" href="#collapseBusinessMenus" role="button" aria-expanded="false" aria-controls="collapseBusinessMenus" class="text-dark text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                                </a>
+                                            </div>
                                         @endif
                                         <li class="mb-2">
                                             <i class="fa-solid fa-users text-dark me-2"></i> 

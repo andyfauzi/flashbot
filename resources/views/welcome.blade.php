@@ -288,16 +288,25 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
-                            @if(isset($packageMenus))
-                                @foreach($packageMenus as $menu)
-                                    <li>
-                                        @if($menu->starter_enabled)
-                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                        @else
-                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                        @endif
-                                    </li>
-                                @endforeach
+                            @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                <div class="collapse" id="collapseStarterMenusHome">
+                                    <ul class="feature-list mb-2 mt-0">
+                                    @foreach($packageMenus as $menu)
+                                        <li>
+                                            @if($menu->starter_enabled)
+                                                <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                            @else
+                                                <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                    </ul>
+                                </div>
+                                <div class="text-center mb-3">
+                                    <a data-bs-toggle="collapse" href="#collapseStarterMenusHome" role="button" aria-expanded="false" aria-controls="collapseStarterMenusHome" class="text-success text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                        Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                    </a>
+                                </div>
                             @endif
                             <li>
                                 <i class="fa-solid fa-users text-primary"></i> 
@@ -338,16 +347,25 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
-                            @if(isset($packageMenus))
-                                @foreach($packageMenus as $menu)
-                                    <li>
-                                        @if($menu->pro_enabled)
-                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                        @else
-                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                        @endif
-                                    </li>
-                                @endforeach
+                            @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                <div class="collapse" id="collapseProMenusHome">
+                                    <ul class="feature-list mb-2 mt-0">
+                                    @foreach($packageMenus as $menu)
+                                        <li>
+                                            @if($menu->pro_enabled)
+                                                <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                            @else
+                                                <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                    </ul>
+                                </div>
+                                <div class="text-center mb-3">
+                                    <a data-bs-toggle="collapse" href="#collapseProMenusHome" role="button" aria-expanded="false" aria-controls="collapseProMenusHome" class="text-primary text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                        Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                    </a>
+                                </div>
                             @endif
                             <li>
                                 <i class="fa-solid fa-users text-primary"></i> 
@@ -387,16 +405,25 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
-                            @if(isset($packageMenus))
-                                @foreach($packageMenus as $menu)
-                                    <li>
-                                        @if($menu->business_enabled)
-                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                        @else
-                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                        @endif
-                                    </li>
-                                @endforeach
+                            @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
+                                <div class="collapse" id="collapseBusinessMenusHome">
+                                    <ul class="feature-list mb-2 mt-0">
+                                    @foreach($packageMenus as $menu)
+                                        <li>
+                                            @if($menu->business_enabled)
+                                                <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                            @else
+                                                <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                    </ul>
+                                </div>
+                                <div class="text-center mb-3">
+                                    <a data-bs-toggle="collapse" href="#collapseBusinessMenusHome" role="button" aria-expanded="false" aria-controls="collapseBusinessMenusHome" class="text-dark text-decoration-none fw-bold small" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Lihat Semua Fitur <i class=\'fa-solid fa-chevron-down\'></i>' : 'Sembunyikan Fitur <i class=\'fa-solid fa-chevron-up\'></i>'">
+                                        Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
+                                    </a>
+                                </div>
                             @endif
                             <li>
                                 <i class="fa-solid fa-users text-primary"></i> 

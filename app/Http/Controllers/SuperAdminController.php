@@ -431,6 +431,9 @@ class SuperAdminController extends Controller
             \App\Models\LandlordSetting::set('discount_yearly_percent', $request->discount_yearly_percent);
         }
 
+        // Save Show Package Menus
+        \App\Models\LandlordSetting::set('show_package_menus_on_pricing', $request->has('show_package_menus_on_pricing') ? '1' : '0');
+
         // Save Fallback Payment
         if ($request->has('payment_instructions_fallback')) {
             \App\Models\LandlordSetting::set('payment_instructions_fallback', $request->payment_instructions_fallback);

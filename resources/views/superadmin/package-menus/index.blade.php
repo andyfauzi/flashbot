@@ -171,6 +171,20 @@
                 </div>
             </div>
 
+            <!-- Tambahan: Pengaturan Tampilan Kartu Harga -->
+            <div class="mt-5 mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-eye me-2"></i> Tampilan Menu pada Kartu Harga</h5>
+                <p class="text-muted small">Jika diaktifkan, seluruh rincian hak akses menu aplikasi akan ditampilkan secara lengkap pada daftar fitur (Landing Page & Dasbor Penagihan). Jika dinonaktifkan, detail menu ini akan disembunyikan agar kartu harga tidak terlalu panjang.</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="show_package_menus_on_pricing" name="show_package_menus_on_pricing" value="1" {{ \App\Models\LandlordSetting::get('show_package_menus_on_pricing', '1') == '1' ? 'checked' : '' }}>
+                            <label class="form-check-label fw-bold" for="show_package_menus_on_pricing">Tampilkan Detail Hak Akses Menu</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tambahan: Harga Paket Tahunan (Berdasarkan Diskon) -->
             <div class="mt-5 mb-4">
                 <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-tags me-2"></i> Pengaturan Harga Paket Langganan Tahunan (1 Tahun)</h5>
