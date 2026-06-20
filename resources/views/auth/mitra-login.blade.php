@@ -1,15 +1,27 @@
-@extends('layouts.app')
-
-@section('title', 'Login Mitra Sales')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tenanta.id</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
 <div class="container d-flex align-items-center justify-content-center min-vh-100">
     <div class="card border-0 shadow-lg rounded-4" style="max-width: 400px; width: 100%;">
         <div class="card-body p-5">
             <div class="text-center mb-4">
-                <i class="fa-solid fa-handshake fa-3x text-primary mb-3"></i>
-                <h4 class="fw-bold" style="font-family: var(--font-heading);">Mitra Sales</h4>
-                <p class="text-muted small">Silakan masuk untuk memantau performa dan komisi penjualan Anda.</p>
+                <i class="fa-solid fa-store fa-3x text-primary mb-3"></i>
+                <h4 class="fw-bold" style="font-family: var(--font-heading);">Tenanta.id</h4>
+                <p class="text-muted small">Silakan masuk ke akun Anda.</p>
             </div>
 
             @if(session('sukses'))
@@ -44,4 +56,5 @@
         </div>
     </div>
 </div>
-@endsection
+</body>
+</html>
