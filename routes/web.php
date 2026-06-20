@@ -14,7 +14,7 @@ Route::get('/debug-php', function () {
 
 Route::get('/', function () {
     if (app()->has('current_tenant')) {
-        return redirect()->route('dashboard.transaksi.index');
+        return redirect()->route('portal.index');
     }
     
     // Ambil data CMS dari tabel landlord_settings
