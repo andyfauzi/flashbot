@@ -81,33 +81,6 @@
                         </div>
                     </div>
 
-                    <!-- Payment Gateway Xendit / Mekari Pay -->
-                    <div class="card border border-success shadow-sm rounded-4 mb-4 bg-light">
-                        <div class="card-header bg-success text-white border-bottom-0 py-3 rounded-top-4">
-                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-credit-card me-2"></i> Payment Gateway (Xendit / Mekari Pay)</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" name="is_payment_gateway_active" id="pgActive" value="1" {{ old('is_payment_gateway_active', $identitas->is_payment_gateway_active ?? false) ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold text-dark" for="pgActive">Aktifkan Pembayaran Otomatis</label>
-                                <div class="form-text text-muted">Jika diaktifkan, chatbot akan membuat link pembayaran otomatis. Jika dimatikan, chatbot akan memberikan instruksi transfer manual (Nomor Rekening / QRIS).</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="xendit_api_key" class="form-label fw-bold text-dark">Secret API Key</label>
-                                <input type="password" class="form-control @error('xendit_api_key') is-invalid @enderror" id="xendit_api_key" name="xendit_api_key" value="{{ old('xendit_api_key', $identitas->xendit_api_key ?? '') }}" placeholder="xnd_production_xxx...">
-                                <div class="form-text text-muted">Dapatkan dari dashboard Xendit/Mekari Pay (Settings > API Keys).</div>
-                                @error('xendit_api_key') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="mb-0">
-                                <label for="xendit_webhook_token" class="form-label fw-bold text-dark">Webhook Verification Token</label>
-                                <input type="password" class="form-control @error('xendit_webhook_token') is-invalid @enderror" id="xendit_webhook_token" name="xendit_webhook_token" value="{{ old('xendit_webhook_token', $identitas->xendit_webhook_token ?? '') }}" placeholder="Token untuk validasi webhook">
-                                <div class="form-text text-muted">Dapatkan dari pengaturan Webhook (Callback Token). URL Webhook Anda adalah: <code>{{ url('/api/webhook/xendit') }}</code></div>
-                                @error('xendit_webhook_token') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Koneksi WhatsApp (Meta Cloud API) -->
                     <div class="card border border-info shadow-sm rounded-4 mb-4 bg-light">

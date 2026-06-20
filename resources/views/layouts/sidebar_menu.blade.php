@@ -258,6 +258,11 @@
                     <i data-lucide="credit-card"></i><span>Tagihan & Paket</span>
                 </a>
                 @endif
+                @if(auth()->user() && auth()->user()->isAdmin() && \App\Helpers\TenantPlanHelper::hasMenu('pengaturan_pembayaran'))
+                <a href="{{ route('dashboard.pengaturan.payment') }}" class="{{ request()->routeIs('dashboard.pengaturan.payment') ? 'active' : '' }}">
+                    <i data-lucide="credit-card"></i><span>Pengaturan Pembayaran</span>
+                </a>
+                @endif
                 @if(auth()->user() && auth()->user()->isAdmin() && \App\Helpers\TenantPlanHelper::hasMenu('admin_whatsapp'))
                 <a href="{{ route('chatbot.system_users.index') }}" class="{{ request()->routeIs('chatbot.system_users.*') ? 'active' : '' }}">
                     <i data-lucide="shield-check"></i><span>Admin WhatsApp</span>
@@ -272,6 +277,19 @@
         </div>
     </div>
     @endif
+    @endif
+
+    <!-- ============================================== -->
+    <!-- 🆘 PUSAT BANTUAN -->
+    <!-- ============================================== -->
+    @if(auth()->user() && !auth()->user()->is_super_admin)
+    <div class="accordion-item bg-transparent border-0 mb-1">
+        <h2 class="accordion-header" id="headingBantuan{{ $prefix }}">
+            <a href="{{ route('dashboard.help') }}" class="accordion-button bg-transparent shadow-none px-3 py-2 fw-bold collapsed text-decoration-none" style="display: block;">
+                <i data-lucide="help-circle" class="me-2 text-primary"></i> Pusat Bantuan
+            </a>
+        </h2>
+    </div>
     @endif
 
     <!-- ============================================== -->

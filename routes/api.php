@@ -67,6 +67,7 @@ Route::middleware('web')->post('/heartbeat', function () {
     return response()->json(['error' => 'Unauthenticated'], 401);
 });
 
-Route::post('/webhook/midtrans', [\App\Http\Controllers\PaymentController::class, 'webhook']);
+Route::post('/webhook/midtrans', [\App\Http\Controllers\PaymentController::class, 'webhook']); // Landlord SaaS
+Route::post('/webhook/tenant/midtrans', [\App\Http\Controllers\Api\MidtransCallbackController::class, 'handle']); // Tenant Orders
 Route::post('/webhook/xendit', [\App\Http\Controllers\Api\XenditWebhookController::class, 'handle']);
 Route::match(['get', 'post'], '/webhook/meta', [\App\Http\Controllers\Api\MetaWebhookController::class, 'handle']);

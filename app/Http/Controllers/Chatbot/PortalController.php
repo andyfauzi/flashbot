@@ -140,9 +140,9 @@ class PortalController extends Controller
                 $statusPesanan = 'pending';
                 if ($validated['tipe_pengiriman'] === 'kurir_toko' || $validated['tipe_pengiriman'] === 'kurir_customer') {
                     $statusPesanan = 'pending_ongkir';
-                } elseif ($validated['tipe_pengiriman'] === 'dine_in') {
+                } elseif ($validated['tipe_pengiriman'] === 'dine_in' || $validated['tipe_pengiriman'] === 'ambil_sendiri') {
                     if ($validated['metode_pembayaran'] === 'transfer' || $validated['metode_pembayaran'] === 'qris') {
-                        $statusPesanan = 'pending_payment'; // Xendit/QRIS harus nunggu dibayar dulu
+                        $statusPesanan = 'pending_payment'; // Xendit/Midtrans/QRIS harus nunggu dibayar dulu
                     } else {
                         $statusPesanan = 'menunggu_pembayaran'; // Kasir
                     }
@@ -255,11 +255,21 @@ class PortalController extends Controller
                 Log::error("Gagal mengirim notifikasi WhatsApp grup untuk order portal: " . $waEx->getMessage());
             }
 
+            $snapToken = null;
+            if ($pesanan->metode_pembayaran === 'transfer' && $pesanan->status === 'pending_payment') {
+                $midtransService = new \App\Services\MidtransService();
+                if ($midtransService->isActive()) {
+                    $snapToken = $midtransService->getSnapToken($pesanan);
+                    // Jika gagal dapat token, log saja, nanti customer bisa bayar manual via WA
+                }
+            }
+
             return response()->json([
                 'status'      => 'success',
                 'message'     => 'Pesanan berhasil dikirim!',
                 'nomor_order' => $pesanan->nomor_order,
-                'total_biaya' => $pesanan->total_biaya
+                'total_biaya' => $pesanan->total_biaya,
+                'snap_token'  => $snapToken
             ]);
 
         } catch (\Exception $e) {

@@ -232,11 +232,18 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
         Route::get('/pengaturan/toko', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'index'])->name('dashboard.pengaturan.toko');
         Route::post('/pengaturan/toko', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'update'])->name('dashboard.pengaturan.toko.update');
 
+        // Pengaturan Payment Gateway
+        Route::get('/pengaturan/payment', [\App\Http\Controllers\Dashboard\PaymentGatewayController::class, 'index'])->name('dashboard.pengaturan.payment');
+        Route::post('/pengaturan/payment', [\App\Http\Controllers\Dashboard\PaymentGatewayController::class, 'update'])->name('dashboard.pengaturan.payment.update');
+
         // Manajemen Meja & Reservasi
         Route::resource('meja', \App\Http\Controllers\Dashboard\MejaController::class)->names('dashboard.meja')->except(['show']);
         Route::resource('reservasi', \App\Http\Controllers\Dashboard\ReservasiController::class)->names('dashboard.reservasi')->except(['show']);
     });
     
+    // Pusat Bantuan
+    Route::get('/help', [\App\Http\Controllers\Dashboard\HelpController::class, 'index'])->name('dashboard.help');
+
     // UI Mode Toggle
     Route::post('/toggle-ui-mode', [\App\Http\Controllers\Dashboard\UserController::class, 'toggleUiMode'])->name('dashboard.ui_mode.toggle');
 });

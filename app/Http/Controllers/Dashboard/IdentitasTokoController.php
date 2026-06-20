@@ -33,9 +33,6 @@ class IdentitasTokoController extends Controller
             'qris' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
             'tema_portal' => 'required|in:warm,cool,kalem',
             'tema_desktop' => 'required|in:warm,cool,kalem',
-            'xendit_api_key' => 'nullable|string',
-            'xendit_webhook_token' => 'nullable|string',
-            'is_payment_gateway_active' => 'nullable|boolean',
             'whatsapp_gateway' => 'required|in:sistem,meta_mandiri',
             'meta_phone_number_id' => 'nullable|string',
             'meta_access_token' => 'nullable|string',
@@ -59,10 +56,6 @@ class IdentitasTokoController extends Controller
 
         $identitas->nama_bot = $validated['nama_bot'] ?? 'Teta Assistant';
         $identitas->karakter_bot = $validated['karakter_bot'] ?? 'Customer Service Virtual (AI) ramah';
-
-        $identitas->xendit_api_key = $validated['xendit_api_key'] ?? null;
-        $identitas->xendit_webhook_token = $validated['xendit_webhook_token'] ?? null;
-        $identitas->is_payment_gateway_active = $request->has('is_payment_gateway_active');
 
         $identitas->whatsapp_gateway = $validated['whatsapp_gateway'];
         $identitas->meta_phone_number_id = $validated['meta_phone_number_id'] ?? null;

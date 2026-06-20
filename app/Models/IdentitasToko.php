@@ -25,10 +25,16 @@ class IdentitasToko extends Model
         'karakter_bot',
         'jenis_layanan',
         'wajib_dp_reservasi',
+        'midtrans_server_key',
+        'midtrans_client_key',
+        'midtrans_is_production',
+        'is_midtrans_active',
     ];
 
     protected $casts = [
         'is_broadcast_approved' => 'boolean',
         'wajib_dp_reservasi' => 'boolean',
+        'midtrans_is_production' => 'boolean',
+        'is_midtrans_active' => 'boolean',
     ];
 }

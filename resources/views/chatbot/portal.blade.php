@@ -1608,21 +1608,28 @@
                 if (data.status === 'success') {
                     closeCheckoutModal();
                     
-                    // Show success confirmation
-                    document.getElementById('successOrderNumber').textContent = data.nomor_order;
-                    
-                    // Build WhatsApp message link for manual confirmation
-                    const waText = encodeURIComponent(
-                        `Halo, saya ingin mengonfirmasi pesanan saya dari Portal.\n\n` +
-                        `*Nomor Order:* ${data.nomor_order}\n` +
-                        `*Nama:* ${payload.nama_penerima}\n` +
-                        `*Total Belanja:* ${formatRupiah(data.total_biaya)}\n\n` +
-                        `Mohon segera diproses ya. Terima kasih! 🙏`
-                    );
-                    const waNumber = '{{ preg_replace("/[^0-9]/", "", $identitas->telepon ?? "6282123456789") }}';
-                    document.getElementById('successWaLink').href = `https://wa.me/${waNumber}?text=${waText}`;
-                    
-                    document.getElementById('successOverlay').classList.add('open');
+                    if (data.snap_token) {
+                        // Buka popup Midtrans
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: function(result){
+                                showSuccessMessage(data, payload);
+                            },
+                            onPending: function(result){
+                                showSuccessMessage(data, payload);
+                            },
+                            onError: function(result){
+                                alert('Pembayaran gagal. Silakan coba lagi atau bayar manual via WhatsApp.');
+                                showSuccessMessage(data, payload);
+                            },
+                            onClose: function(){
+                                alert('Anda menutup popup pembayaran sebelum menyelesaikan pembayaran. Anda dapat membayar manual via WhatsApp.');
+                                showSuccessMessage(data, payload);
+                            }
+                        });
+                    } else {
+                        // Tidak pakai midtrans atau COD
+                        showSuccessMessage(data, payload);
+                    }
                 }
             })
             .catch(error => {
@@ -1632,6 +1639,24 @@
                 btnSubmit.textContent = originalBtnText;
                 btnSubmit.removeAttribute('disabled');
             });
+        }
+
+        function showSuccessMessage(data, payload) {
+            // Show success confirmation
+            document.getElementById('successOrderNumber').textContent = data.nomor_order;
+            
+            // Build WhatsApp message link for manual confirmation
+            const waText = encodeURIComponent(
+                `Halo, saya ingin mengonfirmasi pesanan saya dari Portal.\n\n` +
+                `*Nomor Order:* ${data.nomor_order}\n` +
+                `*Nama:* ${payload.nama_penerima}\n` +
+                `*Total Belanja:* ${formatRupiah(data.total_biaya)}\n\n` +
+                `Mohon segera diproses ya. Terima kasih! 🙏`
+            );
+            const waNumber = '{{ preg_replace("/[^0-9]/", "", $identitas->nomor_telepon ?? "6282123456789") }}';
+            document.getElementById('successWaLink').href = `https://wa.me/${waNumber}?text=${waText}`;
+            
+            document.getElementById('successOverlay').classList.add('open');
         }
 
         // Reset Cart and Form after success Close
@@ -1653,5 +1678,9 @@
             }).format(number);
         }
     </script>
+    
+    @if(isset($identitas) && $identitas->is_midtrans_active && $identitas->midtrans_client_key)
+        <script src="{{ $identitas->midtrans_is_production ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ $identitas->midtrans_client_key }}"></script>
+    @endif
 </body>
 </html>
