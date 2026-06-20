@@ -240,7 +240,7 @@ class PaymentController extends Controller
         \Midtrans\Config::$isProduction = $isProduction;
 
         // Handle fitur "Tes URL Notifikasi" dari Dasbor Midtrans
-        if ($request->order_id == 'test-1234') {
+        if ($request->order_id == 'test-1234' || \Illuminate\Support\Str::startsWith($request->order_id, 'payment_notif_test')) {
             return response()->json(['status' => 'ok', 'message' => 'Test notification received successfully'], 200);
         }
 
