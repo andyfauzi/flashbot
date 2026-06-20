@@ -21,8 +21,16 @@ Route::get('/', function () {
     $settings = [];
     $packageMenus = [];
     try {
-        $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
-        $packageMenus = \App\Models\PackageMenu::all();
+        if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('landlord_settings')) {
+            $settingsDb = \Illuminate\Support\Facades\DB::connection('landlord')->table('landlord_settings')->get();
+            foreach ($settingsDb as $row) {
+                $settings[$row->key] = $row->value ?? '';
+            }
+        }
+        
+        if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('package_menus')) {
+            $packageMenus = \Illuminate\Support\Facades\DB::connection('landlord')->table('package_menus')->orderBy('order')->get();
+        }
     } catch (\Exception $e) {
         // Abaikan jika migrasi belum dijalankan
     }

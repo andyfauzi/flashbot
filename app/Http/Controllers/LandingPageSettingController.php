@@ -14,6 +14,13 @@ class LandingPageSettingController extends Controller
     {
         // Ambil semua pengaturan dan jadikan key-value pair array
         $settings = LandlordSetting::pluck('value', 'key')->toArray();
+        
+        // Ganti null dengan string kosong agar form tidak merender nilai default
+        foreach ($settings as $key => $value) {
+            if ($value === null) {
+                $settings[$key] = '';
+            }
+        }
 
         return view('superadmin.landing-page.index', compact('settings'));
     }
