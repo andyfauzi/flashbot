@@ -68,11 +68,15 @@ class PaymentController extends Controller
         $pricePro = (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
         $priceBusiness = (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
 
+        $priceStarterYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_starter_yearly'] ?? '990000');
+        $priceProYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_pro_yearly'] ?? '1990000');
+        $priceBusinessYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_business_yearly'] ?? '4990000');
+
         $featuresStarter = array_filter(array_map('trim', explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nMaks 50 Produk\nMaks 3 Kasir")));
         $featuresPro = array_filter(array_map('trim', explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nMaks 500 Produk\nMaks 10 Kasir")));
         $featuresBusiness = array_filter(array_map('trim', explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nUnlimited Produk\nUnlimited Kasir")));
 
-        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
+        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
     }
 
     public function startTrial(Request $request)
@@ -139,7 +143,10 @@ class PaymentController extends Controller
     {
         $request->validate([
             'plan' => 'required|in:starter,pro,business',
+            'duration' => 'nullable|in:monthly,yearly',
         ]);
+
+        $duration = $request->input('duration', 'monthly');
 
         // Pastikan kita di landlord context sebelum query apapun
         TenantManager::switchToLandlord();
@@ -156,11 +163,19 @@ class PaymentController extends Controller
 
         // Determine price
         $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
-        $priceMap = [
-            'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000'),
-            'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000'),
-            'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000'),
-        ];
+        if ($duration === 'yearly') {
+            $priceMap = [
+                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter_yearly'] ?? '990000'),
+                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro_yearly'] ?? '1990000'),
+                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business_yearly'] ?? '4990000'),
+            ];
+        } else {
+            $priceMap = [
+                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000'),
+                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000'),
+                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000'),
+            ];
+        }
 
         $amount  = $priceMap[$request->plan];
         
@@ -191,7 +206,7 @@ class PaymentController extends Controller
         $payment = TenantPayment::create([
             'tenant_id'    => $tenant->id,
             'order_id'     => $orderId,
-            'plan_name'    => $request->plan,
+            'plan_name'    => $request->plan . '|' . $duration,
             'gross_amount' => $amount,
             'status'       => 'pending',
             'sales_voucher_id'  => $voucher ? $voucher->id : null,
@@ -205,7 +220,11 @@ class PaymentController extends Controller
 
         if (empty($serverKey)) {
             Log::error('Midtrans Server Key belum dikonfigurasi.');
-            return response()->json(['error' => 'Konfigurasi pembayaran belum lengkap. Hubungi administrator.'], 500);
+            return response()->json([
+                'fallback' => true,
+                'order_id' => $orderId,
+                'message' => 'Midtrans belum dikonfigurasi. Silakan lakukan pembayaran manual.'
+            ], 200);
         }
 
         \Midtrans\Config::$serverKey   = $serverKey;
@@ -231,7 +250,11 @@ class PaymentController extends Controller
             return response()->json(['snap_token' => $snapToken]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage(), ['order_id' => $orderId]);
-            return response()->json(['error' => 'Gagal terhubung ke server pembayaran Midtrans. Pesan: ' . $e->getMessage()], 500);
+            return response()->json([
+                'fallback' => true,
+                'order_id' => $orderId,
+                'message' => 'Gagal terhubung ke server pembayaran Midtrans. Pesan: ' . $e->getMessage()
+            ], 200);
         }
     }
 
@@ -282,12 +305,17 @@ class PaymentController extends Controller
                 // Update Tenant Plan
                 $tenant = Tenant::find($payment->tenant_id);
                 if ($tenant) {
+                    $parts = explode('|', $payment->plan_name);
+                    $actualPlan = $parts[0];
+                    $duration = $parts[1] ?? 'monthly';
+                    $daysToAdd = ($duration === 'yearly') ? 365 : 30;
+
                     $tenant->update([
-                        'plan'           => $payment->plan_name,
+                        'plan'           => $actualPlan,
                         'is_active'      => true,
                         'plan_expires_at' => ($tenant->plan_expires_at && $tenant->plan_expires_at > now())
-                            ? $tenant->plan_expires_at->addDays(30)
-                            : now()->addDays(30),
+                            ? $tenant->plan_expires_at->addDays($daysToAdd)
+                            : now()->addDays($daysToAdd),
                     ]);
 
                     // Send Email Notification

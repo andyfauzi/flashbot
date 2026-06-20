@@ -426,6 +426,25 @@ class SuperAdminController extends Controller
             \App\Models\LandlordSetting::set('limit_device_business', $request->limit_device_business);
         }
 
+        // Save Yearly Prices
+        if ($request->has('price_starter_yearly')) {
+            \App\Models\LandlordSetting::set('price_starter_yearly', $request->price_starter_yearly);
+        }
+        if ($request->has('price_pro_yearly')) {
+            \App\Models\LandlordSetting::set('price_pro_yearly', $request->price_pro_yearly);
+        }
+        if ($request->has('price_business_yearly')) {
+            \App\Models\LandlordSetting::set('price_business_yearly', $request->price_business_yearly);
+        }
+
+        // Save Fallback Payment
+        if ($request->has('payment_instructions_fallback')) {
+            \App\Models\LandlordSetting::set('payment_instructions_fallback', $request->payment_instructions_fallback);
+        }
+        if ($request->has('whatsapp_confirmation_number')) {
+            \App\Models\LandlordSetting::set('whatsapp_confirmation_number', $request->whatsapp_confirmation_number);
+        }
+
         return redirect()->back()->with('success', 'Konfigurasi menu paket dan batasan fitur berhasil diperbarui.');
     }
 

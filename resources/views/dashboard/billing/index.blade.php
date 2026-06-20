@@ -77,6 +77,17 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-muted mb-4">Pilihan Paket & Perpanjangan</h5>
 
+                    <!-- Toggle Durasi Langganan -->
+                    <div class="mb-4 d-flex justify-content-center">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="plan_duration" id="duration_monthly" value="monthly" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_monthly">Bulanan</label>
+
+                            <input type="radio" class="btn-check" name="plan_duration" id="duration_yearly" value="yearly" autocomplete="off">
+                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_yearly">Tahunan</label>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label for="voucher_code" class="form-label fw-bold">Kode Voucher Diskon</label>
                         <div class="input-group">
@@ -93,7 +104,10 @@
                             <div class="card border-2 border-light hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-success">Starter</h4>
-                                    <h5 class="mb-3">Rp {{ number_format($priceStarter, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">
+                                        <span class="price-display" data-monthly="{{ $priceStarter }}" data-yearly="{{ $priceStarterYearly }}">Rp {{ number_format($priceStarter, 0, ',', '.') }}</span>
+                                        <small class="text-muted duration-label">/bln</small>
+                                    </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresStarter as $feature)
                                         <li><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
@@ -111,7 +125,10 @@
                                 <div class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">Populer</div>
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-primary">Pro</h4>
-                                    <h5 class="mb-3">Rp {{ number_format($pricePro, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">
+                                        <span class="price-display" data-monthly="{{ $pricePro }}" data-yearly="{{ $priceProYearly }}">Rp {{ number_format($pricePro, 0, ',', '.') }}</span>
+                                        <small class="text-muted duration-label">/bln</small>
+                                    </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresPro as $feature)
                                         <li><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
@@ -140,7 +157,10 @@
                             <div class="card border-2 border-dark hover-shadow transition cursor-pointer text-center h-100">
                                 <div class="card-body p-4">
                                     <h4 class="fw-bold text-dark">Business</h4>
-                                    <h5 class="mb-3">Rp {{ number_format($priceBusiness, 0, ',', '.') }}<small class="text-muted">/bln</small></h5>
+                                    <h5 class="mb-3">
+                                        <span class="price-display" data-monthly="{{ $priceBusiness }}" data-yearly="{{ $priceBusinessYearly }}">Rp {{ number_format($priceBusiness, 0, ',', '.') }}</span>
+                                        <small class="text-muted duration-label">/bln</small>
+                                    </h5>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresBusiness as $feature)
                                         <li><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
@@ -201,6 +221,41 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Fallback Pembayaran Manual -->
+<div class="modal fade" id="fallbackPaymentModal" tabindex="-1" aria-labelledby="fallbackPaymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="fallbackPaymentModalLabel">
+                    <i class="fa-solid fa-building-columns text-primary me-2"></i>Pembayaran Manual
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-4">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Sistem pembayaran otomatis sedang dalam pemeliharaan. Silakan lakukan transfer manual ke rekening berikut.
+                </div>
+                
+                <h6 class="fw-bold mb-2">Instruksi Pembayaran:</h6>
+                <div class="bg-light rounded p-3 mb-4 font-monospace" style="font-size: 0.95rem; white-space: pre-wrap;">{{ \App\Models\LandlordSetting::get('payment_instructions_fallback', "BCA: 1234567890\nA.n PT Tenanta Inovasi") }}</div>
+                
+                <p class="mb-1 text-muted small">Order ID Anda:</p>
+                <p class="fw-bold font-monospace fs-5 text-dark" id="fallbackOrderId">-</p>
+                
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-2">Setelah transfer, mohon konfirmasi ke WhatsApp kami dengan melampirkan bukti transfer dan Order ID di atas.</p>
+                    @php
+                        $waNumber = \App\Models\LandlordSetting::get('whatsapp_confirmation_number', '6281234567890');
+                    @endphp
+                    <a href="#" id="btnConfirmWhatsApp" target="_blank" class="btn btn-success w-100 rounded-pill fw-bold py-2">
+                        <i class="fa-brands fa-whatsapp me-2"></i> Konfirmasi via WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -212,6 +267,20 @@
 @endphp
 <script src="{{ $snapUrl }}" data-client-key="{{ $midtransClientKey }}"></script>
 <script>
+    // Toggle Durasi
+    document.querySelectorAll('input[name="plan_duration"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const duration = this.value; // 'monthly' or 'yearly'
+            document.querySelectorAll('.price-display').forEach(el => {
+                const amount = el.getAttribute('data-' + duration);
+                el.innerText = 'Rp ' + parseInt(amount).toLocaleString('id-ID');
+            });
+            document.querySelectorAll('.duration-label').forEach(el => {
+                el.innerText = duration === 'yearly' ? '/thn' : '/bln';
+            });
+        });
+    });
+
     let currentVoucher = '';
 
     document.getElementById('btn-check-voucher').addEventListener('click', function() {
@@ -283,6 +352,7 @@
                 },
                 body: JSON.stringify({ 
                     plan: plan,
+                    duration: document.querySelector('input[name="plan_duration"]:checked').value,
                     voucher_code: currentVoucher
                 })
             })
@@ -293,6 +363,23 @@
                 return response.json();
             })
             .then(data => {
+                if (data.fallback) {
+                    // Show fallback modal
+                    document.getElementById('fallbackOrderId').innerText = data.order_id;
+                    
+                    const waNumber = '{{ $waNumber ?? "6281234567890" }}';
+                    const waMessage = `Halo admin, saya ingin mengkonfirmasi pembayaran manual untuk berlangganan.\n\nOrder ID: *${data.order_id}*\nPaket: *${plan.toUpperCase()}*\nMohon segera diproses. Berikut saya lampirkan bukti transfer.`;
+                    const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
+                    document.getElementById('btnConfirmWhatsApp').href = waUrl;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('fallbackPaymentModal'));
+                    modal.show();
+                    
+                    button.innerHTML = btnOriginalText;
+                    button.disabled = false;
+                    return;
+                }
+
                 if (data.snap_token) {
                     // Buka popup Snap Midtrans
                     window.snap.pay(data.snap_token, {

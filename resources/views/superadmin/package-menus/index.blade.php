@@ -171,6 +171,46 @@
                 </div>
             </div>
 
+            <!-- Tambahan: Harga Paket Tahunan -->
+            <div class="mt-5 mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-tags me-2"></i> Pengaturan Harga Paket Langganan Tahunan (1 Tahun)</h5>
+                <p class="text-muted small">Tentukan nominal harga untuk pelanggan yang memilih paket tahunan (Rp).</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Harga Tahunan Starter</label>
+                        <input type="text" class="form-control" name="price_starter_yearly" value="{{ \App\Models\LandlordSetting::get('price_starter_yearly', '990000') }}">
+                        <small class="text-muted">Misal: 990000 (tanpa titik/koma)</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Harga Tahunan Pro</label>
+                        <input type="text" class="form-control" name="price_pro_yearly" value="{{ \App\Models\LandlordSetting::get('price_pro_yearly', '1990000') }}">
+                        <small class="text-muted">Misal: 1990000</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Harga Tahunan Business</label>
+                        <input type="text" class="form-control" name="price_business_yearly" value="{{ \App\Models\LandlordSetting::get('price_business_yearly', '4990000') }}">
+                        <small class="text-muted">Misal: 4990000</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tambahan: Fallback Pembayaran Manual (Midtrans Error) -->
+            <div class="mt-5 mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-building-columns me-2"></i> Fallback Rekening Pembayaran Manual</h5>
+                <p class="text-muted small">Instruksi ini akan otomatis muncul pada saat tenant akan membayar langganan namun server Midtrans sedang gagal memuat *Snap Token*.</p>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Instruksi / Info Rekening Bank Landlord</label>
+                        <textarea class="form-control" name="payment_instructions_fallback" rows="4">{{ \App\Models\LandlordSetting::get('payment_instructions_fallback', "BCA: 1234567890\nMandiri: 0987654321\nA.n PT Tenanta Inovasi") }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Nomor WhatsApp Konfirmasi</label>
+                        <input type="text" class="form-control" name="whatsapp_confirmation_number" value="{{ \App\Models\LandlordSetting::get('whatsapp_confirmation_number', '6281234567890') }}">
+                        <small class="text-muted">Gunakan awalan 62. Contoh: 6281234567890</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-end mt-4">
                 <button type="submit" class="btn btn-primary d-flex align-items-center">
                     <i data-lucide="save" class="me-2"></i> Simpan Konfigurasi
