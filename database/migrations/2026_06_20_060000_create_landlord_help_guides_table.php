@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('landlord')->create('landlord_help_guides', function (Blueprint $table) {
-            $table->id();
-            $table->string('pertanyaan');
-            $table->text('jawaban');
-            $table->integer('urutan')->default(0);
-            $table->timestamps();
-        });
+        if (!Schema::connection('landlord')->hasTable('landlord_help_guides')) {
+            Schema::connection('landlord')->create('landlord_help_guides', function (Blueprint $table) {
+                $table->id();
+                $table->string('pertanyaan');
+                $table->text('jawaban');
+                $table->integer('urutan')->default(0);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

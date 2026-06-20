@@ -12,18 +12,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Insert new menu to package_menus in landlord db
-        DB::connection('landlord')->table('package_menus')->insert([
-            'menu_key' => 'pengaturan_pembayaran',
-            'menu_label' => 'Pengaturan Payment Gateway',
-            'category' => 'Pengaturan Sistem',
-            'gratis_enabled' => false,
-            'starter_enabled' => false,
-            'pro_enabled' => true,
-            'business_enabled' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Add payment integration menu option to the Landlord package_menus
+        if (Schema::connection('landlord')->hasTable('package_menus')) {
+            $exists = DB::connection('landlord')->table('package_menus')->where('menu_key', 'payment')->exists();
+            if (!$exists) {
+                DB::connection('landlord')->table('package_menus')->insert([
+                    'menu_key' => 'payment',
+                    'menu_label' => 'Payment Gateway (Midtrans/Xendit)',
+                    'category' => 'Transaksi & Pembayaran',
+                    'gratis_enabled' => false,
+                    'starter_enabled' => false,
+                    'pro_enabled' => true,
+                    'business_enabled' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**
