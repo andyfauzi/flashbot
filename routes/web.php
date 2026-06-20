@@ -141,10 +141,18 @@ Route::get('/mitra-login', function () {
 })->name('sales.login');
 
 Route::post('/mitra-login', function (\Illuminate\Http\Request $request) {
-    $credentials = $request->validate([
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
         'email'    => 'required|email',
         'password' => 'required',
     ]);
+
+    if ($validator->fails()) {
+        return redirect()->route('sales.login')
+            ->withErrors($validator)
+            ->withInput($request->only('email'));
+    }
+
+    $credentials = $validator->validated();
 
     if (Auth::attempt($credentials)) {
         $user = Auth::user();
@@ -157,7 +165,10 @@ Route::post('/mitra-login', function (\Illuminate\Http\Request $request) {
         return redirect()->route('sales.login')->withErrors(['email' => 'Akses ditolak. Anda bukan Mitra Sales.'])->onlyInput('email');
     }
 
-    return redirect()->route('sales.login')->withErrors(['email' => 'Akses ditolak. Email atau password salah.'])->onlyInput('email');
+    return redirect()->route('sales.login')->withErrors([
+        'email' => 'Email atau password salah.',
+        'password' => 'Email atau password salah.'
+    ])->onlyInput('email');
 })->middleware('throttle:5,1')->name('sales.login.post');
 
 Route::middleware(['auth', 'sales.agent'])->prefix('mitra')->group(function () {
