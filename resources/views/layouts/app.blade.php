@@ -12,8 +12,8 @@
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#D97757">
-    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=2">
-    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=2">
+    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=3">
+    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ninsky">
@@ -41,18 +41,7 @@
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
                 <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko) }}</span>
             @else
-                @php
-                    $logoPath = public_path('img/tenanta.png');
-                    $logoData = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
-                @endphp
-                @if($logoData)
-                    <img src="data:image/png;base64,{{ $logoData }}" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
-                @else
-                    <div class="bg-primary bg-opacity-10 rounded text-primary d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                        <i data-lucide="store" style="width: 16px; height: 16px;"></i>
-                    </div>
-                    <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">TENANTA.ID</span>
-                @endif
+                <img src="{{ asset('img/tenanta.png') }}?v=3" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
             @endif
         </a>
     </div>

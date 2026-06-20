@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tenanta.id SaaS Platform</title>
     
-    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=2">
-    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=2">
+    <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=3">
+    <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=3">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -210,15 +210,7 @@
     <nav class="navbar navbar-expand-lg fixed-top py-3">
         <div class="container">
             <a class="navbar-brand" href="#">
-                @php
-                    $logoPath = public_path('img/tenanta.png');
-                    $logoData = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
-                @endphp
-                @if($logoData)
-                    <img src="data:image/png;base64,{{ $logoData }}" alt="Tenanta.id" style="height: 32px; object-fit: contain;">
-                @else
-                    <i class="fa-solid fa-bolt me-2"></i>Tenanta.id
-                @endif
+                <img src="{{ asset('img/tenanta.png') }}?v=3" alt="Tenanta.id" style="height: 32px; object-fit: contain;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
