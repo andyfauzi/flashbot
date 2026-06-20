@@ -68,15 +68,18 @@ class PaymentController extends Controller
         $pricePro = (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
         $priceBusiness = (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
 
-        $priceStarterYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_starter_yearly'] ?? '990000');
-        $priceProYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_pro_yearly'] ?? '1990000');
-        $priceBusinessYearly = (int) preg_replace('/[^0-9]/', '', $settings['price_business_yearly'] ?? '4990000');
+        $discountPercent = (int) ($settings['discount_yearly_percent'] ?? 20);
+        $multiplier = 12 * (1 - ($discountPercent / 100));
+
+        $priceStarterYearly = $priceStarter * $multiplier;
+        $priceProYearly = $pricePro * $multiplier;
+        $priceBusinessYearly = $priceBusiness * $multiplier;
 
         $featuresStarter = array_filter(array_map('trim', explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nMaks 50 Produk\nMaks 3 Kasir")));
         $featuresPro = array_filter(array_map('trim', explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nMaks 500 Produk\nMaks 10 Kasir")));
         $featuresBusiness = array_filter(array_map('trim', explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nUnlimited Produk\nUnlimited Kasir")));
 
-        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
+        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'discountPercent', 'featuresStarter', 'featuresPro', 'featuresBusiness'));
     }
 
     public function startTrial(Request $request)
@@ -161,13 +164,15 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Toko tidak ditemukan. Pastikan Anda login dengan akun pemilik toko.'], 403);
         }
 
-        // Determine price
         $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
+        $discountPercent = (int) ($settings['discount_yearly_percent'] ?? 20);
+        $multiplier = 12 * (1 - ($discountPercent / 100));
+
         if ($duration === 'yearly') {
             $priceMap = [
-                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter_yearly'] ?? '990000'),
-                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro_yearly'] ?? '1990000'),
-                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business_yearly'] ?? '4990000'),
+                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000') * $multiplier,
+                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000') * $multiplier,
+                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000') * $multiplier,
             ];
         } else {
             $priceMap = [

@@ -426,15 +426,9 @@ class SuperAdminController extends Controller
             \App\Models\LandlordSetting::set('limit_device_business', $request->limit_device_business);
         }
 
-        // Save Yearly Prices
-        if ($request->has('price_starter_yearly')) {
-            \App\Models\LandlordSetting::set('price_starter_yearly', $request->price_starter_yearly);
-        }
-        if ($request->has('price_pro_yearly')) {
-            \App\Models\LandlordSetting::set('price_pro_yearly', $request->price_pro_yearly);
-        }
-        if ($request->has('price_business_yearly')) {
-            \App\Models\LandlordSetting::set('price_business_yearly', $request->price_business_yearly);
+        // Save Yearly Discount Percent
+        if ($request->has('discount_yearly_percent')) {
+            \App\Models\LandlordSetting::set('discount_yearly_percent', $request->discount_yearly_percent);
         }
 
         // Save Fallback Payment

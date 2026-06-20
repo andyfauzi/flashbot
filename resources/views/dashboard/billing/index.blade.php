@@ -84,7 +84,7 @@
                             <label class="btn btn-outline-primary px-4 fw-bold" for="duration_monthly">Bulanan</label>
 
                             <input type="radio" class="btn-check" name="plan_duration" id="duration_yearly" value="yearly" autocomplete="off">
-                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_yearly">Tahunan</label>
+                            <label class="btn btn-outline-primary px-4 fw-bold" for="duration_yearly">Tahunan (Hemat {{ $discountPercent }}%)</label>
                         </div>
                     </div>
 
