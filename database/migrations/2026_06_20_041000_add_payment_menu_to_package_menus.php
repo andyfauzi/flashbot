@@ -16,7 +16,7 @@ return new class extends Migration
         DB::connection('landlord')->table('package_menus')->insert([
             'menu_key' => 'pengaturan_pembayaran',
             'menu_label' => 'Pengaturan Payment Gateway',
-            'kategori' => 'Pengaturan Sistem',
+            'category' => 'Pengaturan Sistem',
             'gratis_enabled' => false,
             'starter_enabled' => false,
             'pro_enabled' => true,
