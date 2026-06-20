@@ -41,7 +41,10 @@
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
                 <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko) }}</span>
             @else
-                <img src="{{ asset('img/tenanta.png') }}?v=3" alt="Tenanta.id" style="height: 30px; object-fit: contain;">
+                <div class="d-flex align-items-center justify-content-center rounded" style="width:30px;height:30px;background:rgba(79,70,229,0.12);">
+                    <i class="fa-solid fa-bolt" style="color:#4F46E5;font-size:15px;"></i>
+                </div>
+                <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}</span>
             @endif
         </a>
     </div>

@@ -210,7 +210,7 @@
     <nav class="navbar navbar-expand-lg fixed-top py-3">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <img src="{{ asset('img/tenanta.png') }}?v=4" alt="Tenanta.id" style="height: 32px; object-fit: contain;">
+                <i class="fa-solid fa-bolt me-2"></i>Tenanta.id
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
