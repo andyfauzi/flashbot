@@ -22,9 +22,8 @@
                         <tr>
                             <th class="ps-4">Waktu</th>
                             <th>Aksi (Action)</th>
-                            <th>Entitas (Entity)</th>
-                            <th>Data Lama (Old Values)</th>
-                            <th>Data Baru (New Values)</th>
+                            <th>Entitas (Target)</th>
+                            <th colspan="2">Detail Ekstra</th>
                             <th class="pe-4">IP Address</th>
                         </tr>
                     </thead>
@@ -39,22 +38,15 @@
                                     {{ $audit->action }}
                                 </span>
                             </td>
-                            <td class="fw-semibold text-dark">{{ $audit->entity }}</td>
-                            <td>
-                                @if($audit->old_values)
-                                    <pre class="small bg-light p-2 rounded text-muted mb-0" style="max-width: 250px; overflow-x: auto;">{{ json_encode(json_decode($audit->old_values), JSON_PRETTY_PRINT) }}</pre>
+                            <td class="fw-semibold text-dark">{{ $audit->target ?? '-' }}</td>
+                            <td colspan="2">
+                                @if($audit->details)
+                                    <pre class="small bg-light p-2 rounded text-dark mb-0" style="max-width: 500px; overflow-x: auto;">{{ is_string($audit->details) ? $audit->details : json_encode($audit->details, JSON_PRETTY_PRINT) }}</pre>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td>
-                                @if($audit->new_values)
-                                    <pre class="small bg-light p-2 rounded text-dark mb-0" style="max-width: 250px; overflow-x: auto;">{{ json_encode(json_decode($audit->new_values), JSON_PRETTY_PRINT) }}</pre>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td class="pe-4 text-muted small">{{ $audit->ip_address ?? '-' }}</td>
+                            <td class="pe-4 text-muted small">{{ $audit->ip ?? '-' }}</td>
                         </tr>
                         @empty
                         <tr>
