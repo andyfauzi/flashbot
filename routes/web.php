@@ -19,13 +19,15 @@ Route::get('/', function () {
     
     // Ambil data CMS dari tabel landlord_settings
     $settings = [];
+    $packageMenus = [];
     try {
         $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
+        $packageMenus = \App\Models\PackageMenu::all();
     } catch (\Exception $e) {
         // Abaikan jika migrasi belum dijalankan
     }
 
-    return view('welcome', compact('settings'));
+    return view('welcome', compact('settings', 'packageMenus'));
 });
 
 Route::get('/debug-log', function() {
@@ -290,6 +292,10 @@ Route::prefix('super-admin')
         // Landing Page CMS
         Route::get('/landing-page', [\App\Http\Controllers\LandingPageSettingController::class, 'index'])->name('superadmin.landing_page');
         Route::post('/landing-page', [\App\Http\Controllers\LandingPageSettingController::class, 'update'])->name('superadmin.landing_page.update');
+
+        // Package Menus (Fitur Matrix)
+        Route::get('/package-menus', [\App\Http\Controllers\SuperAdminController::class, 'packageMenus'])->name('superadmin.package_menus');
+        Route::post('/package-menus', [\App\Http\Controllers\SuperAdminController::class, 'updatePackageMenus'])->name('superadmin.package_menus.update');
 
         // Pengaturan Meta WhatsApp Landlord
         Route::get('/meta', [\App\Http\Controllers\SuperAdminController::class, 'showMetaSettings'])->name('superadmin.meta');

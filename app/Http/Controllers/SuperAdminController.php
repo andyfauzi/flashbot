@@ -326,4 +326,43 @@ class SuperAdminController extends Controller
 
         return redirect()->back()->with('success', 'Pengaturan global berhasil disimpan.');
     }
+
+    public function packageMenus()
+    {
+        TenantManager::switchToLandlord();
+        $menus = \App\Models\PackageMenu::all()->groupBy('category');
+        return view('superadmin.package-menus.index', compact('menus'));
+    }
+
+    public function updatePackageMenus(Request $request)
+    {
+        TenantManager::switchToLandlord();
+        
+        // Reset all menus first
+        \App\Models\PackageMenu::query()->update([
+            'gratis_enabled' => false,
+            'starter_enabled' => false,
+            'pro_enabled' => false,
+            'business_enabled' => false,
+        ]);
+
+        $plans = ['gratis', 'starter', 'pro', 'business'];
+
+        foreach ($plans as $plan) {
+            if ($request->has($plan) && is_array($request->$plan)) {
+                $menuKeys = array_keys($request->$plan);
+                \App\Models\PackageMenu::whereIn('menu_key', $menuKeys)->update([
+                    "{$plan}_enabled" => true
+                ]);
+            }
+        }
+
+        // Clear all plan caches
+        \Illuminate\Support\Facades\Cache::forget('plan_menus_gratis');
+        \Illuminate\Support\Facades\Cache::forget('plan_menus_starter');
+        \Illuminate\Support\Facades\Cache::forget('plan_menus_pro');
+        \Illuminate\Support\Facades\Cache::forget('plan_menus_business');
+
+        return redirect()->back()->with('success', 'Konfigurasi menu paket berhasil diperbarui.');
+    }
 }

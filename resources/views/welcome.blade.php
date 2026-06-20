@@ -288,6 +288,17 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
+                            @if(isset($packageMenus))
+                                @foreach($packageMenus as $menu)
+                                    <li>
+                                        @if($menu->starter_enabled)
+                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                        @else
+                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            @endif
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
@@ -309,6 +320,17 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
+                            @if(isset($packageMenus))
+                                @foreach($packageMenus as $menu)
+                                    <li>
+                                        @if($menu->pro_enabled)
+                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                        @else
+                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            @endif
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
                             <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro</a>
@@ -329,6 +351,17 @@
                                     <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
                                 @endif
                             @endforeach
+                            @if(isset($packageMenus))
+                                @foreach($packageMenus as $menu)
+                                    <li>
+                                        @if($menu->business_enabled)
+                                            <i class="fa-solid fa-check-circle text-success"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
+                                        @else
+                                            <i class="fa-solid fa-xmark text-muted"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            @endif
                         </ul>
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings['contact_phone'] ?? '6281234567890') }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Hubungi Sales</a>
                     </div>
