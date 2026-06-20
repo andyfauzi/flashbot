@@ -123,13 +123,15 @@ class PaymentController extends Controller
         $discountAmount = ($voucher->diskon_persen / 100) * $amount;
         $finalAmount = max(0, $amount - $discountAmount);
 
+        $targetMsg = $voucher->target_paket == 'semua' ? 'Semua Paket' : 'Paket ' . ucfirst($voucher->target_paket);
+
         return response()->json([
             'valid' => true,
             'discount_percent' => $voucher->diskon_persen,
             'discount_amount' => $discountAmount,
             'original_price' => $amount,
             'final_price' => $finalAmount,
-            'message' => "Voucher berhasil! Anda mendapat diskon {$voucher->diskon_persen}%"
+            'message' => "Voucher valid! Diskon {$voucher->diskon_persen}% (Khusus $targetMsg)"
         ]);
     }
 
@@ -173,6 +175,10 @@ class PaymentController extends Controller
                 ->first();
 
             if ($voucher) {
+                if ($voucher->target_paket !== 'semua' && $voucher->target_paket !== $request->plan) {
+                    return response()->json(['error' => 'Kode voucher ini tidak berlaku untuk paket ' . ucfirst($request->plan) . '.'], 400);
+                }
+                
                 $discountAmount = ($voucher->diskon_persen / 100) * $amount;
                 $amount = max(0, $amount - $discountAmount);
                 $commissionAmount = ($voucher->komisi_persen / 100) * $amount;

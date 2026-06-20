@@ -61,6 +61,7 @@
                                     <th>Informasi Sales</th>
                                     <th>Diskon (Tenant)</th>
                                     <th>Komisi (Sales)</th>
+                                    <th>Peruntukan Paket</th>
                                     <th>Penggunaan</th>
                                     <th>Total Komisi</th>
                                     <th>Status</th>
@@ -84,6 +85,13 @@
                                     </td>
                                     <td>
                                         <span class="fw-bold text-success">{{ $v->komisi_persen }}%</span>
+                                    </td>
+                                    <td>
+                                        @if($v->target_paket == 'semua')
+                                            <span class="badge bg-secondary rounded-pill px-3">Semua Paket</span>
+                                        @else
+                                            <span class="badge bg-info text-dark rounded-pill px-3 text-capitalize">Paket {{ $v->target_paket }}</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge bg-secondary rounded-pill px-3">{{ $v->payments_count }}x dipakai</span>
@@ -120,7 +128,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-5">
+                                    <td colspan="9" class="text-center text-muted py-5">
                                         <i class="fa-solid fa-ticket fa-3x mb-3 text-light"></i>
                                         <p>Belum ada kode voucher sales yang dibuat.</p>
                                     </td>
@@ -161,6 +169,15 @@
                 <div class="mb-3">
                     <label class="form-label fw-bold">No WhatsApp Sales (Opsional)</label>
                     <input type="text" name="no_wa_sales" class="form-control" placeholder="Contoh: 628123456789">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Peruntukan Paket</label>
+                    <select name="target_paket" class="form-select" required>
+                        <option value="semua">Berlaku untuk Semua Paket</option>
+                        <option value="starter">Khusus Paket Starter</option>
+                        <option value="pro">Khusus Paket Pro</option>
+                        <option value="business">Khusus Paket Business</option>
+                    </select>
                 </div>
                 <div class="row g-3">
                     <div class="col-md-6 mb-3">

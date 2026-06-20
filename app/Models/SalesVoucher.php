@@ -17,6 +17,7 @@ class SalesVoucher extends Model
         'no_wa_sales',
         'diskon_persen',
         'komisi_persen',
+        'target_paket',
         'is_active',
     ];
 

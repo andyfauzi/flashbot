@@ -26,6 +26,7 @@ class SalesVoucherController extends Controller
             'no_wa_sales' => 'nullable|string|max:20',
             'diskon_persen' => 'required|integer|min:0|max:100',
             'komisi_persen' => 'required|integer|min:0|max:100',
+            'target_paket' => 'required|in:semua,starter,pro,business',
         ]);
 
         SalesVoucher::create([
@@ -34,6 +35,7 @@ class SalesVoucherController extends Controller
             'no_wa_sales' => $request->no_wa_sales,
             'diskon_persen' => $request->diskon_persen,
             'komisi_persen' => $request->komisi_persen,
+            'target_paket' => $request->target_paket,
             'is_active' => true,
         ]);
 
