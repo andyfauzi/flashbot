@@ -82,63 +82,7 @@
                     </div>
 
 
-                    <!-- Koneksi WhatsApp (Meta Cloud API) -->
-                    <div class="card border border-info shadow-sm rounded-4 mb-4 bg-light">
-                        <div class="card-header bg-info text-dark border-bottom-0 py-3 rounded-top-4">
-                            <h5 class="fw-bold mb-0"><i class="fa-brands fa-whatsapp me-2"></i> Koneksi WhatsApp Bot</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="alert alert-warning mb-4" role="alert">
-                                <h6 class="alert-heading fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Informasi Penting & Keamanan</h6>
-                                <p class="mb-2 text-dark" style="font-size: 0.9rem;">
-                                    Secara bawaan, bot menggunakan <strong>Gateway Sistem (Baileys)</strong> yang dikelola oleh kami tanpa biaya tambahan. Anda bebas beralih ke <strong>Meta Cloud API Mandiri</strong> untuk mendapatkan jaminan 100% anti-banned dan performa resmi, namun perhatikan hal berikut:
-                                </p>
-                                <ul class="mb-0 text-dark" style="font-size: 0.9rem;">
-                                    <li><strong>Biaya Meta:</strong> Meta akan mengenakan biaya per percakapan (conversation) sesuai harga resmi mereka. Tagihan akan masuk ke kartu kredit Anda yang terhubung di Facebook Business.</li>
-                                    <li><strong>Keamanan Token:</strong> Jaga kerahasiaan <em>Permanent Access Token</em> Anda. Token ini memberi akses penuh untuk mengirim pesan atas nama bisnis Anda.</li>
-                                    <li><strong>Fallback Aman:</strong> Jika integrasi Meta Anda gagal/bermasalah, Anda dapat kapan saja kembali ke <strong>Gateway Sistem</strong> dengan merubah pengaturan ini. Tidak ada data yang hilang.</li>
-                                </ul>
-                            </div>
 
-                            <div class="mb-4">
-                                <label for="whatsapp_gateway" class="form-label fw-bold text-dark">Pilih Jalur Koneksi</label>
-                                <select class="form-select @error('whatsapp_gateway') is-invalid @enderror" id="whatsapp_gateway" name="whatsapp_gateway" onchange="toggleMetaConfig()" required>
-                                    <option value="sistem" {{ old('whatsapp_gateway', $identitas->whatsapp_gateway ?? 'sistem') == 'sistem' ? 'selected' : '' }}>Gunakan Gateway Sistem (Gratis & Dikelola Pusat)</option>
-                                    <option value="meta_mandiri" {{ old('whatsapp_gateway', $identitas->whatsapp_gateway ?? 'sistem') == 'meta_mandiri' ? 'selected' : '' }}>Gunakan Meta WhatsApp Cloud API (Koneksi Pribadi)</option>
-                                </select>
-                                @error('whatsapp_gateway') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div id="meta_config_section" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="meta_phone_number_id" class="form-label fw-bold text-dark">Phone Number ID</label>
-                                    <input type="text" class="form-control @error('meta_phone_number_id') is-invalid @enderror" id="meta_phone_number_id" name="meta_phone_number_id" value="{{ old('meta_phone_number_id', $identitas->meta_phone_number_id ?? '') }}" placeholder="Contoh: 1045231...">
-                                    <div class="form-text text-muted">Didapatkan dari dashboard Meta Developer.</div>
-                                    @error('meta_phone_number_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="meta_access_token" class="form-label fw-bold text-dark">Permanent Access Token</label>
-                                    <input type="password" class="form-control @error('meta_access_token') is-invalid @enderror" id="meta_access_token" name="meta_access_token" value="{{ old('meta_access_token', $identitas->meta_access_token ?? '') }}" placeholder="EAALx...">
-                                    <div class="form-text text-muted">Pastikan Anda menggunakan System User Token yang tidak memiliki masa kadaluarsa (Permanent).</div>
-                                    @error('meta_access_token') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="meta_webhook_token" class="form-label fw-bold text-dark">Webhook Verify Token</label>
-                                    <input type="password" class="form-control @error('meta_webhook_token') is-invalid @enderror" id="meta_webhook_token" name="meta_webhook_token" value="{{ old('meta_webhook_token', $identitas->meta_webhook_token ?? '') }}" placeholder="Masukkan teks unik apapun (misal: rahasia_toko_123)">
-                                    <div class="form-text text-muted">Token bebas buatan Anda sendiri untuk verifikasi keamanan.</div>
-                                    @error('meta_webhook_token') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="alert alert-secondary p-3 mt-3">
-                                    <strong class="text-dark">Webhook URL untuk Meta:</strong><br>
-                                    <code class="fs-6">{{ url('/api/webhook/meta') }}</code>
-                                    <p class="mt-2 mb-0 text-muted small">Salin URL dan Webhook Token di atas ke pengaturan Webhook di Dashboard Meta For Developers Anda, dan pilih event <code>messages</code>.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Pengaturan Model Bisnis -->
                     <div class="card border border-info shadow-sm rounded-4 mb-4 bg-light">
@@ -165,27 +109,7 @@
                         </div>
                     </div>
 
-                    <!-- Identitas Bot AI -->
-                    <div class="card border border-secondary shadow-sm rounded-4 mb-4 bg-light">
-                        <div class="card-header bg-secondary text-white border-bottom-0 py-3 rounded-top-4">
-                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-robot me-2"></i> Pengaturan Identitas Bot AI</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <label for="nama_bot" class="form-label fw-bold text-dark">Nama Bot Assistant</label>
-                                <input type="text" class="form-control @error('nama_bot') is-invalid @enderror" id="nama_bot" name="nama_bot" value="{{ old('nama_bot', $identitas->nama_bot ?? 'Teta Assistant') }}">
-                                <div class="form-text text-muted">Nama panggil AI untuk pelanggan. (Default: Teta Assistant).</div>
-                                @error('nama_bot') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
 
-                            <div class="mb-0">
-                                <label for="karakter_bot" class="form-label fw-bold text-dark">Karakter / Sifat Bot</label>
-                                <input type="text" class="form-control @error('karakter_bot') is-invalid @enderror" id="karakter_bot" name="karakter_bot" value="{{ old('karakter_bot', $identitas->karakter_bot ?? 'Customer Service Virtual (AI) ramah') }}">
-                                <div class="form-text text-muted">Deskripsikan bagaimana sifat AI melayani pelanggan. (Contoh: "Customer Service Virtual (AI) ramah").</div>
-                                @error('karakter_bot') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Pilihan Tema Warna -->
                     <div class="card border border-primary shadow-sm rounded-4 mb-4 bg-light">
@@ -232,20 +156,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    function toggleMetaConfig() {
-        var gateway = document.getElementById('whatsapp_gateway').value;
-        var metaSection = document.getElementById('meta_config_section');
-        if (gateway === 'meta_mandiri') {
-            metaSection.style.display = 'block';
-        } else {
-            metaSection.style.display = 'none';
-        }
-    }
-    
-    // Run on load
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleMetaConfig();
-    });
-</script>
+
 @endsection

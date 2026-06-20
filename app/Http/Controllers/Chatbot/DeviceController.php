@@ -182,4 +182,47 @@ class DeviceController extends Controller
 
         return back()->with('sukses', "Pesan sapaan device '{$device->nama_device}' berhasil disimpan!");
     }
+
+    public function updateSettings(Request $request)
+    {
+        $identitas = \App\Models\IdentitasToko::first() ?? new \App\Models\IdentitasToko();
+        $action = $request->input('action');
+
+        if ($action === 'save_gateway') {
+            $validated = $request->validate([
+                'whatsapp_gateway' => 'required|in:sistem,meta_mandiri',
+                'meta_phone_number_id' => 'nullable|string',
+                'meta_access_token' => 'nullable|string',
+                'meta_webhook_token' => 'nullable|string',
+            ]);
+            $identitas->whatsapp_gateway = $validated['whatsapp_gateway'];
+            $identitas->meta_phone_number_id = $validated['meta_phone_number_id'];
+            $identitas->meta_access_token = $validated['meta_access_token'];
+            $identitas->meta_webhook_token = $validated['meta_webhook_token'];
+            $identitas->save();
+            return back()->with('sukses', 'Pengaturan Gateway WhatsApp berhasil disimpan!');
+        }
+
+        if ($action === 'save_bot_identity') {
+            $validated = $request->validate([
+                'nama_bot' => 'nullable|string|max:100',
+                'karakter_bot' => 'nullable|string|max:255',
+            ]);
+            $identitas->nama_bot = $validated['nama_bot'] ?? 'Teta Assistant';
+            $identitas->karakter_bot = $validated['karakter_bot'] ?? 'Customer Service Virtual (AI) ramah';
+            $identitas->save();
+            return back()->with('sukses', 'Identitas Bot AI berhasil disimpan!');
+        }
+
+        if ($action === 'save_gemini_key') {
+            $validated = $request->validate([
+                'gemini_api_key' => 'nullable|string',
+            ]);
+            $identitas->gemini_api_key = $validated['gemini_api_key'];
+            $identitas->save();
+            return back()->with('sukses', 'Google Gemini API Key berhasil disimpan!');
+        }
+
+        return back()->with('error', 'Aksi tidak dikenali.');
+    }
 }

@@ -11,4 +11,9 @@ class HelpController extends Controller
     {
         return view('dashboard.help.index');
     }
+
+    public function api()
+    {
+        return view('dashboard.help.api');
+    }
 }

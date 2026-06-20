@@ -33,6 +33,7 @@ Route::prefix('chatbot')->middleware('auth')->group(function () {
     // =============================================
     Route::get('/device',          [\App\Http\Controllers\Chatbot\DeviceController::class, 'index'])->name('chatbot.device.index');
     Route::post('/device',         [\App\Http\Controllers\Chatbot\DeviceController::class, 'store'])->name('chatbot.device.store');
+    Route::post('/device/settings',[\App\Http\Controllers\Chatbot\DeviceController::class, 'updateSettings'])->name('chatbot.device.settings.update');
     Route::post('/device/{device}/default', [\App\Http\Controllers\Chatbot\DeviceController::class, 'setAsDefault'])->name('chatbot.device.default');
     Route::delete('/device/{device}', [\App\Http\Controllers\Chatbot\DeviceController::class, 'destroy'])->name('chatbot.device.hapus');
     Route::get('/device/status/{session}', [\App\Http\Controllers\Chatbot\DeviceController::class, 'statusQr'])->name('chatbot.device.status');

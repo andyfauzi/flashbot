@@ -243,6 +243,7 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
     
     // Pusat Bantuan
     Route::get('/help', [\App\Http\Controllers\Dashboard\HelpController::class, 'index'])->name('dashboard.help');
+    Route::get('/help/api', [\App\Http\Controllers\Dashboard\HelpController::class, 'api'])->name('dashboard.help.api');
 
     // UI Mode Toggle
     Route::post('/toggle-ui-mode', [\App\Http\Controllers\Dashboard\UserController::class, 'toggleUiMode'])->name('dashboard.ui_mode.toggle');
@@ -293,8 +294,22 @@ Route::prefix('super-admin')
         Route::post('/{id}/toggle-broadcast', [\App\Http\Controllers\SuperAdminController::class, 'toggleBroadcast'])->name('superadmin.toggle_broadcast');
         Route::delete('/{id}', [\App\Http\Controllers\SuperAdminController::class, 'destroy'])->name('superadmin.destroy');
 
+        // Log & Audit
+        Route::get('/logs', [\App\Http\Controllers\SuperAdminController::class, 'logs'])->name('superadmin.logs');
+        Route::get('/audits', [\App\Http\Controllers\SuperAdminController::class, 'audits'])->name('superadmin.audits');
+
+        // Broadcast
+        Route::get('/broadcast', [\App\Http\Controllers\SuperAdminController::class, 'broadcast'])->name('superadmin.broadcast');
+        Route::post('/broadcast/send', [\App\Http\Controllers\SuperAdminController::class, 'sendBroadcast'])->name('superadmin.broadcast.send');
+
         // Global Settings
         Route::post('/settings', [\App\Http\Controllers\SuperAdminController::class, 'updateSettings'])->name('superadmin.settings.update');
+
+        // Help Guides (Pusat Bantuan Landlord)
+        Route::get('/help-guides', [\App\Http\Controllers\SuperAdminController::class, 'helpGuides'])->name('superadmin.help_guides');
+        Route::post('/help-guides', [\App\Http\Controllers\SuperAdminController::class, 'storeHelpGuide'])->name('superadmin.help_guides.store');
+        Route::put('/help-guides/{id}', [\App\Http\Controllers\SuperAdminController::class, 'updateHelpGuide'])->name('superadmin.help_guides.update');
+        Route::delete('/help-guides/{id}', [\App\Http\Controllers\SuperAdminController::class, 'destroyHelpGuide'])->name('superadmin.help_guides.destroy');
 
         // Landing Page CMS
         Route::get('/landing-page', [\App\Http\Controllers\LandingPageSettingController::class, 'index'])->name('superadmin.landing_page');

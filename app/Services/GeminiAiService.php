@@ -20,7 +20,12 @@ class GeminiAiService
 
     public function __construct()
     {
-        $this->apiKey = env('GEMINI_API_KEY', '');
+        $identitas = \App\Models\IdentitasToko::first();
+        if ($identitas && !empty($identitas->gemini_api_key)) {
+            $this->apiKey = $identitas->gemini_api_key;
+        } else {
+            $this->apiKey = env('GEMINI_API_KEY', '');
+        }
     }
 
     public function handleMessage(string $nomorWa, string $pesanUser, string $context = 'customer'): ?string

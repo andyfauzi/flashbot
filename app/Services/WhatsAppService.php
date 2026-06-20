@@ -123,6 +123,34 @@ class WhatsAppService
             $nomor = $this->normalisasiNomor($nomor);
         }
 
+        // ==========================================
+        // CEK KUOTA (RATE LIMIT) BOT WA
+        // ==========================================
+        $tenant = \App\Services\TenantManager::current();
+        if ($tenant) {
+            $plan = $tenant->plan ?? 'gratis';
+            $limit = \App\Models\LandlordSetting::get('limit_wa_' . $plan);
+            if ($limit === null) {
+                switch ($plan) {
+                    case 'gratis': $limit = 100; break;
+                    case 'starter': $limit = 1000; break;
+                    case 'pro': $limit = 5000; break;
+                    case 'business': $limit = 999999; break;
+                    default: $limit = 100;
+                }
+            }
+            
+            $currentMonthCount = \App\Models\ChatbotPesan::where('arah', 'keluar')
+                ->whereMonth('waktu', now()->month)
+                ->whereYear('waktu', now()->year)
+                ->count();
+                
+            if ($currentMonthCount >= $limit) {
+                \Illuminate\Support\Facades\Log::warning("⚠️ Tenant {$tenant->name} ({$tenant->subdomain}) melebihi kuota bot WA bulan ini ({$currentMonthCount}/{$limit}). Pesan tidak dikirim.");
+                return false;
+            }
+        }
+
         $gateway = env('WHATSAPP_GATEWAY', 'baileys');
         
         try {

@@ -33,12 +33,6 @@ class IdentitasTokoController extends Controller
             'qris' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
             'tema_portal' => 'required|in:warm,cool,kalem',
             'tema_desktop' => 'required|in:warm,cool,kalem',
-            'whatsapp_gateway' => 'required|in:sistem,meta_mandiri',
-            'meta_phone_number_id' => 'nullable|string',
-            'meta_access_token' => 'nullable|string',
-            'meta_webhook_token' => 'nullable|string',
-            'nama_bot' => 'nullable|string|max:100',
-            'karakter_bot' => 'nullable|string|max:255',
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
         ]);
 
@@ -53,14 +47,6 @@ class IdentitasTokoController extends Controller
         $identitas->tema_desktop = $validated['tema_desktop'];
         $identitas->jenis_layanan = $validated['jenis_layanan'];
         $identitas->wajib_dp_reservasi = $request->has('wajib_dp_reservasi');
-
-        $identitas->nama_bot = $validated['nama_bot'] ?? 'Teta Assistant';
-        $identitas->karakter_bot = $validated['karakter_bot'] ?? 'Customer Service Virtual (AI) ramah';
-
-        $identitas->whatsapp_gateway = $validated['whatsapp_gateway'];
-        $identitas->meta_phone_number_id = $validated['meta_phone_number_id'] ?? null;
-        $identitas->meta_access_token = $validated['meta_access_token'] ?? null;
-        $identitas->meta_webhook_token = $validated['meta_webhook_token'] ?? null;
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists

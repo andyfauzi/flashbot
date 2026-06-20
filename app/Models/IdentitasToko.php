@@ -29,6 +29,7 @@ class IdentitasToko extends Model
         'midtrans_client_key',
         'midtrans_is_production',
         'is_midtrans_active',
+        'gemini_api_key',
     ];
 
     protected $casts = [

@@ -47,7 +47,7 @@ class MidtransCallbackController extends Controller
         }
 
         // Switch to tenant DB
-        TenantManager::switchToTenant($tenant);
+        TenantManager::switchTo($tenant);
 
         // Cari pesanan
         $pesanan = Pesanan::find($pesananId);

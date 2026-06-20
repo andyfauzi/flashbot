@@ -18,41 +18,43 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="accordion" id="accordionHelp">
+                        @php
+                            $guides = \App\Models\LandlordHelpGuide::orderBy('urutan')->get();
+                        @endphp
+
+                        @foreach($guides as $index => $guide)
                         <div class="accordion-item mb-3 border rounded">
-                            <h2 class="accordion-header" id="headingOne">
-                                <button class="accordion-button fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    Bagaimana cara mengatur bot WhatsApp?
+                            <h2 class="accordion-header" id="heading{{ $guide->id }}">
+                                <button class="accordion-button fw-bold text-dark {{ $index == 0 ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $guide->id }}" aria-expanded="{{ $index == 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $guide->id }}">
+                                    {{ $guide->pertanyaan }}
                                 </button>
                             </h2>
-                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionHelp">
+                            <div id="collapse{{ $guide->id }}" class="accordion-collapse collapse {{ $index == 0 ? 'show' : '' }}" aria-labelledby="heading{{ $guide->id }}" data-bs-parent="#accordionHelp">
                                 <div class="accordion-body text-muted">
-                                    Anda dapat membuka menu <strong>Dashboard Chatbot</strong>, lalu pastikan koneksi device berstatus "Connected" (jika menggunakan Baileys). Anda juga bisa mengatur nama bot dan karakter pelayanannya pada menu <strong>Pengaturan Toko</strong>.
+                                    {!! nl2br(html_entity_decode($guide->jawaban)) !!}
                                 </div>
                             </div>
                         </div>
+                        @endforeach
 
-                        <div class="accordion-item mb-3 border rounded">
-                            <h2 class="accordion-header" id="headingTwo">
-                                <button class="accordion-button fw-bold text-dark collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    Bagaimana cara mengubah harga atau stok produk?
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionHelp">
-                                <div class="accordion-body text-muted">
-                                    Buka menu <strong>Manajemen Produk</strong> > <strong>Produk & Varian</strong>. Klik tombol "Edit" pada produk yang ingin diubah. Jika Anda menggunakan sistem HPP, masuk ke menu <strong>Kalkulator HPP</strong> untuk mengatur margin keuntungan dari resep.
-                                </div>
-                            </div>
+                        @if($guides->isEmpty())
+                        <div class="alert alert-info border-0 rounded-4 mb-4">
+                            <i class="fa-solid fa-circle-info me-2"></i> Belum ada panduan dasar yang ditambahkan oleh Administrator Pusat.
                         </div>
+                        @endif
 
-                        <div class="accordion-item mb-3 border rounded">
-                            <h2 class="accordion-header" id="headingThree">
-                                <button class="accordion-button fw-bold text-dark collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    Bagaimana cara menerima pesanan?
+                        <div class="accordion-item mb-3 border rounded border-primary">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button fw-bold text-primary collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    <i class="fa-solid fa-plug me-2"></i> Panduan Integrasi API (Midtrans, Xendit, Gemini, Meta)
                                 </button>
                             </h2>
-                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionHelp">
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionHelp">
                                 <div class="accordion-body text-muted">
-                                    Setiap ada pesanan baru dari WhatsApp atau Portal, pesanan tersebut akan otomatis muncul di menu <strong>Kasir (POS)</strong> di tab "Pesanan Aktif" atau di menu <strong>Riwayat Transaksi</strong>. Anda dapat menerima pesanan dan memprosesnya hingga selesai.
+                                    <p class="mb-3">Pelajari cara mendapatkan kunci API (API Keys) dari layanan pihak ketiga seperti Payment Gateway dan Meta WhatsApp untuk dipasangkan ke dalam sistem ini.</p>
+                                    <a href="{{ route('dashboard.help.api') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                                        <i class="fa-solid fa-arrow-right me-1"></i> Baca Panduan API Selengkapnya
+                                    </a>
                                 </div>
                             </div>
                         </div>

@@ -314,11 +314,23 @@
                 <a href="{{ route('superadmin.package_menus') }}" class="{{ request()->routeIs('superadmin.package_menus') ? 'active' : '' }}">
                     <i data-lucide="list-checks"></i><span>Paket Tenant (Matrix)</span>
                 </a>
+                <a href="{{ route('superadmin.help_guides') }}" class="{{ request()->routeIs('superadmin.help_guides') ? 'active' : '' }}">
+                    <i data-lucide="book"></i><span>Panduan Tenant</span>
+                </a>
                 <a href="{{ route('superadmin.meta') }}" class="{{ request()->routeIs('superadmin.meta*') ? 'active' : '' }}">
                     <i data-lucide="message-circle"></i><span>Meta API Pusat</span>
                 </a>
                 <a href="{{ route('superadmin.midtrans') }}" class="{{ request()->routeIs('superadmin.midtrans*') ? 'active' : '' }}">
-                    <i data-lucide="credit-card"></i><span>Midtrans Landlord</span>
+                    <i data-lucide="credit-card"></i><span>Midtrans Pusat</span>
+                </a>
+                <a href="{{ route('superadmin.broadcast') }}" class="{{ request()->routeIs('superadmin.broadcast*') ? 'active' : '' }}">
+                    <i data-lucide="send"></i><span>Broadcast & Pesan</span>
+                </a>
+                <a href="{{ route('superadmin.logs') }}" class="{{ request()->routeIs('superadmin.logs*') ? 'active' : '' }}">
+                    <i data-lucide="terminal"></i><span>System Error Logs</span>
+                </a>
+                <a href="{{ route('superadmin.audits') }}" class="{{ request()->routeIs('superadmin.audits*') ? 'active' : '' }}">
+                    <i data-lucide="file-shield"></i><span>Audit Activity Logs</span>
                 </a>
             </div>
         </div>

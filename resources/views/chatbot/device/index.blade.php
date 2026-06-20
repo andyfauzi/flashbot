@@ -32,6 +32,122 @@
     </div>
     @endif
 
+    <div class="row mb-4 g-4">
+        {{-- Card Gateway --}}
+        <div class="col-md-4">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="icon-box-premium brand">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="font-family: var(--font-heading);">Gateway WhatsApp</h5>
+                        <p class="text-secondary mb-0 small">Pilih jalur koneksi bot</p>
+                    </div>
+                </div>
+                <form action="{{ route('chatbot.device.settings.update') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="action" value="save_gateway">
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <label class="form-label small fw-bold text-secondary mb-0">Pilih Jalur</label>
+                        <a href="{{ route('dashboard.help.api') }}" class="small text-decoration-none"><i class="fa-solid fa-book-open me-1"></i> Baca Panduan Meta API</a>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select @error('whatsapp_gateway') is-invalid @enderror" id="whatsapp_gateway" name="whatsapp_gateway" onchange="toggleMetaConfig()" required>
+                            <option value="sistem" {{ old('whatsapp_gateway', $identitas->whatsapp_gateway ?? 'sistem') == 'sistem' ? 'selected' : '' }}>Gateway Sistem (Gratis)</option>
+                            <option value="meta_mandiri" {{ old('whatsapp_gateway', $identitas->whatsapp_gateway ?? 'sistem') == 'meta_mandiri' ? 'selected' : '' }}>Meta Cloud API (Mandiri)</option>
+                        </select>
+                    </div>
+
+                    <div id="meta_config_section" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Phone Number ID</label>
+                            <input type="text" class="form-control" id="meta_phone_number_id" name="meta_phone_number_id" value="{{ old('meta_phone_number_id', $identitas->meta_phone_number_id ?? '') }}" placeholder="1045231...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Permanent Access Token</label>
+                            <input type="password" class="form-control" id="meta_access_token" name="meta_access_token" value="{{ old('meta_access_token', $identitas->meta_access_token ?? '') }}" placeholder="EAALx...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Webhook Verify Token</label>
+                            <input type="password" class="form-control" id="meta_webhook_token" name="meta_webhook_token" value="{{ old('meta_webhook_token', $identitas->meta_webhook_token ?? '') }}" placeholder="Teks unik rahasia">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-premium btn-premium-brand w-100 py-2 mt-auto">
+                        <i class="fa-solid fa-save"></i> Simpan Gateway
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- Card Identitas AI --}}
+        <div class="col-md-4">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="icon-box-premium text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="font-family: var(--font-heading);">Identitas Bot AI</h5>
+                        <p class="text-secondary mb-0 small">Karakter balasan AI</p>
+                    </div>
+                </div>
+                <form action="{{ route('chatbot.device.settings.update') }}" method="POST" class="d-flex flex-column h-100">
+                    @csrf
+                    <input type="hidden" name="action" value="save_bot_identity">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Nama Panggilan AI</label>
+                        <input type="text" class="form-control @error('nama_bot') is-invalid @enderror" id="nama_bot" name="nama_bot" value="{{ old('nama_bot', $identitas->nama_bot ?? 'Teta Assistant') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Karakter / Sifat Balasan</label>
+                        <textarea rows="3" class="form-control @error('karakter_bot') is-invalid @enderror" id="karakter_bot" name="karakter_bot" placeholder="CS Virtual yang ramah dan sopan">{{ old('karakter_bot', $identitas->karakter_bot ?? 'Customer Service Virtual (AI) ramah') }}</textarea>
+                    </div>
+                    <div class="mt-auto pt-3">
+                        <button type="submit" class="btn btn-premium w-100 py-2 text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                            <i class="fa-solid fa-save"></i> Simpan Identitas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Card Gemini Key (BYOK) --}}
+        <div class="col-md-4">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="icon-box-premium text-white" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="font-family: var(--font-heading);">Google Gemini API</h5>
+                        <p class="text-secondary mb-0 small">Bawa key AI sendiri (BYOK)</p>
+                    </div>
+                </div>
+                <form action="{{ route('chatbot.device.settings.update') }}" method="POST" class="d-flex flex-column h-100">
+                    @csrf
+                    <input type="hidden" name="action" value="save_gemini_key">
+                    <div class="alert alert-secondary p-3 mb-3 border-0 small rounded-3">
+                        <i class="fa-solid fa-lightbulb text-warning me-1"></i> Jika dikosongkan, bot akan memakai kuota API sistem pusat. Jika Anda ingin berhemat, masukkan API Key mandiri Anda di bawah ini.
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <label class="form-label small fw-bold text-secondary mb-0">Gemini API Key</label>
+                        <a href="{{ route('dashboard.help.api') }}" class="small text-decoration-none text-success"><i class="fa-solid fa-book-open me-1"></i> Cara Ambil Key</a>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control @error('gemini_api_key') is-invalid @enderror" id="gemini_api_key" name="gemini_api_key" value="{{ old('gemini_api_key', $identitas->gemini_api_key ?? '') }}" placeholder="AIzaSy...">
+                    </div>
+                    <div class="mt-auto pt-3">
+                        <button type="submit" class="btn btn-premium w-100 py-2 text-white" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none;">
+                            <i class="fa-solid fa-save"></i> Simpan API Key
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         {{-- Form Tambah Device --}}
         <div class="col-md-4">
@@ -379,6 +495,21 @@
     document.addEventListener('DOMContentLoaded', function () {
         setTimeout(checkStatus, 800);
         setInterval(checkStatus, 3000);
+    });
+
+    function toggleMetaConfig() {
+        var gateway = document.getElementById('whatsapp_gateway').value;
+        var metaSection = document.getElementById('meta_config_section');
+        if (gateway === 'meta_mandiri') {
+            metaSection.style.display = 'block';
+        } else {
+            metaSection.style.display = 'none';
+        }
+    }
+    
+    // Run on load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleMetaConfig();
     });
 </script>
 @endsection

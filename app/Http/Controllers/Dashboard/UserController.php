@@ -27,6 +27,31 @@ class UserController extends Controller
             'role' => 'required|in:owner,admin,kasir,user',
         ]);
 
+        // Check employee limits based on plan
+        $tenant = \App\Services\TenantManager::current();
+        if ($tenant) {
+            $plan = $tenant->plan ?? 'gratis';
+            
+            // Get limit from landlord settings
+            $limit = \App\Models\LandlordSetting::get('limit_karyawan_' . $plan);
+            
+            // Default limits if not set in DB
+            if ($limit === null) {
+                switch ($plan) {
+                    case 'gratis': $limit = 1; break;
+                    case 'starter': $limit = 2; break;
+                    case 'pro': $limit = 10; break;
+                    case 'business': $limit = 999; break;
+                    default: $limit = 1;
+                }
+            }
+
+            $currentEmployeeCount = User::count();
+            if ($currentEmployeeCount >= $limit) {
+                return back()->with('error', "Batas maksimal akun karyawan untuk paket {$plan} Anda adalah {$limit} akun. Silakan upgrade paket untuk menambah kasir/karyawan baru.");
+            }
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,

@@ -18,6 +18,18 @@ class SuperAdminController extends Controller
         TenantManager::switchToLandlord();
 
         $tenants = Tenant::orderBy('created_at', 'desc')->get();
+        $totalTenants = $tenants->count();
+        $activeTenants = $tenants->where('is_active', true)->count();
+        $suspendedTenants = $totalTenants - $activeTenants;
+        
+        // Estimasi Pendapatan dari TenantPayment (jika ada)
+        $monthlyRevenue = 0;
+        if (DB::connection('landlord')->getSchemaBuilder()->hasTable('tenant_payments')) {
+            $monthlyRevenue = DB::connection('landlord')->table('tenant_payments')
+                ->where('status', 'paid')
+                ->whereMonth('created_at', now()->month)
+                ->sum('amount');
+        }
         
         // Cek status broadcast dan gateway untuk setiap tenant
         foreach ($tenants as $tenant) {
@@ -38,7 +50,7 @@ class SuperAdminController extends Controller
         
         TenantManager::switchToLandlord();
 
-        return view('superadmin.index', compact('tenants'));
+        return view('superadmin.index', compact('tenants', 'totalTenants', 'activeTenants', 'suspendedTenants', 'monthlyRevenue'));
     }
 
     public function showMetaSettings()
@@ -317,11 +329,20 @@ class SuperAdminController extends Controller
     {
         TenantManager::switchToLandlord();
 
-        $val = $request->has('is_payment_gateway_enabled') ? '1' : '0';
-        \App\Models\LandlordSetting::set('is_payment_gateway_enabled', $val);
+        if ($request->has('is_payment_gateway_enabled')) {
+            \App\Models\LandlordSetting::set('is_payment_gateway_enabled', '1');
+        } else {
+            // Only update if it was submitted in a form that contains it
+            // if we are updating other settings, we shouldn't overwrite it unless explicitly provided
+            // To be safe, let's just check if it's present.
+        }
+
+        if ($request->has('global_announcement_text')) {
+            \App\Models\LandlordSetting::set('global_announcement_text', $request->global_announcement_text);
+        }
 
         AuditLogger::record('superadmin.settings_updated', "system", [
-            'is_payment_gateway_enabled' => $val
+            'updated_by' => auth()->id()
         ]);
 
         return redirect()->back()->with('success', 'Pengaturan global berhasil disimpan.');
@@ -363,6 +384,188 @@ class SuperAdminController extends Controller
         \Illuminate\Support\Facades\Cache::forget('plan_menus_pro');
         \Illuminate\Support\Facades\Cache::forget('plan_menus_business');
 
-        return redirect()->back()->with('success', 'Konfigurasi menu paket berhasil diperbarui.');
+        // Save Employee Limits
+        if ($request->has('limit_karyawan_gratis')) {
+            \App\Models\LandlordSetting::set('limit_karyawan_gratis', $request->limit_karyawan_gratis);
+        }
+        if ($request->has('limit_karyawan_starter')) {
+            \App\Models\LandlordSetting::set('limit_karyawan_starter', $request->limit_karyawan_starter);
+        }
+        if ($request->has('limit_karyawan_pro')) {
+            \App\Models\LandlordSetting::set('limit_karyawan_pro', $request->limit_karyawan_pro);
+        }
+        if ($request->has('limit_karyawan_business')) {
+            \App\Models\LandlordSetting::set('limit_karyawan_business', $request->limit_karyawan_business);
+        }
+
+        // Save WA Quota Limits
+        if ($request->has('limit_wa_gratis')) {
+            \App\Models\LandlordSetting::set('limit_wa_gratis', $request->limit_wa_gratis);
+        }
+        if ($request->has('limit_wa_starter')) {
+            \App\Models\LandlordSetting::set('limit_wa_starter', $request->limit_wa_starter);
+        }
+        if ($request->has('limit_wa_pro')) {
+            \App\Models\LandlordSetting::set('limit_wa_pro', $request->limit_wa_pro);
+        }
+        if ($request->has('limit_wa_business')) {
+            \App\Models\LandlordSetting::set('limit_wa_business', $request->limit_wa_business);
+        }
+
+        return redirect()->back()->with('success', 'Konfigurasi menu paket dan batasan fitur berhasil diperbarui.');
+    }
+
+    public function helpGuides()
+    {
+        TenantManager::switchToLandlord();
+        $guides = \App\Models\LandlordHelpGuide::orderBy('urutan')->get();
+        return view('superadmin.help_guides', compact('guides'));
+    }
+
+    public function storeHelpGuide(Request $request)
+    {
+        TenantManager::switchToLandlord();
+        $request->validate([
+            'pertanyaan' => 'required|string|max:255',
+            'jawaban' => 'required|string',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        \App\Models\LandlordHelpGuide::create([
+            'pertanyaan' => $request->pertanyaan,
+            'jawaban' => $request->jawaban,
+            'urutan' => $request->urutan ?? 0,
+        ]);
+
+        return redirect()->route('superadmin.help_guides')->with('success', 'Panduan berhasil ditambahkan.');
+    }
+
+    public function updateHelpGuide(Request $request, $id)
+    {
+        TenantManager::switchToLandlord();
+        $request->validate([
+            'pertanyaan' => 'required|string|max:255',
+            'jawaban' => 'required|string',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        $guide = \App\Models\LandlordHelpGuide::findOrFail($id);
+        $guide->update([
+            'pertanyaan' => $request->pertanyaan,
+            'jawaban' => $request->jawaban,
+            'urutan' => $request->urutan ?? 0,
+        ]);
+
+        return redirect()->route('superadmin.help_guides')->with('success', 'Panduan berhasil diperbarui.');
+    }
+
+    public function destroyHelpGuide($id)
+    {
+        TenantManager::switchToLandlord();
+        $guide = \App\Models\LandlordHelpGuide::findOrFail($id);
+        $guide->delete();
+
+        return redirect()->route('superadmin.help_guides')->with('success', 'Panduan berhasil dihapus.');
+    }
+
+    public function logs()
+    {
+        TenantManager::switchToLandlord();
+        $logPath = storage_path('logs/laravel.log');
+        $logs = '';
+        if (file_exists($logPath)) {
+            // Get last 1000 lines
+            $file = new \SplFileObject($logPath, 'r');
+            $file->seek(PHP_INT_MAX);
+            $totalLines = $file->key();
+            $file->seek(max(0, $totalLines - 1000));
+            while (!$file->eof()) {
+                $logs .= $file->current();
+                $file->next();
+            }
+        }
+        return view('superadmin.logs', compact('logs'));
+    }
+
+    public function audits()
+    {
+        TenantManager::switchToLandlord();
+        $audits = DB::connection('landlord')->table('audit_logs')
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+        return view('superadmin.audits', compact('audits'));
+    }
+
+    public function broadcast()
+    {
+        TenantManager::switchToLandlord();
+        return view('superadmin.broadcast');
+    }
+
+    public function sendBroadcast(Request $request)
+    {
+        TenantManager::switchToLandlord();
+        $request->validate([
+            'message' => 'required|string',
+            'channel' => 'required|array'
+        ]);
+
+        $tenants = Tenant::where('is_active', true)->get();
+        $successCount = 0;
+        $messageText = $request->message;
+
+        foreach ($tenants as $tenant) {
+            // Get owner user from tenant DB
+            try {
+                $dbName = 'tenant_' . strtolower($tenant->subdomain);
+                config(['database.connections.tenant.database' => $dbName]);
+                DB::purge('tenant');
+                
+                $owner = DB::connection('tenant')->table('users')->where('role', 'owner')->first();
+                $identitas = DB::connection('tenant')->table('identitas_tokos')->first();
+
+                if (!$owner) continue;
+
+                // Send via Email
+                if (in_array('email', $request->channel) && $owner->email) {
+                    \Illuminate\Support\Facades\Mail::raw($messageText, function($msg) use ($owner) {
+                        $msg->to($owner->email)
+                            ->subject('Pemberitahuan Penting: Flashbot');
+                    });
+                    $successCount++;
+                }
+
+                // Send via WhatsApp
+                if (in_array('whatsapp', $request->channel)) {
+                    // Try to get phone number from identitas or owner
+                    $phone = null;
+                    if ($identitas && !empty($identitas->nomor_hp)) {
+                        $phone = $identitas->nomor_hp;
+                    } elseif ($owner->phone ?? false) {
+                        $phone = $owner->phone;
+                    }
+
+                    if ($phone) {
+                        // Use landlord session for Baileys
+                        $baileysUrl = env('BAILEYS_API_URL', 'http://127.0.0.1:3000');
+                        \Illuminate\Support\Facades\Http::post($baileysUrl . '/api/send-message', [
+                            'sessionId' => 'landlord',
+                            'jid' => $phone . '@s.whatsapp.net',
+                            'message' => ['text' => $messageText]
+                        ]);
+                        $successCount++;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Broadcast failed for tenant {$tenant->id}: " . $e->getMessage());
+            }
+        }
+
+        AuditLogger::record('superadmin.broadcast', "system", [
+            'channels' => $request->channel,
+            'success_count' => $successCount
+        ]);
+
+        return redirect()->back()->with('success', "Pesan broadcast berhasil dikirim ke antrean ({$successCount} penerima).");
     }
 }

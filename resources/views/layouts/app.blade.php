@@ -211,7 +211,32 @@
                 </div>
             @endif
             
-            <div class="fade-in-up">
+            <div class="content-wrapper">
+                
+                @php
+                    // Check if there is a global announcement
+                    $announcement = '';
+                    try {
+                        // Accessing landlord database from tenant
+                        $announcement = \Illuminate\Support\Facades\DB::connection('landlord')
+                            ->table('landlord_settings')
+                            ->where('key', 'global_announcement_text')
+                            ->value('value');
+                    } catch (\Exception $e) {}
+                @endphp
+
+                @if(!empty($announcement))
+                <div class="container-fluid px-4 pt-4">
+                    <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm rounded-4 d-flex align-items-center" role="alert">
+                        <i class="fa-solid fa-bullhorn fa-lg me-3 text-warning-emphasis"></i>
+                        <div class="text-dark fw-medium">
+                            {!! nl2br(e($announcement)) !!}
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                @endif
+
                 @yield('content')
             </div>
         </div>

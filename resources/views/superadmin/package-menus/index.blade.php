@@ -87,6 +87,62 @@
                 </table>
             </div>
 
+            <!-- Tambahan: Batas Maksimal Karyawan -->
+            <div class="mt-5 mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-users-gear me-2"></i> Pengaturan Batas Maksimal Karyawan</h5>
+                <p class="text-muted small">Tentukan berapa banyak akun karyawan (kasir/manajer) yang bisa dibuat oleh tenant berdasarkan paket langganannya.</p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Gratis</label>
+                        <input type="number" class="form-control" name="limit_karyawan_gratis" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_gratis', 1) }}" min="1">
+                        <small class="text-muted">Misal: 1 (Hanya Owner)</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Starter</label>
+                        <input type="number" class="form-control" name="limit_karyawan_starter" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_starter', 2) }}" min="1">
+                        <small class="text-muted">Misal: 2</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Pro</label>
+                        <input type="number" class="form-control" name="limit_karyawan_pro" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_pro', 10) }}" min="1">
+                        <small class="text-muted">Misal: 10</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Business</label>
+                        <input type="number" class="form-control" name="limit_karyawan_business" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_business', 999) }}" min="1">
+                        <small class="text-muted">Isi angka besar (999) untuk Unlimited</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tambahan: Rate Limiting / Kuota Bot WA -->
+            <div class="mt-5 mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-robot me-2"></i> Pengaturan Kuota Balasan Bot WA (Per Bulan)</h5>
+                <p class="text-muted small">Tentukan berapa maksimal pesan bot yang dapat dikirim oleh tenant setiap bulan.</p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Gratis</label>
+                        <input type="number" class="form-control" name="limit_wa_gratis" value="{{ \App\Models\LandlordSetting::get('limit_wa_gratis', 100) }}" min="0">
+                        <small class="text-muted">Misal: 100 Pesan</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Starter</label>
+                        <input type="number" class="form-control" name="limit_wa_starter" value="{{ \App\Models\LandlordSetting::get('limit_wa_starter', 1000) }}" min="0">
+                        <small class="text-muted">Misal: 1000 Pesan</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Pro</label>
+                        <input type="number" class="form-control" name="limit_wa_pro" value="{{ \App\Models\LandlordSetting::get('limit_wa_pro', 5000) }}" min="0">
+                        <small class="text-muted">Misal: 5000 Pesan</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Paket Business</label>
+                        <input type="number" class="form-control" name="limit_wa_business" value="{{ \App\Models\LandlordSetting::get('limit_wa_business', 999999) }}" min="0">
+                        <small class="text-muted">Isi angka besar (999999) untuk Unlimited</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-end mt-4">
                 <button type="submit" class="btn btn-primary d-flex align-items-center">
                     <i data-lucide="save" class="me-2"></i> Simpan Konfigurasi
