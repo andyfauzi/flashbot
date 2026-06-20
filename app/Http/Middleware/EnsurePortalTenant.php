@@ -24,6 +24,11 @@ class EnsurePortalTenant
             abort(403, 'Langganan toko ini telah kedaluwarsa. Hubungi pemilik toko.');
         }
 
+        // Cek fitur paket
+        if (!\App\Helpers\TenantPlanHelper::hasMenu('portal_customer')) {
+            abort(403, 'Fitur Katalog Online (Portal Customer) tidak tersedia pada paket langganan toko ini.');
+        }
+
         return $next($request);
     }
 }

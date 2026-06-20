@@ -19,6 +19,7 @@ class PackageMenuSeeder extends Seeder
             ['menu_key' => 'riwayat_transaksi', 'menu_label' => 'Riwayat Transaksi', 'category' => 'Kasir & Penjualan', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
             ['menu_key' => 'kasir_pos', 'menu_label' => 'Kasir POS', 'category' => 'Kasir & Penjualan', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
             ['menu_key' => 'jadwal_pesanan', 'menu_label' => 'Jadwal Pesanan (Pre-Order)', 'category' => 'Kasir & Penjualan', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
+            ['menu_key' => 'portal_customer', 'menu_label' => 'Katalog Online (Portal Customer)', 'category' => 'Kasir & Penjualan', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
 
             // Dine-in & Reservasi
             ['menu_key' => 'manajemen_meja', 'menu_label' => 'Manajemen Meja', 'category' => 'Dine-in & Reservasi', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
