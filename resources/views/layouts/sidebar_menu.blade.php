@@ -1,6 +1,16 @@
 <div class="accordion accordion-flush bg-transparent" id="accordion{{ $prefix }}">
     
-    @if(!auth()->user() || !auth()->user()->is_super_admin)
+    @if(auth()->user() && auth()->user()->isSales())
+    <div class="accordion-item bg-transparent border-0 mb-1">
+        <h2 class="accordion-header" id="headingSales{{ $prefix }}">
+            <a href="{{ route('sales.dashboard') }}" class="accordion-button bg-transparent shadow-none px-3 py-2 fw-bold {{ request()->routeIs('sales.dashboard') ? '' : 'collapsed' }} text-decoration-none" style="display: block;">
+                <i data-lucide="handshake" class="me-2 text-primary"></i> Dashboard Sales
+            </a>
+        </h2>
+    </div>
+    @endif
+    
+    @if(!auth()->user() || (!auth()->user()->is_super_admin && !auth()->user()->isSales()))
     <!-- ============================================== -->
     <!-- 🛒 KASIR & PENJUALAN -->
     <!-- ============================================== -->

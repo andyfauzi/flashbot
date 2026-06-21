@@ -112,6 +112,8 @@
                             <h6 class="fw-bold text-success">Paket Starter</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_starter" value="{{ $settings['price_starter'] ?? 'Rp 99.000' }}">
+                            <label class="form-label small">Harga / Tahun</label>
+                            <input type="text" class="form-control form-control-sm mb-2" name="price_starter_yearly" value="{{ $settings['price_starter_yearly'] ?? 'Rp 990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_starter" rows="3">{{ $settings['features_starter'] ?? "1 Cabang Toko\nFitur Kasir Dasar\nLaporan Standar" }}</textarea>
                         </div>
@@ -122,6 +124,8 @@
                             <h6 class="fw-bold text-primary">Paket Pro</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_pro" value="{{ $settings['price_pro'] ?? 'Rp 199.000' }}">
+                            <label class="form-label small">Harga / Tahun</label>
+                            <input type="text" class="form-control form-control-sm mb-2" name="price_pro_yearly" value="{{ $settings['price_pro_yearly'] ?? 'Rp 1.990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_pro" rows="3">{{ $settings['features_pro'] ?? "5 Cabang Toko\nFitur Manufaktur\nBot WhatsApp" }}</textarea>
                         </div>
@@ -132,10 +136,41 @@
                             <h6 class="fw-bold text-dark">Paket Business</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_business" value="{{ $settings['price_business'] ?? 'Rp 499.000' }}">
+                            <label class="form-label small">Harga / Tahun</label>
+                            <input type="text" class="form-control form-control-sm mb-2" name="price_business_yearly" value="{{ $settings['price_business_yearly'] ?? 'Rp 4.990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_business" rows="3">{{ $settings['features_business'] ?? "Unlimited Cabang\nPrioritas Support\nWhite Label" }}</textarea>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Petunjuk Penggunaan -->
+            <div class="custom-card">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-book-open text-info me-2"></i>Petunjuk Penggunaan</h5>
+                <div class="mb-3">
+                    <label class="form-label">Teks Petunjuk Penggunaan</label>
+                    <textarea class="form-control" name="user_guide_text" rows="4" placeholder="Masukkan langkah-langkah penggunaan di sini...">{{ $settings['user_guide_text'] ?? '' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gambar Petunjuk Penggunaan</label>
+                    @if(isset($settings['user_guide_image']) && !empty($settings['user_guide_image']))
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/' . $settings['user_guide_image']) }}" alt="User Guide Image" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    @endif
+                    <input type="file" class="form-control" name="user_guide_image" accept="image/*">
+                    <div class="form-text">Upload gambar pendukung petunjuk penggunaan.</div>
+                </div>
+            </div>
+
+            <!-- Syarat dan Ketentuan -->
+            <div class="custom-card">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-file-contract text-danger me-2"></i>Syarat dan Ketentuan</h5>
+                <div class="mb-3">
+                    <label class="form-label">Isi Syarat & Ketentuan</label>
+                    <textarea class="form-control" name="terms_conditions" rows="6" placeholder="Masukkan isi syarat dan ketentuan...">{{ $settings['terms_conditions'] ?? '' }}</textarea>
+                    <div class="form-text">Teks ini akan ditampilkan di halaman Syarat & Ketentuan terpisah.</div>
                 </div>
             </div>
         </div>

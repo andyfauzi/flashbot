@@ -12,7 +12,16 @@
             <h1 class="fw-bold mb-4">Syarat dan Ketentuan Layanan (Terms of Service)</h1>
             <p class="text-muted">Terakhir Diperbarui: {{ date('d F Y') }}</p>
             <hr>
-            
+
+            @php
+                $dynamicTerms = \App\Models\LandlordSetting::get('terms_conditions');
+            @endphp
+
+            @if($dynamicTerms)
+                <div class="mb-4 text-secondary" style="line-height: 1.8;">
+                    {!! nl2br(e($dynamicTerms)) !!}
+                </div>
+            @else
             <h4>1. Penerimaan Syarat</h4>
             <p>Dengan mengakses dan menggunakan platform Tenanta.id SaaS, Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan ketentuan apa pun, Anda dilarang menggunakan layanan kami.</p>
 
@@ -74,6 +83,12 @@
             
             <h5>8.8 Lisensi dan Biaya Pihak Ketiga</h5>
             <p>Pelanggan memahami bahwa sebagian biaya berlangganan digunakan untuk pembelian atau penggunaan lisensi, infrastruktur server, nomor WhatsApp, API, dan layanan pihak ketiga lainnya yang tidak dapat dibatalkan. Oleh karena itu, biaya yang telah digunakan untuk penyediaan layanan tersebut tidak dapat dimintakan pengembalian dana.</p>
+            @endif
+
+            <div class="alert alert-info mt-4">
+                <h5 class="alert-heading fw-bold">Ketentuan Integrasi WhatsApp</h5>
+                <p class="mb-0">Chatbot Tenanta.id menggunakan library unofficial Whatsapp API Indonesia dan <strong>tidak berafiliasi dengan Meta atau WhatsApp Inc.</strong> Namun demikian, kami menyediakan untuk tiap tenant konfigurasi untuk melakukan pendaftaran Meta API secara mandiri melalui pengaturan toko masing-masing.</p>
+            </div>
 
             <div class="mt-5 text-center">
                 <a href="/" class="btn btn-primary rounded-pill px-4">Kembali ke Beranda</a>

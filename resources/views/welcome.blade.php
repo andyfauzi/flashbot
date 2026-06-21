@@ -331,8 +331,9 @@
                             </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter</a>
-                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '1']) }}" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 15 Hari</a>
+                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter (Bulan)</a>
+                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_starter_yearly'] ?? 'Rp 990.000' }})</a>
+                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '1']) }}" class="btn btn-light text-success w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 15 Hari</a>
                         </div>
                     </div>
                 </div>
@@ -390,8 +391,9 @@
                             </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro</a>
-                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '1']) }}" class="btn btn-outline-primary w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 30 Hari</a>
+                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro (Bulan)</a>
+                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-primary w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_pro_yearly'] ?? 'Rp 1.990.000' }})</a>
+                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '1']) }}" class="btn btn-light text-primary w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 30 Hari</a>
                         </div>
                     </div>
                 </div>
@@ -448,14 +450,41 @@
                             </li>
                         </ul>
                         <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0']) }}" class="btn btn-dark w-100 rounded-pill fw-bold py-2">Daftar Business</a>
-                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Uji Coba Gratis 30 Hari</a>
+                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0']) }}" class="btn btn-dark w-100 rounded-pill fw-bold py-2">Daftar Business (Bulan)</a>
+                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_business_yearly'] ?? 'Rp 4.990.000' }})</a>
+                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-light text-dark w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 30 Hari</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    @if(!empty($settings['user_guide_text']) || !empty($settings['user_guide_image']))
+    <!-- User Guide Section -->
+    <section class="py-5 bg-white border-top">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold" style="font-size: 2.5rem;">Petunjuk Penggunaan</h2>
+                <p class="text-muted fs-5">Langkah mudah memulai bisnis dengan Tenanta.id</p>
+            </div>
+            <div class="row align-items-center">
+                @if(!empty($settings['user_guide_image']))
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="{{ asset('storage/' . $settings['user_guide_image']) }}" class="img-fluid rounded-4 shadow" alt="Petunjuk Penggunaan">
+                </div>
+                <div class="col-lg-6">
+                @else
+                <div class="col-lg-12 text-center">
+                @endif
+                    <div class="fs-5 text-secondary" style="line-height: 1.8;">
+                        {!! nl2br(e($settings['user_guide_text'] ?? '')) !!}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
 
     <!-- Footer -->
     <footer id="contact" class="footer">

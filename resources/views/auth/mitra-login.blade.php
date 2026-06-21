@@ -42,7 +42,10 @@
                 
                 <div class="mb-4">
                     <label class="form-label fw-bold small">Password</label>
-                    <input type="password" name="password" class="form-control form-control-lg bg-light border-0" required placeholder="Masukkan password">
+                    <input type="password" name="password" class="form-control form-control-lg bg-light border-0 @error('password') is-invalid @enderror" required placeholder="Masukkan password">
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm">
