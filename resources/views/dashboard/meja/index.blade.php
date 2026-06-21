@@ -10,19 +10,6 @@
     </button>
 </div>
 
-<div class="card border-0 shadow-sm rounded-4 mb-4 bg-light">
-    <div class="card-body p-4 d-flex justify-content-between align-items-center">
-        <div>
-            <h6 class="fw-bold mb-1">Pengaturan Reservasi Chatbot</h6>
-            <p class="text-muted small mb-0">Jika diaktifkan, pelanggan harus membayar Uang Muka (DP) saat mereservasi meja via WhatsApp Chatbot.</p>
-        </div>
-        <form action="{{ route('dashboard.meja.update_dp') }}" method="POST" id="formUpdateDp">
-            @csrf
-            <div class="form-check form-switch form-switch-lg mb-0" style="transform: scale(1.2);">
-                <input class="form-check-input" type="checkbox" role="switch" id="wajib_dp_reservasi" name="wajib_dp_reservasi" value="1" {{ (isset($identitasToko) && $identitasToko->wajib_dp_reservasi) ? 'checked' : '' }} onchange="document.getElementById('formUpdateDp').submit();">
-            </div>
-        </form>
-    </div>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">

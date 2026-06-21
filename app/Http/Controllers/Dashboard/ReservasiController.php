@@ -84,4 +84,32 @@ class ReservasiController extends Controller
 
         return redirect()->route('dashboard.reservasi.index')->with('sukses', 'Reservasi berhasil dihapus.');
     }
+
+    public function pengaturan()
+    {
+        $identitas = \App\Models\IdentitasToko::first();
+        return view('dashboard.reservasi.pengaturan', compact('identitas'));
+    }
+
+    public function simpanPengaturan(Request $request)
+    {
+        $validated = $request->validate([
+            'jam_buka' => 'nullable|date_format:H:i',
+            'jam_tutup' => 'nullable|date_format:H:i',
+            'wajib_dp_reservasi' => 'nullable|boolean',
+            'nominal_dp_reservasi' => 'nullable|numeric|min:0',
+        ]);
+
+        $validated['wajib_dp_reservasi'] = $request->has('wajib_dp_reservasi');
+        $validated['nominal_dp_reservasi'] = $validated['nominal_dp_reservasi'] ?? 0;
+
+        $identitas = \App\Models\IdentitasToko::first();
+        if ($identitas) {
+            $identitas->update($validated);
+        } else {
+            \App\Models\IdentitasToko::create($validated);
+        }
+
+        return redirect()->route('dashboard.reservasi.pengaturan')->with('sukses', 'Pengaturan reservasi & operasional berhasil disimpan.');
+    }
 }

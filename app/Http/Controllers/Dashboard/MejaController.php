@@ -60,15 +60,4 @@ class MejaController extends Controller
 
         return redirect()->route('dashboard.meja.index')->with('sukses', 'Meja berhasil dihapus.');
     }
-
-    public function updateDp(Request $request)
-    {
-        $identitas = \App\Models\IdentitasToko::first();
-        if ($identitas) {
-            $identitas->update([
-                'wajib_dp_reservasi' => $request->has('wajib_dp_reservasi') ? true : false
-            ]);
-        }
-        return redirect()->route('dashboard.meja.index')->with('sukses', 'Pengaturan Wajib DP Reservasi berhasil diperbarui.');
-    }
 }

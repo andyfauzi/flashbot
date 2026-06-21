@@ -33,6 +33,9 @@ class IdentitasToko extends Model
         'whatsapp_gateway',
         'meta_phone_number_id',
         'meta_access_token',
+        'jam_buka',
+        'jam_tutup',
+        'nominal_dp_reservasi',
     ];
 
     protected $casts = [
