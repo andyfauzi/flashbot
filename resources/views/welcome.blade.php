@@ -232,6 +232,9 @@
                     <li class="nav-item">
                         <a class="nav-link fw-medium" href="{{ route('legal.privacy') }}">Kebijakan Privasi</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="{{ route('legal.panduan') }}">Petunjuk Penggunaan</a>
+                    </li>
                 </ul>
                 <div class="d-flex gap-2">
                     @auth
@@ -466,74 +469,7 @@
         </div>
     </section>
 
-    @php
-        $guides = collect([]);
-        try {
-            if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('landlord_help_guides')) {
-                // Auto-sync jika masih kosong
-                if (\App\Models\LandlordHelpGuide::count() == 0) {
-                    $oldSettings = \Illuminate\Support\Facades\DB::connection('landlord')->table('landlord_settings')->where('key', 'user_guide_text')->first();
-                    if ($oldSettings && !empty($oldSettings->value)) {
-                        \App\Models\LandlordHelpGuide::create([
-                            'pertanyaan' => 'Panduan Penggunaan Tenanta.id',
-                            'jawaban' => $oldSettings->value,
-                            'urutan' => 1
-                        ]);
-                    }
-                }
-                
-                $guides = \App\Models\LandlordHelpGuide::orderBy('urutan')->get();
-            }
-        } catch (\Exception $e) {
-            // Abaikan jika migrasi belum ada
-        }
-        
-        // Dummy data jika masih kosong
-        if ($guides->isEmpty()) {
-            $guides = collect([
-                (object)[
-                    'id' => 1,
-                    'pertanyaan' => 'Bagaimana cara memulai menggunakan Tenanta.id?',
-                    'jawaban' => "1. Lakukan pendaftaran akun melalui paket yang tersedia.\n2. Lengkapi profil toko Anda.\n3. Masuk ke Dashboard untuk menambahkan produk dan mulai berjualan!"
-                ],
-                (object)[
-                    'id' => 2,
-                    'pertanyaan' => 'Apakah saya bisa mengubah paket langganan nanti?',
-                    'jawaban' => 'Tentu saja! Anda dapat melakukan upgrade atau downgrade paket kapan saja melalui menu Billing di Dashboard.'
-                ]
-            ]);
-        }
-    @endphp
 
-    <!-- User Guide Section -->
-    <section class="py-5 bg-white border-top">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold" style="font-size: 2.5rem;">Petunjuk Penggunaan</h2>
-                <p class="text-muted fs-5">Langkah mudah memulai bisnis dengan Tenanta.id</p>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="accordion" id="accordionHelpLanding">
-                        @foreach($guides as $index => $guide)
-                        <div class="accordion-item mb-3 border rounded shadow-sm">
-                            <h2 class="accordion-header" id="headingLanding{{ $guide->id }}">
-                                <button class="accordion-button fw-bold text-dark {{ $index == 0 ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLanding{{ $guide->id }}" aria-expanded="{{ $index == 0 ? 'true' : 'false' }}" aria-controls="collapseLanding{{ $guide->id }}">
-                                    {{ $guide->pertanyaan }}
-                                </button>
-                            </h2>
-                            <div id="collapseLanding{{ $guide->id }}" class="accordion-collapse collapse {{ $index == 0 ? 'show' : '' }}" aria-labelledby="headingLanding{{ $guide->id }}" data-bs-parent="#accordionHelpLanding">
-                                <div class="accordion-body text-secondary" style="line-height: 1.8;">
-                                    {!! nl2br(html_entity_decode($guide->jawaban)) !!}
-                                </div>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer id="contact" class="footer">

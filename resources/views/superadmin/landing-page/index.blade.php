@@ -148,8 +148,26 @@
             <!-- Petunjuk Penggunaan -->
             <div class="custom-card">
                 <h5 class="fw-bold mb-4"><i class="fa-solid fa-book-open text-info me-2"></i>Petunjuk Penggunaan</h5>
-                <div class="alert alert-info border-0 rounded-3">
-                    <i class="fa-solid fa-circle-info me-2"></i> Data Petunjuk Penggunaan di Landing Page sekarang secara otomatis mengambil dari data <strong>Pusat Bantuan Landlord</strong>. Silakan kelola di menu <a href="{{ route('superadmin.help_guides') }}" class="fw-bold alert-link">Pusat Bantuan</a>.
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Teks Petunjuk Penggunaan</label>
+                            <textarea class="form-control" name="user_guide_text" rows="5" placeholder="Masukkan langkah-langkah penggunaan di sini...">{{ $settings['user_guide_text'] ?? "1. Daftar dan Lengkapi Profil Toko Anda\n2. Tambahkan Produk atau Layanan di Dashboard\n3. Nikmati kemudahan transaksi dengan POS & Bot WhatsApp Tenanta.id!" }}</textarea>
+                            <div class="form-text">Gunakan Enter untuk baris baru.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Gambar Petunjuk Penggunaan</label>
+                            @if(!empty($settings['user_guide_image']))
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $settings['user_guide_image']) }}" alt="Petunjuk Penggunaan" class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="user_guide_image" accept="image/*">
+                            <div class="form-text">Format yang didukung: JPG, PNG, GIF. Maks: 2MB. Rekomendasi rasio 16:9.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

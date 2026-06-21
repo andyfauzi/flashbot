@@ -54,6 +54,20 @@ Route::get('/privacy', function() {
     return view('legal.privacy');
 })->name('legal.privacy');
 
+Route::get('/panduan', function() {
+    $settings = [];
+    try {
+        if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('landlord_settings')) {
+            $settingsDb = \Illuminate\Support\Facades\DB::connection('landlord')->table('landlord_settings')->get();
+            foreach ($settingsDb as $row) {
+                $settings[$row->key] = $row->value ?? '';
+            }
+        }
+    } catch (\Exception $e) {}
+    
+    return view('legal.panduan', compact('settings'));
+})->name('legal.panduan');
+
 if (app()->environment('local')) {
     Route::get('/test-dispatch', function() {
         $start = microtime(true);
