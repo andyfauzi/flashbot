@@ -226,6 +226,12 @@
                     <li class="nav-item">
                         <a class="nav-link fw-medium" href="#contact">Kontak</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="{{ route('legal.terms') }}">Syarat & Ketentuan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="{{ route('legal.privacy') }}">Kebijakan Privasi</a>
+                    </li>
                 </ul>
                 <div class="d-flex gap-2">
                     @auth
@@ -517,10 +523,6 @@
                 </div>
             </div>
             <div class="border-top border-secondary mt-5 pt-4 text-center text-secondary opacity-75">
-                <div class="mb-2">
-                    <a href="{{ route('legal.terms') }}" class="text-light text-decoration-none me-3 hover-primary">Syarat & Ketentuan</a>
-                    <a href="{{ route('legal.privacy') }}" class="text-light text-decoration-none hover-primary">Kebijakan Privasi</a>
-                </div>
                 &copy; {{ date('Y') }} Tenanta.id SaaS. All rights reserved.
             </div>
         </div>
