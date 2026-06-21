@@ -176,6 +176,19 @@
         </div>
 
         <div class="col-lg-4">
+            <!-- Footer Information -->
+            <div class="custom-card">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-shoe-prints text-secondary me-2"></i>Pengaturan Footer</h5>
+                <div class="mb-3">
+                    <label class="form-label">Judul Footer</label>
+                    <input type="text" class="form-control" name="footer_title" value="{{ $settings['footer_title'] ?? 'Tenanta.id' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Deskripsi Singkat Footer</label>
+                    <textarea class="form-control" name="footer_description" rows="3">{{ $settings['footer_description'] ?? 'Platform SaaS Kasir Pintar terdepan di Indonesia. Mengelola ribuan transaksi dengan kecepatan cahaya.' }}</textarea>
+                </div>
+            </div>
+
             <!-- Contact Information -->
             <div class="custom-card">
                 <h5 class="fw-bold mb-4"><i class="fa-solid fa-address-book text-warning me-2"></i>Informasi Kontak</h5>

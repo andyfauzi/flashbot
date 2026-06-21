@@ -497,8 +497,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h3 class="footer-title"><i class="fa-solid fa-bolt text-primary me-2"></i>Tenanta.id</h3>
-                    <p class="text-secondary opacity-75">Platform SaaS Kasir Pintar terdepan di Indonesia. Mengelola ribuan transaksi dengan kecepatan cahaya.</p>
+                    <h3 class="footer-title"><i class="fa-solid fa-bolt text-primary me-2"></i>{{ $settings['footer_title'] ?? 'Tenanta.id' }}</h3>
+                    <p class="text-secondary opacity-75">{{ $settings['footer_description'] ?? 'Platform SaaS Kasir Pintar terdepan di Indonesia. Mengelola ribuan transaksi dengan kecepatan cahaya.' }}</p>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h5 class="footer-title">Hubungi Kami</h5>
