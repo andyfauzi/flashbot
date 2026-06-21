@@ -61,13 +61,27 @@
                                 @endif
                             </td>
                             <td class="py-3 text-end px-4">
+                                @if($r->status == 'menunggu')
+                                <form action="{{ route('dashboard.reservasi.approve', $r) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui reservasi ini?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-circle me-1" title="Setujui">
+                                        <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('dashboard.reservasi.reject', $r) }}" method="POST" class="d-inline" onsubmit="return confirm('Tolak reservasi ini?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle me-1" title="Tolak">
+                                        <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                </form>
+                                @endif
                                 <button type="button" class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#modalEditReservasi{{ $r->id }}" title="Update Status">
                                     <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
                                 </button>
                                 <form action="{{ route('dashboard.reservasi.destroy', $r) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus reservasi ini?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle ms-1" title="Hapus">
                                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                     </button>
                                 </form>

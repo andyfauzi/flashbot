@@ -98,10 +98,11 @@ class ReservasiController extends Controller
             'jam_tutup' => 'nullable|date_format:H:i',
             'wajib_dp_reservasi' => 'nullable|boolean',
             'nominal_dp_reservasi' => 'nullable|numeric|min:0',
+            'minimal_jam_reservasi' => 'nullable|integer|min:0|max:24',
         ]);
 
         $validated['wajib_dp_reservasi'] = $request->has('wajib_dp_reservasi');
-        $validated['nominal_dp_reservasi'] = $validated['nominal_dp_reservasi'] ?? 0;
+        $validated['minimal_jam_reservasi'] = $request->minimal_jam_reservasi ?? 0;
 
         $identitas = \App\Models\IdentitasToko::first();
         if ($identitas) {
@@ -110,6 +111,21 @@ class ReservasiController extends Controller
             \App\Models\IdentitasToko::create($validated);
         }
 
-        return redirect()->route('dashboard.reservasi.pengaturan')->with('sukses', 'Pengaturan reservasi & operasional berhasil disimpan.');
+        return redirect()->route('dashboard.reservasi.pengaturan')->with('sukses', 'Pengaturan reservasi dan operasional berhasil disimpan.');
+    }
+
+    public function approve(Reservasi $reservasi)
+    {
+        $reservasi->update(['status' => 'dikonfirmasi']);
+        return redirect()->route('dashboard.reservasi.index')->with('sukses', 'Reservasi berhasil disetujui.');
+    }
+
+    public function reject(Reservasi $reservasi)
+    {
+        $reservasi->update(['status' => 'batal']);
+        if ($reservasi->meja) {
+            $reservasi->meja->update(['status' => 'tersedia']);
+        }
+        return redirect()->route('dashboard.reservasi.index')->with('sukses', 'Reservasi berhasil ditolak.');
     }
 }

@@ -281,4 +281,74 @@ class PortalController extends Controller
             ], 400);
         }
     }
+
+    public function submitReservasi(Request $request, $nama_toko_slug)
+    {
+        $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
+        
+        $validated = $request->validate([
+            'nama_pelanggan' => 'required|string|max:255',
+            'nomor_telepon'  => 'required|string|max:50',
+            'tanggal_waktu'  => 'required|date',
+            'jumlah_orang'   => 'required|integer|min:1',
+            'catatan'        => 'nullable|string'
+        ]);
+
+        $identitas = \App\Models\IdentitasToko::first();
+        
+        // Cek minimal jam reservasi
+        if ($identitas && $identitas->minimal_jam_reservasi > 0) {
+            $minJam = $identitas->minimal_jam_reservasi;
+            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu']);
+            $minWaktu = \Carbon\Carbon::now()->addHours($minJam);
+            if ($waktuReservasi->lessThan($minWaktu)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Reservasi minimal dilakukan H-{$minJam} jam dari waktu saat ini."
+                ], 400);
+            }
+        }
+
+        // Cek jam operasional
+        if ($identitas && $identitas->jam_buka && $identitas->jam_tutup) {
+            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu']);
+            $jamBuka = \Carbon\Carbon::parse($identitas->jam_buka);
+            $jamTutup = \Carbon\Carbon::parse($identitas->jam_tutup);
+            
+            $waktuTime = \Carbon\Carbon::createFromTime($waktuReservasi->hour, $waktuReservasi->minute, 0);
+            $bukaTime = \Carbon\Carbon::createFromTime($jamBuka->hour, $jamBuka->minute, 0);
+            $tutupTime = \Carbon\Carbon::createFromTime($jamTutup->hour, $jamTutup->minute, 0);
+
+            if ($waktuTime->lessThan($bukaTime) || $waktuTime->greaterThan($tutupTime)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Reservasi ditolak. Waktu reservasi harus dalam jam operasional toko (" . $bukaTime->format('H:i') . " - " . $tutupTime->format('H:i') . ")."
+                ], 400);
+            }
+        }
+
+        $wajibDp = $identitas->wajib_dp_reservasi ?? false;
+        $nominalDp = $identitas->nominal_dp_reservasi ?? 50000;
+
+        $reservasi = \App\Models\Reservasi::create([
+            'nama_pelanggan' => $validated['nama_pelanggan'],
+            'nomor_telepon'  => $validated['nomor_telepon'],
+            'tanggal_waktu'  => $validated['tanggal_waktu'],
+            'jumlah_orang'   => $validated['jumlah_orang'],
+            'catatan'        => $validated['catatan'] ?? null,
+            'is_dp_required' => $wajibDp,
+            'nominal_dp'     => $wajibDp ? $nominalDp : 0,
+            'status_pembayaran_dp' => $wajibDp ? 'belum_bayar' : null,
+            'status'         => 'menunggu'
+        ]);
+
+        return response()->json([
+            'status'      => 'success',
+            'message'     => 'Reservasi berhasil dikirim!',
+            'reservasi_id'=> $reservasi->id,
+            'wajib_dp'    => $wajibDp,
+            'nominal_dp'  => $wajibDp ? $nominalDp : 0,
+            'rekening'    => $identitas->rekening ?? ''
+        ]);
+    }
 }

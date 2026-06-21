@@ -60,6 +60,19 @@
                         </div>
                     </div>
 
+                    <hr class="mb-4">
+
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-hourglass-start text-warning me-2"></i> Aturan Waktu Reservasi</h5>
+                    <div class="mb-4">
+                        <label for="minimal_jam_reservasi" class="form-label fw-semibold">Batas Minimum Reservasi (H- Jam)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control @error('minimal_jam_reservasi') is-invalid @enderror" id="minimal_jam_reservasi" name="minimal_jam_reservasi" value="{{ old('minimal_jam_reservasi', $identitas->minimal_jam_reservasi ?? 2) }}" min="0" max="24" step="1">
+                            <span class="input-group-text bg-light">Jam Sebelumnya</span>
+                        </div>
+                        <div class="form-text">Contoh: Jika diisi '2', maka pelanggan hanya bisa memesan meja untuk jam yang minimal berjarak 2 jam dari waktu saat ini. Isi '0' jika membolehkan reservasi mendadak.</div>
+                        @error('minimal_jam_reservasi') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
                     <div class="text-end mt-4">
                         <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium">
                             <i class="fa-solid fa-save me-1"></i> Simpan Pengaturan

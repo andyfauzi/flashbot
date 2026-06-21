@@ -312,6 +312,8 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
         Route::resource('meja', \App\Http\Controllers\Dashboard\MejaController::class)->names('dashboard.meja')->except(['show']);
         Route::get('/reservasi/pengaturan', [\App\Http\Controllers\Dashboard\ReservasiController::class, 'pengaturan'])->name('dashboard.reservasi.pengaturan');
         Route::post('/reservasi/pengaturan', [\App\Http\Controllers\Dashboard\ReservasiController::class, 'simpanPengaturan'])->name('dashboard.reservasi.pengaturan.simpan');
+        Route::post('/reservasi/{reservasi}/approve', [\App\Http\Controllers\Dashboard\ReservasiController::class, 'approve'])->name('dashboard.reservasi.approve');
+        Route::post('/reservasi/{reservasi}/reject', [\App\Http\Controllers\Dashboard\ReservasiController::class, 'reject'])->name('dashboard.reservasi.reject');
         Route::resource('reservasi', \App\Http\Controllers\Dashboard\ReservasiController::class)->names('dashboard.reservasi')->except(['show']);
     });
     
@@ -347,12 +349,10 @@ Route::get('/storage/{path}', function ($path) {
 // =============================================
 Route::middleware(['portal.active'])->group(function () {
     // Self-Service Dine-In
-    Route::get('/meja/{meja}/pesan', [\App\Http\Controllers\Chatbot\PortalController::class, 'dineIn'])->name('portal.dine_in');
-
-    Route::get('/portal', [\App\Http\Controllers\Chatbot\PortalController::class, 'index'])->name('portal.index');
-    Route::post('/portal/order', [\App\Http\Controllers\Chatbot\PortalController::class, 'store'])
-        ->name('portal.store')
-        ->middleware('throttle:portal-order');
+    Route::get('/portal/{nama_toko_slug}', [\App\Http\Controllers\Chatbot\PortalController::class, 'index'])->name('portal.index');
+    Route::post('/portal/{nama_toko_slug}/checkout', [\App\Http\Controllers\Chatbot\PortalController::class, 'checkout'])->name('portal.checkout');
+    Route::post('/portal/{nama_toko_slug}/reservasi', [\App\Http\Controllers\Chatbot\PortalController::class, 'submitReservasi'])->name('portal.reservasi');
+    Route::get('/portal/{nama_toko_slug}/success', [\App\Http\Controllers\Chatbot\PortalController::class, 'success'])->name('portal.success');
 });
 
 // =============================================

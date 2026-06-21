@@ -995,6 +995,18 @@
     <!-- Main Container -->
     <div class="container">
         
+        @if(!isset($meja) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
+        <div style="background: var(--card-bg); padding: 16px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Ingin Makan di Tempat?</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Reservasi meja Anda sekarang tanpa antre!</p>
+            </div>
+            <button onclick="openReservasiModal()" style="background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                📅 Booking Meja
+            </button>
+        </div>
+        @endif
+
         <!-- Section Kategori (Awal) -->
         <div id="sectionKategori">
             <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--text-main); text-align: center;">Pilih Kategori Menu</h2>
@@ -1176,6 +1188,47 @@
             <div class="checkout-modal-footer">
                 <button type="button" class="btn btn-cancel" onclick="closeCheckoutModal()">Batal</button>
                 <button type="submit" form="checkoutForm" class="btn btn-primary" id="btnSubmitOrder">Kirim Pesanan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservasi Modal Overlay -->
+    <div class="checkout-modal-overlay" id="reservasiOverlay">
+        <div class="checkout-modal">
+            <div class="checkout-modal-header">
+                <h3>Formulir Reservasi Tempat</h3>
+                <button class="close-drawer-btn" onclick="closeReservasiModal()">✕</button>
+            </div>
+            <form class="checkout-form" id="reservasiForm" onsubmit="submitReservasi(event)">
+                <div class="form-group">
+                    <label for="resName">Nama Pemesan</label>
+                    <input type="text" class="form-control" id="resName" required placeholder="Contoh: Budi Santoso">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="resPhone">Nomor WhatsApp Aktif</label>
+                        <input type="tel" class="form-control" id="resPhone" required placeholder="Contoh: 08123456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="resPax">Jumlah Orang (Pax)</label>
+                        <input type="number" class="form-control" id="resPax" required min="1" value="2">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="resTanggal">Jadwal Reservasi (H-{{ $identitas->minimal_jam_reservasi ?? 2 }} Jam)</label>
+                    <input type="datetime-local" class="form-control" id="resTanggal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="resCatatan">Catatan Tambahan</label>
+                    <textarea class="form-control" id="resCatatan" placeholder="Contoh: Kursi bayi, dekat jendela, ulang tahun..."></textarea>
+                </div>
+            </form>
+            <div class="checkout-modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeReservasiModal()">Batal</button>
+                <button type="submit" form="reservasiForm" class="btn btn-primary" id="btnSubmitReservasi">Kirim Reservasi</button>
             </div>
         </div>
     </div>
@@ -1704,6 +1757,60 @@
             toggleAlamatField(false);
             document.getElementById('successOverlay').classList.remove('open');
             showCategoriesSection(); // Return to category selection page
+        }
+
+        function openReservasiModal() {
+            document.getElementById('reservasiOverlay').classList.add('open');
+        }
+
+        function closeReservasiModal() {
+            document.getElementById('reservasiOverlay').classList.remove('open');
+        }
+
+        function submitReservasi(event) {
+            event.preventDefault();
+
+            const btnSubmit = document.getElementById('btnSubmitReservasi');
+            const originalBtnText = btnSubmit.textContent;
+            btnSubmit.textContent = 'Memproses...';
+            btnSubmit.setAttribute('disabled', 'true');
+
+            const payload = {
+                nama_pelanggan: document.getElementById('resName').value,
+                nomor_telepon: document.getElementById('resPhone').value,
+                tanggal_waktu: document.getElementById('resTanggal').value,
+                jumlah_orang: document.getElementById('resPax').value,
+                catatan: document.getElementById('resCatatan').value,
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            };
+
+            fetch('{{ route("portal.reservasi", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': payload._token
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal mengirim reservasi.');
+                }
+                return data;
+            })
+            .then(data => {
+                closeReservasiModal();
+                alert(data.message + (data.wajib_dp ? '\n\nSilakan bayar DP sebesar Rp ' + data.nominal_dp + ' ke rekening: ' + data.rekening : ''));
+                document.getElementById('reservasiForm').reset();
+            })
+            .catch(error => {
+                alert(error.message);
+            })
+            .finally(() => {
+                btnSubmit.textContent = originalBtnText;
+                btnSubmit.removeAttribute('disabled');
+            });
         }
 
         // Helper: Format Rupiah

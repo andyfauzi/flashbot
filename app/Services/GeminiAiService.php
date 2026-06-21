@@ -830,12 +830,17 @@ class GeminiAiService
         $taglineText = $tagline ? " Jika memungkinkan, sertakan motto/tagline toko kami secara natural di akhir percakapan: \"{$tagline}\"." : "";
         
         $jenisLayanan = $identitas && $identitas->jenis_layanan ? $identitas->jenis_layanan : 'keduanya';
-        $isDineInSupported = in_array($jenisLayanan, ['dine_in', 'keduanya']);
+                $isDineInSupported = in_array($jenisLayanan, ['dine_in', 'keduanya']);
         $wajibDp = $identitas && $identitas->wajib_dp_reservasi ? true : false;
         
         $reservasiText = "";
         if ($isDineInSupported) {
-            $reservasiText = "\n12. FITUR RESERVASI MEJA: Karena toko ini melayani Dine-in (Makan di tempat), pelanggan bisa melakukan reservasi meja. Jika pelanggan ingin reservasi, minta: Nama, Tanggal & Jam (Pastikan jam operasional masuk akal), dan Jumlah Orang (Pax). Jika informasi tersebut sudah lengkap, panggil fungsi `buat_reservasi`.";
+            $minJam = isset($identitas) && $identitas->minimal_jam_reservasi ? intval($identitas->minimal_jam_reservasi) : 0;
+            $minJamNote = "";
+            if ($minJam > 0) {
+                $minJamNote = " (PENTING: Waktu reservasi harus berjarak minimal {$minJam} jam dari waktu saat ini. Jika pelanggan meminta waktu yang lebih cepat dari itu, tolak secara sopan dan beritahu batas minimum reservasi adalah {$minJam} jam sebelumnya)";
+            }
+            $reservasiText = "\n12. FITUR RESERVASI MEJA: Karena toko ini melayani Dine-in (Makan di tempat), pelanggan bisa melakukan reservasi meja. Jika pelanggan ingin reservasi, minta: Nama, Tanggal & Jam{$minJamNote}, dan Jumlah Orang (Pax). Jika informasi tersebut sudah lengkap, panggil fungsi `buat_reservasi`.";
             if ($wajibDp) {
                 $reservasiText .= " Setelah fungsi berhasil dipanggil, WAJIB informasikan kepada pelanggan bahwa mereka harus membayar Uang Muka (DP) sebesar Rp 50.000 ke rekening berikut: \"{$rekening}\" agar meja bisa dikonfirmasi.";
             } else {
