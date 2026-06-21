@@ -66,7 +66,8 @@
                                     <div class="modal-body px-4 pt-3 pb-4">
                                         @php 
                                             $domainUrl = request()->getSchemeAndHttpHost();
-                                            $qrUrl = $domainUrl . route('portal.dine_in', $meja->id, false); 
+                                            $tenantSlug = app('current_tenant')->subdomain ?? 'demo';
+                                            $qrUrl = $domainUrl . route('portal.index', ['nama_toko_slug' => $tenantSlug, 'meja' => $meja->id], false); 
                                             $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qrUrl);
                                         @endphp
                                         <img src="{{ $qrApiUrl }}" alt="QR Code Meja {{ $meja->nomor_meja }}" class="img-fluid rounded mb-3" style="max-width: 200px;">

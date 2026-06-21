@@ -381,7 +381,10 @@ class PreOrderController extends Controller
                 
                 $tenant = app('current_tenant');
                 $namaToko = $tenant->identitas_toko->nama_toko ?? $tenant->name ?? 'Toko Kami';
-                $pesan = "Halo *" . ($pesanan->nama_penerima ?: 'Pelanggan') . "*,\n\nTerima kasih, pembayaran Anda untuk pesanan di *{$namaToko}* telah kami terima.\n\nBerikut rincian pembayaran Anda:\nNomor Order: *{$pesanan->nomor_order}*\nTotal Pesanan: *Rp " . number_format($pesanan->total_biaya, 0, ',', '.') . "*\nStatus: *$statusPesan*\nNominal Dibayar: *Rp " . number_format($pesanan->uang_muka, 0, ',', '.') . "*\nSisa Tagihan: *Rp " . number_format($sisa, 0, ',', '.') . "*\n\nIni adalah struk digital bukti sah pembayaran Anda. Pesanan akan disiapkan sesuai jadwal yang ditentukan. Terima kasih! 🌸";
+                
+                $antrianTeks = $pesanan->nomor_antrian ? "Nomor Antrian: *{$pesanan->nomor_antrian}*\n" : "";
+
+                $pesan = "Halo *" . ($pesanan->nama_penerima ?: 'Pelanggan') . "*,\n\nTerima kasih, pembayaran Anda untuk pesanan di *{$namaToko}* telah kami terima.\n\nBerikut rincian pembayaran Anda:\n{$antrianTeks}Nomor Order: *{$pesanan->nomor_order}*\nTotal Pesanan: *Rp " . number_format($pesanan->total_biaya, 0, ',', '.') . "*\nStatus: *$statusPesan*\nNominal Dibayar: *Rp " . number_format($pesanan->uang_muka, 0, ',', '.') . "*\nSisa Tagihan: *Rp " . number_format($sisa, 0, ',', '.') . "*\n\nIni adalah struk digital bukti sah pembayaran Anda. Pesanan akan disiapkan sesuai jadwal yang ditentukan. Terima kasih! 🌸";
                 
                 $waService->kirimPesan($pesanan->nomor_wa, $pesan);
             } catch (\Exception $e) {

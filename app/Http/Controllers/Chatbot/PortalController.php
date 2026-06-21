@@ -216,20 +216,22 @@ class PortalController extends Controller
                     $isDineIn = $pesanan->tipe_pengiriman === 'dine_in';
                     
                     if ($isDineIn) {
+                        $antrianTeks = $pesanan->nomor_antrian ? "🎫 Antrian: *{$pesanan->nomor_antrian}*\n" : "";
                         $notifText = "🔔 *PESANAN DINE-IN BARU*\n" .
                             "━━━━━━━━━━━━━━━━\n\n" .
                             "📦 No Order: *{$pesanan->nomor_order}*\n" .
-                            "👤 Pemesan: *{$pesanan->nama_penerima}*\n" .
+                            "{$antrianTeks}👤 Pemesan: *{$pesanan->nama_penerima}*\n" .
                             "🍽️ " . strtoupper($alamatText) . "\n" .
                             "💵 Pembayaran: " . strtoupper($pesanan->metode_pembayaran) . " (" . ($pesanan->metode_pembayaran === 'cod' ? 'Bayar di Kasir' : 'Lunas/Transfer') . ")\n\n" .
                             "🛍️ Menu:\n{$itemSummary}\n" .
                             "💰 Total: *Rp " . number_format($pesanan->total_biaya, 0, ',', '.') . "*\n" .
                             "━━━━━━━━━━━━━━━━\n\n";
                     } else {
+                        $antrianTeks = $pesanan->nomor_antrian ? "🎫 Antrian: *{$pesanan->nomor_antrian}*\n" : "";
                         $notifText = "🔔 *PESANAN BARU DARI PORTAL CUSTOMER*\n" .
                             "━━━━━━━━━━━━━━━━\n\n" .
                             "📦 No Order: *{$pesanan->nomor_order}*\n" .
-                            "👤 Penerima: *{$pesanan->nama_penerima}* (+{$pesanan->nomor_wa})\n" .
+                            "{$antrianTeks}👤 Penerima: *{$pesanan->nama_penerima}* (+{$pesanan->nomor_wa})\n" .
                             "🚚 Tipe Kirim: " . strtoupper(str_replace('_', ' ', $pesanan->tipe_pengiriman)) . "\n" .
                             "📍 Alamat: {$alamatText}\n" .
                             "📅 Jadwal Ambil: " . date('d/m/Y H:i', strtotime($pesanan->tanggal_diambil)) . "\n" .

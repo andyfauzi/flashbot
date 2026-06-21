@@ -35,13 +35,21 @@
             </div>
         </div>
     </div>
-    <!-- Penjualan 7 Hari -->
     <div class="col-md-6">
         <div class="card-premium p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold mb-0 text-secondary" style="font-family: var(--font-heading);">
-                    <i class="fa-solid fa-chart-line text-muted me-2"></i>Penjualan (7 Hari Terakhir)
+                    <i class="fa-solid fa-chart-line text-muted me-2"></i>Penjualan 
                 </h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border-0 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">
+                        {{ isset($range) && $range == '30' ? '1 Bulan Terakhir' : '7 Hari Terakhir' }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="font-size: 0.85rem;">
+                        <li><a class="dropdown-item py-2 {{ (!isset($range) || $range != '30') ? 'active bg-primary text-white' : '' }}" href="{{ request()->fullUrlWithQuery(['range' => '7']) }}">7 Hari Terakhir</a></li>
+                        <li><a class="dropdown-item py-2 {{ (isset($range) && $range == '30') ? 'active bg-primary text-white' : '' }}" href="{{ request()->fullUrlWithQuery(['range' => '30']) }}">1 Bulan Terakhir</a></li>
+                    </ul>
+                </div>
             </div>
             @if(isset($grafikPenjualan) && $grafikPenjualan->sum('total') > 0)
                 <div style="height: 120px; position: relative;">
@@ -53,7 +61,7 @@
                         <i class="fa-solid fa-chart-line fs-2"></i>
                     </div>
                     <span class="text-secondary fw-semibold mb-1" style="font-size: 0.9rem;">Belum ada data penjualan</span>
-                    <span class="text-muted" style="font-size: 0.75rem;">Penjualan akan tampil setelah transaksi pertama tercatat.</span>
+                    <span class="text-muted" style="font-size: 0.75rem;">Penjualan akan tampil setelah transaksi lunas tercatat.</span>
                 </div>
             @endif
         </div>
@@ -79,7 +87,12 @@
                 <tbody>
                     @forelse($transaksis as $trx)
                     <tr>
-                        <td class="ps-4 fw-bold">#{{ $trx->nomor_order }}</td>
+                        <td class="ps-4">
+                            <div class="fw-bold">#{{ $trx->nomor_order }}</div>
+                            @if($trx->nomor_antrian)
+                                <span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Antrian: {{ $trx->nomor_antrian }}</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="small">{{ $trx->created_at->format('d M Y') }}</div>
                             <div class="text-muted" style="font-size: 11px;">{{ $trx->created_at->format('H:i') }}</div>
@@ -256,8 +269,14 @@
     document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('trafficChart').getContext('2d');
         
-        const labels = {!! json_encode($grafikPenjualan->pluck('tanggal')) !!};
+        const rawLabels = {!! json_encode($grafikPenjualan->pluck('tanggal')) !!};
         const rawData = {!! json_encode($grafikPenjualan->pluck('total')) !!};
+        
+        // Format label menjadi tanggal (Contoh: "21 Jun")
+        const labels = rawLabels.map(dateStr => {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        });
         
         const gradient = ctx.createLinearGradient(0, 0, 0, 120);
         gradient.addColorStop(0, 'rgba(37, 99, 235, 0.35)');
@@ -288,7 +307,17 @@
                 },
                 scales: {
                     x: {
-                        display: false
+                        display: true,
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 10 },
+                            color: '#9ca3af',
+                            maxRotation: 0,
+                            maxTicksLimit: 7
+                        }
                     },
                     y: {
                         display: false,

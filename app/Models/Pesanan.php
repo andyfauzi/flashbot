@@ -31,8 +31,28 @@ class Pesanan extends Model
         'ulasan',
         'kurir_id',
         'nomor_hp',
-        'meja_id'
+        'meja_id',
+        'nomor_antrian'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($pesanan) {
+            // Generate nomor antrian harian (berdasarkan tanggal server)
+            if (empty($pesanan->nomor_antrian)) {
+                $today = \Carbon\Carbon::today();
+                $lastQueue = self::whereDate('created_at', $today)
+                    ->when($pesanan->tenant_id, function($q) use ($pesanan) {
+                        return $q->where('tenant_id', $pesanan->tenant_id);
+                    })
+                    ->max('nomor_antrian');
+                
+                $pesanan->nomor_antrian = $lastQueue ? $lastQueue + 1 : 1;
+            }
+        });
+    }
 
     public function meja()
     {

@@ -37,14 +37,31 @@ class TransaksiController extends Controller
             'omzet_hari_ini'   => Pesanan::whereDate('created_at', today())->whereIn('status', ['lunas', 'selesai', 'dikirim', 'paid', 'completed'])->sum('total_biaya'),
         ];
 
-        $grafikPenjualan = Pesanan::selectRaw('DATE(created_at) as tanggal, SUM(total_biaya) as total')
-            ->where('created_at', '>=', now()->subDays(7))
+        $range = $request->input('range', '7');
+        $days = $range == '30' ? 30 : 7;
+        
+        // Generate continuous date array for the chart
+        $dates = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $dates[now()->subDays($i)->format('Y-m-d')] = 0;
+        }
+
+        $penjualan = Pesanan::selectRaw('DATE(created_at) as tanggal, SUM(total_biaya) as total')
+            ->where('created_at', '>=', now()->subDays($days)->startOfDay())
             ->whereIn('status', ['lunas', 'selesai', 'dikirim', 'paid', 'completed'])
             ->groupBy('tanggal')
             ->orderBy('tanggal')
             ->get();
 
-        return view('dashboard.transaksi.index', compact('transaksis', 'search', 'statistik', 'grafikPenjualan'));
+        foreach ($penjualan as $p) {
+            $dates[$p->tanggal] = (float) $p->total;
+        }
+
+        $grafikPenjualan = collect($dates)->map(function ($total, $tanggal) {
+            return (object) ['tanggal' => $tanggal, 'total' => $total];
+        })->values();
+
+        return view('dashboard.transaksi.index', compact('transaksis', 'search', 'statistik', 'grafikPenjualan', 'range'));
     }
 
     public function cancel(Request $request, $id)

@@ -780,8 +780,9 @@ class OrderService
             $session->delete();
             $user->update(['langkah' => 'menu']); // Kembalikan ke menu utama sementara
 
+            $antrianTeks = $pesanan->nomor_antrian ? " (Antrian: *{$pesanan->nomor_antrian}*)" : "";
             $this->wa->kirimPesan($nomor, 
-                "✅ Pesanan Anda telah kami catat dengan nomor order: *{$nomorOrder}*.\n\n" .
+                "✅ Pesanan Anda telah kami catat dengan nomor order: *{$nomorOrder}*{$antrianTeks}.\n\n" .
                 "Mohon tunggu beberapa saat, admin sedang menghitung ongkos kirim ke alamat Anda. Kami akan segera mengirimkan rincian pembayaran setelah ongkos kirim ditentukan."
             );
 
@@ -790,6 +791,7 @@ class OrderService
                 "🔔 *PESANAN BARU MASUK (Menunggu Ongkir)*\n" .
                 "━━━━━━━━━━━━━━━━\n" .
                 "Nomor Order: *{$nomorOrder}*\n" .
+                ($pesanan->nomor_antrian ? "🎫 Antrian: *{$pesanan->nomor_antrian}*\n" : "") .
                 "Pelanggan: @{$nomor}\n" .
                 "Nama Penerima: {$pesanan->nama_penerima}\n" .
                 "Alamat Kirim: {$pesanan->alamat_penerima}\n" .
@@ -946,9 +948,10 @@ class OrderService
             $user->update(['langkah' => 'menu']);
 
             $hargaBarangFmt = number_format($biayaBarang, 0, ',', '.');
+            $antrianTeks = $pesanan->nomor_antrian ? "Nomor Antrian: *{$pesanan->nomor_antrian}*\n" : "";
             $this->wa->kirimPesan($nomor,
                 "✅ *Pesanan Berhasil Dibuat!*\n" .
-                "Nomor Order: *{$nomorOrder}*\n" .
+                "{$antrianTeks}Nomor Order: *{$nomorOrder}*\n" .
                 "Total Tagihan: *Rp {$hargaBarangFmt}*\n" .
                 "Metode Pembayaran: *Bayar Saat Pengambilan (COD)*\n\n" .
                 "Pesanan Anda saat ini sedang dalam proses verifikasi persetujuan admin. Kami akan segera mengirimkan konfirmasi jika pesanan siap diambil."
@@ -959,6 +962,7 @@ class OrderService
                 "🔔 *PESANAN COD / AMBIL DI TEMPAT BARU*\n" .
                 "━━━━━━━━━━━━━━━━\n" .
                 "Nomor Order: *{$nomorOrder}*\n" .
+                ($pesanan->nomor_antrian ? "🎫 Antrian: *{$pesanan->nomor_antrian}*\n" : "") .
                 "Pelanggan: @{$nomor}\n" .
                 "Nama Penerima: {$pesanan->nama_penerima}\n" .
                 "Produk: *{$produk->nama}* ({$jumlah} pcs)\n" .

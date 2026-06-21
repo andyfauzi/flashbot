@@ -73,8 +73,13 @@
     <div class="border-top border-bottom my-2" style="padding: 5px 0;">
         <table style="font-size: 11px;">
             <tr>
-                <td width="35%">No. Order</td>
-                <td width="5%">:</td>
+                <td width="35%" class="fw-bold" style="font-size: 14px;">Antrian</td>
+                <td width="5%" class="fw-bold" style="font-size: 14px;">:</td>
+                <td class="fw-bold" style="font-size: 14px;">{{ $pesanan->nomor_antrian ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td>No. Order</td>
+                <td>:</td>
                 <td>{{ $pesanan->nomor_order }}</td>
             </tr>
             <tr>
@@ -161,6 +166,7 @@
             text += centerText("{{ substr($identitasToko->alamat_toko ?? 'Jl. Contoh Alamat No.123', 0, 32) }}", 32);
             text += centerText("Telp: {{ $identitasToko->nomor_telepon ?? '081234567890' }}", 32);
             text += "--------------------------------\n";
+            text += "Antrian  : {{ $pesanan->nomor_antrian ?? '-' }}\n";
             text += "No. Order: {{ $pesanan->nomor_order }}\n";
             text += "Tanggal  : {{ $pesanan->created_at->format('d/m/Y H:i') }}\n";
             text += "Pelanggan: {{ substr($pesanan->nama_penerima, 0, 20) }}\n";

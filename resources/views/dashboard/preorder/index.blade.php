@@ -63,9 +63,14 @@
                     <tbody>
                         @forelse($pesanans as $p)
                         <tr>
-                            <td class="ps-4 fw-bold text-primary">{{ $p->nomor_order }}</td>
+                            <td class="ps-4">
+                                <div class="fw-bold text-primary">{{ $p->nomor_order }}</div>
+                                @if($p->nomor_antrian)
+                                    <span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Antrian: {{ $p->nomor_antrian }}</span>
+                                @endif
+                            </td>
                             <td>
-                                <div>{{ $p->nama_penerima }}</div>
+                                <div class="fw-bold">{{ $p->nama_penerima }}</div>
                                 @if($p->tipe_pengiriman === 'dine_in' && isset($identitas) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
                                     <span class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;"><i class="fa-solid fa-chair me-1"></i> Meja {{ $p->meja->nomor_meja ?? '?' }}</span>
                                 @elseif(stripos($p->tipe_pengiriman, 'ambil') !== false)
