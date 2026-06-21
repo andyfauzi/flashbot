@@ -50,6 +50,22 @@ Route::get('/terms', function() {
     return view('legal.tos');
 })->name('legal.terms');
 
+Route::get('/test-antrian', function() {
+    $pesanan = \App\Models\Pesanan::create([
+        'nomor_order' => 'TEST-' . rand(1000, 9999),
+        'nomor_wa' => '08123456789',
+        'nama_penerima' => 'Test',
+        'alamat_penerima' => 'Test',
+        'tipe_pengiriman' => 'ambil_sendiri',
+        'biaya_barang' => 1000,
+        'biaya_pengantaran' => 0,
+        'total_biaya' => 1000,
+        'metode_pembayaran' => 'cod',
+        'status' => 'pending'
+    ]);
+    return response()->json($pesanan);
+});
+
 Route::get('/privacy', function() {
     return view('legal.privacy');
 })->name('legal.privacy');

@@ -35,21 +35,18 @@ class Pesanan extends Model
         'nomor_antrian'
     ];
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         static::creating(function ($pesanan) {
+            \Illuminate\Support\Facades\Log::info("Creating event for Pesanan triggered!");
             // Generate nomor antrian harian (berdasarkan tanggal server)
             if (empty($pesanan->nomor_antrian)) {
                 $today = \Carbon\Carbon::today();
                 $lastQueue = self::whereDate('created_at', $today)
-                    ->when($pesanan->tenant_id, function($q) use ($pesanan) {
-                        return $q->where('tenant_id', $pesanan->tenant_id);
-                    })
                     ->max('nomor_antrian');
                 
                 $pesanan->nomor_antrian = $lastQueue ? $lastQueue + 1 : 1;
+                \Illuminate\Support\Facades\Log::info("Generated nomor_antrian: " . $pesanan->nomor_antrian);
             }
         });
     }
