@@ -24,7 +24,7 @@
                         <div class="user-guide-content fs-5" style="line-height: 1.8;">
                             @php
                                 $defaultGuide = "1. Daftar dan Lengkapi Profil Toko Anda\n2. Tambahkan Produk atau Layanan di Dashboard\n3. Nikmati kemudahan transaksi dengan POS & Bot WhatsApp Tenanta.id!";
-                                $guideText = $settings['user_guide_text'] ?? $defaultGuide;
+                                $guideText = !empty($settings['user_guide_text']) ? $settings['user_guide_text'] : $defaultGuide;
                             @endphp
                             
                             {!! nl2br(e($guideText)) !!}
