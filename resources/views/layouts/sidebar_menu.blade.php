@@ -71,11 +71,9 @@
                     <i data-lucide="layout-grid"></i><span>Manajemen Meja</span>
                 </a>
                 @endif
-                @if(\App\Helpers\TenantPlanHelper::hasMenu('jadwal_reservasi'))
                 <a href="{{ route('dashboard.reservasi.index') }}" class="{{ request()->routeIs('dashboard.reservasi.index') ? 'active' : '' }}">
                     <i data-lucide="calendar-clock"></i><span>Jadwal Reservasi</span>
                 </a>
-                @endif
                 <a href="{{ route('dashboard.reservasi.pengaturan') }}" class="{{ request()->routeIs('dashboard.reservasi.pengaturan') ? 'active' : '' }}">
                     <i data-lucide="settings-2"></i><span>Pengaturan Operasional & Reservasi</span>
                 </a>
