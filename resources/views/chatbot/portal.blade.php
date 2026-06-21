@@ -1658,13 +1658,37 @@
             // Show success confirmation
             document.getElementById('successOrderNumber').textContent = data.nomor_order;
             
+            // Check outside operating hours
+            let operasionalNote = '';
+            if (data.is_luar_jam_operasional) {
+                operasionalNote = `\n\n*Catatan:* Pesanan Anda masuk di luar jam operasional. Kami akan memproses pesanan Anda pada jam buka toko kami (${data.jam_buka}).\n`;
+                // Add alert directly to DOM if needed
+                const successContainer = document.querySelector('#successOverlay .success-modal');
+                if (successContainer && !document.getElementById('opWarningAlert')) {
+                    const alertHtml = `<div id="opWarningAlert" class="alert alert-warning mt-3" role="alert" style="font-size: 14px; background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba;">
+                        <i class="fa-solid fa-clock me-1"></i> Pesanan masuk di luar jam operasional dan akan diproses pada jam buka toko (${data.jam_buka}).
+                    </div>`;
+                    // Insert before the WA button
+                    const waBtn = document.getElementById('successWaLink');
+                    if (waBtn) {
+                        waBtn.insertAdjacentHTML('beforebegin', alertHtml);
+                    } else {
+                        successContainer.insertAdjacentHTML('beforeend', alertHtml);
+                    }
+                }
+            } else {
+                const opAlert = document.getElementById('opWarningAlert');
+                if (opAlert) opAlert.remove();
+            }
+
             // Build WhatsApp message link for manual confirmation
             const waText = encodeURIComponent(
                 `Halo, saya ingin mengonfirmasi pesanan saya dari Portal.\n\n` +
                 `*Nomor Order:* ${data.nomor_order}\n` +
                 `*Nama:* ${payload.nama_penerima}\n` +
-                `*Total Belanja:* ${formatRupiah(data.total_biaya)}\n\n` +
-                `Mohon segera diproses ya. Terima kasih! 🙏`
+                `*Total Belanja:* ${formatRupiah(data.total_biaya)}\n` +
+                operasionalNote +
+                `\nMohon segera diproses ya. Terima kasih! 🙏`
             );
             const waNumber = '{{ preg_replace("/[^0-9]/", "", $identitas->nomor_telepon ?? "6282123456789") }}';
             document.getElementById('successWaLink').href = `https://wa.me/${waNumber}?text=${waText}`;

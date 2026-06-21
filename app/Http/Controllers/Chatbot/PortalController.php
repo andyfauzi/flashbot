@@ -269,7 +269,9 @@ class PortalController extends Controller
                 'message'     => 'Pesanan berhasil dikirim!',
                 'nomor_order' => $pesanan->nomor_order,
                 'total_biaya' => $pesanan->total_biaya,
-                'snap_token'  => $snapToken
+                'snap_token'  => $snapToken,
+                'is_luar_jam_operasional' => $isLuarJamOperasional ?? false,
+                'jam_buka'    => isset($identitas) && $identitas->jam_buka ? \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i') : null
             ]);
 
         } catch (\Exception $e) {

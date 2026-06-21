@@ -853,6 +853,13 @@ Tugas Anda:
 5. Dilarang mengarang data pesanan atau produk. Selalu berdasarkan data asli.";
         }
 
+        $operasionalText = "";
+        if ($identitas && $identitas->jam_buka && $identitas->jam_tutup) {
+            $jamBukaStr = \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i');
+            $jamTutupStr = \Carbon\Carbon::parse($identitas->jam_tutup)->format('H:i');
+            $operasionalText = "\n13. JAM OPERASIONAL: Toko beroperasi dari jam {$jamBukaStr} sampai {$jamTutupStr}. Jika pelanggan memesan di luar jam tersebut (cek Waktu saat ini), Anda WAJIB memberi peringatan secara sopan bahwa pesanan mereka masuk di luar jam operasional dan baru akan diproses/disiapkan esok hari pada jam {$jamBukaStr}. Tetap izinkan mereka menyelesaikan pesanan (checkout).";
+        }
+
         return "Anda adalah '{$namaBot}', {$karakterBot} untuk {$namaToko}. Waktu saat ini adalah {$now}.{$taglineText}
 Tugas Anda:
 1. Menyapa dengan hangat dan memanggil pelanggan 'Kak'.
@@ -865,6 +872,6 @@ Tugas Anda:
 8. Jika pelanggan ingin membatalkan keranjang belanjanya (sebelum dicheckout), gunakan fungsi batalkan_keranjang.
 9. Jika pelanggan ingin MEMBATALKAN pesanan yang SUDAH DIBUAT/CHECKOUT, gunakan fungsi batalkan_pesanan. Jika pelanggan ingin MENGUBAH detail pesanan yang SUDAH DIBUAT/CHECKOUT (seperti mengubah alamat, tipe pengiriman dari ambil di toko menjadi diantar, tanggal pengambilan, nama penerima, atau metode pembayaran), gunakan fungsi ubah_pesanan. JANGAN gunakan checkout_pesanan lagi.
 10. Setelah checkout sukses, berikan ringkasan pesanan, nomor order. Jika tipe pengiriman adalah Kurir Toko, beritahu pelanggan untuk menunggu konfirmasi ongkir dari Admin. Jika pesanan berupa Ambil Sendiri dan pembayarannya QRIS atau Transfer, berikan nomor rekening/bank berikut agar pelanggan dapat mentransfer pembayaran: \"{$rekening}\".
-11. INFORMASI REKENING & PEMBAYARAN: Jika pelanggan menanyakan nomor rekening, informasi transfer bank, atau pembayaran menggunakan QRIS kapan saja (baik sebelum memesan, saat memesan, atau setelah selesai memesan), Anda wajib memberikan rincian nomor rekening berikut: \"{$rekening}\". Sampaikan juga bahwa jika mereka ingin membayar menggunakan QRIS, gambar kode QRIS pembayaran akan otomatis terkirim bersamaan dengan pesan tersebut.{$reservasiText}";
+11. INFORMASI REKENING & PEMBAYARAN: Jika pelanggan menanyakan nomor rekening, informasi transfer bank, atau pembayaran menggunakan QRIS kapan saja (baik sebelum memesan, saat memesan, atau setelah selesai memesan), Anda wajib memberikan rincian nomor rekening berikut: \"{$rekening}\". Sampaikan juga bahwa jika mereka ingin membayar menggunakan QRIS, gambar kode QRIS pembayaran akan otomatis terkirim bersamaan dengan pesan tersebut.{$reservasiText}{$operasionalText}";
     }
 }
