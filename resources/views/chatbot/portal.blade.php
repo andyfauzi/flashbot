@@ -1160,9 +1160,15 @@
                                 <div class="option-badge">💵 Cash di Kasir</div>
                             </label>
                             <label>
-                                <input type="radio" name="metode_pembayaran" value="transfer" class="option-badge-input">
-                                <div class="option-badge">💳 Transfer Bank / QRIS</div>
+                                <input type="radio" name="metode_pembayaran" value="manual" class="option-badge-input">
+                                <div class="option-badge">🏦 Transfer Manual</div>
                             </label>
+                            @if(isset($identitas) && $identitas->is_midtrans_active && $identitas->midtrans_server_key)
+                            <label>
+                                <input type="radio" name="metode_pembayaran" value="midtrans" class="option-badge-input">
+                                <div class="option-badge">💳 Midtrans (Otomatis)</div>
+                            </label>
+                            @endif
                         </div>
                     </div>
                 </div>

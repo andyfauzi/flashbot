@@ -64,7 +64,7 @@ class PortalController extends Controller
             'meja_id'           => 'nullable|exists:mejas,id',
             'alamat_penerima'   => 'required_if:tipe_pengiriman,kurir_toko,kurir_customer|nullable|string',
             'tanggal_diambil'   => 'required_unless:tipe_pengiriman,dine_in|nullable|date',
-            'metode_pembayaran' => 'required|in:cod,transfer', // cod = cash
+            'metode_pembayaran' => 'required|in:cod,transfer,manual,midtrans', // cod = cash
             'cart'              => 'required|array|min:1',
             'cart.*.id'         => 'required|exists:produks,id',
             'cart.*.varian_id'  => 'nullable|exists:produk_varians,id',
@@ -141,8 +141,8 @@ class PortalController extends Controller
                 if ($validated['tipe_pengiriman'] === 'kurir_toko' || $validated['tipe_pengiriman'] === 'kurir_customer') {
                     $statusPesanan = 'pending_ongkir';
                 } elseif ($validated['tipe_pengiriman'] === 'dine_in' || $validated['tipe_pengiriman'] === 'ambil_sendiri') {
-                    if ($validated['metode_pembayaran'] === 'transfer' || $validated['metode_pembayaran'] === 'qris') {
-                        $statusPesanan = 'pending_payment'; // Xendit/Midtrans/QRIS harus nunggu dibayar dulu
+                    if ($validated['metode_pembayaran'] === 'transfer' || $validated['metode_pembayaran'] === 'manual' || $validated['metode_pembayaran'] === 'midtrans' || $validated['metode_pembayaran'] === 'qris') {
+                        $statusPesanan = 'pending_payment'; // Xendit/Midtrans/QRIS/Manual harus nunggu dibayar dulu
                     } else {
                         $statusPesanan = 'menunggu_pembayaran'; // Kasir
                     }
@@ -256,7 +256,7 @@ class PortalController extends Controller
             }
 
             $snapToken = null;
-            if ($pesanan->metode_pembayaran === 'transfer' && $pesanan->status === 'pending_payment') {
+            if ($pesanan->metode_pembayaran === 'midtrans' && $pesanan->status === 'pending_payment') {
                 $midtransService = new \App\Services\MidtransService();
                 if ($midtransService->isActive()) {
                     $snapToken = $midtransService->getSnapToken($pesanan);
