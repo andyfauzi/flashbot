@@ -79,13 +79,17 @@
                             </td>
                             <td>{{ $p->nomor_wa }}</td>
                             <td>
-                                @foreach($p->items as $item)
-                                    <div class="mb-1">
-                                        <i class="fa-solid fa-box fa-sm text-muted me-1"></i>
-                                        {{ $item->produk->nama ?? 'Produk Terhapus' }} 
-                                        <span class="badge bg-secondary ms-1">{{ $item->jumlah }}x</span>
-                                    </div>
-                                @endforeach
+                                @php
+                                    $itemCount = $p->items->sum('jumlah');
+                                    $itemTypeCount = $p->items->count();
+                                @endphp
+                                @if($itemTypeCount > 0)
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalItems{{ $p->id }}">
+                                        <i class="fa-solid fa-box-open me-1"></i> Lihat {{ $itemCount }} Item
+                                    </button>
+                                @else
+                                    <span class="text-muted small">Kosong</span>
+                                @endif
                             </td>
                             <td class="text-end fw-bold">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</td>
                             <td class="text-end text-success fw-bold">Rp {{ number_format($p->uang_muka, 0, ',', '.') }}</td>
@@ -246,6 +250,53 @@
         </div>
     </div>
 </div>
+
+<!-- Modal List Item Pesanan -->
+@foreach($pesanans as $p)
+    @if($p->items->count() > 0)
+    <div class="modal fade" id="modalItems{{ $p->id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light border-bottom-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-box-open text-primary me-2"></i> Detail Pesanan #{{ $p->nomor_order }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @foreach($p->items as $item)
+                        <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">{{ $item->produk->nama ?? 'Produk Terhapus' }}</div>
+                                @if($item->produkVarian)
+                                    <small class="text-muted d-block">Varian: {{ $item->produkVarian->nama_varian }}</small>
+                                @endif
+                                @if(!empty($item->addons) && is_array($item->addons))
+                                    <small class="text-muted d-block">Addons: 
+                                        @foreach($item->addons as $addon)
+                                            {{ $addon['nama'] ?? '' }}@if(!$loop->last), @endif
+                                        @endforeach
+                                    </small>
+                                @endif
+                                @if($item->catatan)
+                                    <small class="text-danger d-block mt-1"><i class="fa-solid fa-note-sticky fa-xs"></i> "{{ $item->catatan }}"</small>
+                                @endif
+                            </div>
+                            <span class="badge bg-primary rounded-pill" style="font-size: 14px;">{{ $item->jumlah }}x</span>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
+
 @endsection
 
 @section('scripts')
