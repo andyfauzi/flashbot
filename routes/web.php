@@ -14,7 +14,7 @@ Route::get('/debug-php', function () {
 
 Route::get('/', function () {
     if (app()->has('current_tenant')) {
-        return redirect()->route('portal.index');
+        return redirect()->route('portal.index', ['nama_toko_slug' => app('current_tenant')->subdomain]);
     }
     
     // Ambil data CMS dari tabel landlord_settings
