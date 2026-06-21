@@ -302,7 +302,7 @@
                         
                         <div id="preorder_inputs" class="d-none mb-3 bg-light p-2 rounded">
                             <label class="form-label" style="font-size: 13px;">Tanggal Pengambilan:</label>
-                            <input type="date" id="tanggal_diambil" class="form-control form-control-sm mb-2">
+                            <input type="datetime-local" id="tanggal_diambil" class="form-control form-control-sm mb-2">
                             <label class="form-label" style="font-size: 13px;">Uang Muka / DP (Rp):</label>
                             <input type="number" id="uang_muka" class="form-control form-control-sm" placeholder="Isi 0 jika belum bayar DP" min="0">
                         </div>
@@ -790,6 +790,11 @@
             preorderInputs.classList.remove('d-none');
             document.getElementById('uangDiterimaContainer').classList.add('d-none');
             document.getElementById('kembalianContainer').classList.add('d-none');
+            
+            // Set otomatis tanggal dan waktu saat ini (WIB / Waktu Lokal)
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('tanggal_diambil').value = now.toISOString().slice(0, 16);
         } else {
             preorderInputs.classList.add('d-none');
             document.getElementById('tanggal_diambil').value = '';
