@@ -309,6 +309,7 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
         Route::post('/pengaturan/payment', [\App\Http\Controllers\Dashboard\PaymentGatewayController::class, 'update'])->name('dashboard.pengaturan.payment.update');
 
         // Manajemen Meja & Reservasi
+        Route::post('/meja/update-dp', [\App\Http\Controllers\Dashboard\MejaController::class, 'updateDp'])->name('dashboard.meja.update_dp');
         Route::resource('meja', \App\Http\Controllers\Dashboard\MejaController::class)->names('dashboard.meja')->except(['show']);
         Route::resource('reservasi', \App\Http\Controllers\Dashboard\ReservasiController::class)->names('dashboard.reservasi')->except(['show']);
     });

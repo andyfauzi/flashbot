@@ -101,11 +101,6 @@
                                 @error('jenis_layanan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" role="switch" id="wajib_dp_reservasi" name="wajib_dp_reservasi" value="1" {{ old('wajib_dp_reservasi', $identitas->wajib_dp_reservasi ?? false) ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold text-dark ms-1" for="wajib_dp_reservasi">Wajib Uang Muka (DP) untuk Reservasi Meja</label>
-                                <div class="form-text text-muted">Jika diaktifkan, pelanggan harus membayar DP saat mereservasi meja via Chatbot.</div>
-                            </div>
                         </div>
                     </div>
 
