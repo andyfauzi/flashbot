@@ -32,22 +32,27 @@ class PosController extends Controller
 
     public function store(Request $request, \App\Services\CheckoutService $checkoutService)
     {
-        $validated = $request->validate([
-            'nama_penerima' => 'nullable|string|max:100',
-            'nomor_wa' => 'nullable|string|max:20',
-            'metode_pembayaran' => 'required|string',
-            'is_preorder' => 'nullable|boolean',
-            'tanggal_diambil' => 'nullable|date',
-            'uang_muka' => 'nullable|numeric|min:0',
-            'cart' => 'required|array',
-            'cart.*.id' => 'required|exists:produks,id',
-            'cart.*.varian_id' => 'nullable|exists:produk_varians,id',
-            'cart.*.qty' => 'required|integer|min:1',
-            'cart.*.addons' => 'nullable|array',
-            'cart.*.addons.*.id' => 'required|integer',
-            'cart.*.addons.*.nama' => 'required|string',
-            'cart.*.addons.*.harga' => 'required|numeric',
-        ]);
+        try {
+            $validated = $request->validate([
+                'nama_penerima' => 'nullable|string|max:100',
+                'nomor_wa' => 'nullable|string|max:20',
+                'metode_pembayaran' => 'required|string',
+                'is_preorder' => 'nullable|boolean',
+                'tanggal_diambil' => 'nullable|date',
+                'uang_muka' => 'nullable|numeric|min:0',
+                'cart' => 'required|array',
+                'cart.*.id' => 'required|exists:produks,id',
+                'cart.*.varian_id' => 'nullable|exists:produk_varians,id',
+                'cart.*.qty' => 'required|integer|min:1',
+                'cart.*.addons' => 'nullable|array',
+                'cart.*.addons.*.id' => 'required|integer',
+                'cart.*.addons.*.nama' => 'required|string',
+                'cart.*.addons.*.harga' => 'required|numeric',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error('POS Validation Failed', $e->errors());
+            throw $e;
+        }
 
         try {
             $pesanan = $checkoutService->processPosCheckout($validated, auth()->id());

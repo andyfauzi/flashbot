@@ -1639,7 +1639,14 @@
                 }
             })
             .catch(error => {
-                alert(error.message || 'Terjadi kesalahan sistem, silakan coba lagi.');
+                let errorMsg = error.message || 'Terjadi kesalahan sistem, silakan coba lagi.';
+                if (error.errors) {
+                    errorMsg += '\n\nDetail:\n';
+                    for (const key in error.errors) {
+                        errorMsg += `- ${error.errors[key][0]}\n`;
+                    }
+                }
+                alert(errorMsg);
             })
             .finally(() => {
                 btnSubmit.textContent = originalBtnText;
