@@ -448,6 +448,19 @@ class SuperAdminController extends Controller
     public function helpGuides()
     {
         TenantManager::switchToLandlord();
+        
+        // Auto-sync jika masih kosong
+        if (\App\Models\LandlordHelpGuide::count() == 0) {
+            $oldSettings = \Illuminate\Support\Facades\DB::connection('landlord')->table('landlord_settings')->where('key', 'user_guide_text')->first();
+            if ($oldSettings && !empty($oldSettings->value)) {
+                \App\Models\LandlordHelpGuide::create([
+                    'pertanyaan' => 'Panduan Penggunaan Tenanta.id',
+                    'jawaban' => $oldSettings->value,
+                    'urutan' => 1
+                ]);
+            }
+        }
+        
         $guides = \App\Models\LandlordHelpGuide::orderBy('urutan')->get();
         return view('superadmin.help_guides', compact('guides'));
     }
