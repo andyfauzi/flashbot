@@ -466,7 +466,18 @@
         </div>
     </section>
 
-    @if(!empty($settings['user_guide_text']) || !empty($settings['user_guide_image']))
+    @php
+        $guides = [];
+        try {
+            if (\Illuminate\Support\Facades\Schema::connection('landlord')->hasTable('landlord_help_guides')) {
+                $guides = \App\Models\LandlordHelpGuide::orderBy('urutan')->get();
+            }
+        } catch (\Exception $e) {
+            // Abaikan jika migrasi belum ada
+        }
+    @endphp
+
+    @if(count($guides) > 0)
     <!-- User Guide Section -->
     <section class="py-5 bg-white border-top">
         <div class="container">
@@ -474,17 +485,23 @@
                 <h2 class="fw-bold" style="font-size: 2.5rem;">Petunjuk Penggunaan</h2>
                 <p class="text-muted fs-5">Langkah mudah memulai bisnis dengan Tenanta.id</p>
             </div>
-            <div class="row align-items-center">
-                @if(!empty($settings['user_guide_image']))
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="{{ asset('storage/' . $settings['user_guide_image']) }}" class="img-fluid rounded-4 shadow" alt="Petunjuk Penggunaan">
-                </div>
-                <div class="col-lg-6">
-                @else
-                <div class="col-lg-12 text-center">
-                @endif
-                    <div class="fs-5 text-secondary" style="line-height: 1.8;">
-                        {!! nl2br(e($settings['user_guide_text'] ?? '')) !!}
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="accordionHelpLanding">
+                        @foreach($guides as $index => $guide)
+                        <div class="accordion-item mb-3 border rounded shadow-sm">
+                            <h2 class="accordion-header" id="headingLanding{{ $guide->id }}">
+                                <button class="accordion-button fw-bold text-dark {{ $index == 0 ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLanding{{ $guide->id }}" aria-expanded="{{ $index == 0 ? 'true' : 'false' }}" aria-controls="collapseLanding{{ $guide->id }}">
+                                    {{ $guide->pertanyaan }}
+                                </button>
+                            </h2>
+                            <div id="collapseLanding{{ $guide->id }}" class="accordion-collapse collapse {{ $index == 0 ? 'show' : '' }}" aria-labelledby="headingLanding{{ $guide->id }}" data-bs-parent="#accordionHelpLanding">
+                                <div class="accordion-body text-secondary" style="line-height: 1.8;">
+                                    {!! nl2br(html_entity_decode($guide->jawaban)) !!}
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
