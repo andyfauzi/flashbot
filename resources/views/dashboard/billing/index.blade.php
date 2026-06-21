@@ -351,6 +351,47 @@
     </div>
 </div>
 
+<!-- Modal Pilih Metode Pembayaran -->
+<div class="modal fade" id="choosePaymentMethodModal" tabindex="-1" aria-labelledby="choosePaymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="choosePaymentMethodModalLabel">
+                    <i class="fa-solid fa-wallet text-primary me-2"></i>Pilih Metode Pembayaran
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pb-4">
+                <p class="text-muted mb-4">Silakan pilih metode pembayaran untuk melanjutkan berlangganan.</p>
+                <div class="d-grid gap-3">
+                    <button class="btn btn-outline-primary py-3 text-start fw-bold fs-6 rounded-3 btn-method-select" data-method="midtrans">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                                <i class="fa-solid fa-bolt fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-dark">Midtrans (Otomatis)</div>
+                                <div class="small fw-normal text-muted mt-1">QRIS, Virtual Account, E-Wallet, dll. Verifikasi Instan.</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline-dark py-3 text-start fw-bold fs-6 rounded-3 btn-method-select" data-method="manual">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-dark bg-opacity-10 text-dark p-3 rounded-circle me-3">
+                                <i class="fa-solid fa-building-columns fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-dark">Transfer Manual</div>
+                                <div class="small fw-normal text-muted mt-1">Transfer antar bank. Perlu konfirmasi admin via WhatsApp.</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Fallback Pembayaran Manual -->
 <div class="modal fade" id="fallbackPaymentModal" tabindex="-1" aria-labelledby="fallbackPaymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
@@ -465,12 +506,33 @@
         });
     });
 
+    let selectedPlan = '';
+    let selectedDuration = '';
+
     document.querySelectorAll('.btn-upgrade').forEach(button => {
         button.addEventListener('click', function() {
-            const plan = this.getAttribute('data-plan');
+            selectedPlan = this.getAttribute('data-plan');
+            selectedDuration = this.getAttribute('data-duration');
+            
+            // Tampilkan modal pilih metode pembayaran
+            const chooseModal = new bootstrap.Modal(document.getElementById('choosePaymentMethodModal'));
+            chooseModal.show();
+        });
+    });
+
+    document.querySelectorAll('.btn-method-select').forEach(button => {
+        button.addEventListener('click', function() {
+            const method = this.getAttribute('data-method');
             const btnOriginalText = this.innerHTML;
-            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
-            this.disabled = true;
+            
+            // Tutup modal pilihan metode
+            bootstrap.Modal.getInstance(document.getElementById('choosePaymentMethodModal')).hide();
+            
+            // Cari tombol asli untuk menampilkan loading
+            const originalBtn = document.querySelector(`.btn-upgrade[data-plan="${selectedPlan}"][data-duration="${selectedDuration}"]`);
+            const originalBtnText = originalBtn.innerHTML;
+            originalBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            originalBtn.disabled = true;
 
             // Panggil API Checkout
             fetch('{{ route("dashboard.billing.checkout") }}', {
@@ -480,9 +542,10 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({ 
-                    plan: plan,
-                    duration: this.getAttribute('data-duration'),
-                    voucher_code: currentVoucher
+                    plan: selectedPlan,
+                    duration: selectedDuration,
+                    voucher_code: currentVoucher,
+                    payment_method: method
                 })
             })
             .then(response => {
@@ -493,19 +556,24 @@
             })
             .then(data => {
                 if (data.fallback) {
+                    if (method === 'midtrans') {
+                        // Jika pilih midtrans tapi belum disetup, beri tahu bahwa sistem otomatis belum sedia
+                        alert('Sistem pembayaran otomatis belum tersedia saat ini. Kami akan mengalihkan Anda ke metode Transfer Manual.');
+                    }
+                    
                     // Show fallback modal
                     document.getElementById('fallbackOrderId').innerText = data.order_id;
                     
                     const waNumber = '{{ $waNumber ?? "6281234567890" }}';
-                    const waMessage = `Halo admin, saya ingin mengkonfirmasi pembayaran manual untuk berlangganan.\n\nOrder ID: *${data.order_id}*\nPaket: *${plan.toUpperCase()}*\nMohon segera diproses. Berikut saya lampirkan bukti transfer.`;
+                    const waMessage = `Halo admin, saya ingin mengkonfirmasi pembayaran manual untuk berlangganan.\n\nOrder ID: *${data.order_id}*\nPaket: *${selectedPlan.toUpperCase()}*\nMohon segera diproses. Berikut saya lampirkan bukti transfer.`;
                     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
                     document.getElementById('btnConfirmWhatsApp').href = waUrl;
                     
                     const modal = new bootstrap.Modal(document.getElementById('fallbackPaymentModal'));
                     modal.show();
                     
-                    button.innerHTML = btnOriginalText;
-                    button.disabled = false;
+                    originalBtn.innerHTML = originalBtnText;
+                    originalBtn.disabled = false;
                     return;
                 }
 
@@ -520,25 +588,25 @@
                         },
                         onError: function(result){
                             alert("Pembayaran gagal!");
-                            button.innerHTML = btnOriginalText;
-                            button.disabled = false;
+                            originalBtn.innerHTML = originalBtnText;
+                            originalBtn.disabled = false;
                         },
                         onClose: function(){
-                            button.innerHTML = btnOriginalText;
-                            button.disabled = false;
+                            originalBtn.innerHTML = originalBtnText;
+                            originalBtn.disabled = false;
                         }
                     });
                 } else {
                     alert('Gagal mengambil token pembayaran. ' + (data.error || ''));
-                    button.innerHTML = btnOriginalText;
-                    button.disabled = false;
+                    originalBtn.innerHTML = originalBtnText;
+                    originalBtn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Billing Error:', error);
                 alert('❌ Gagal memproses pembayaran:\n' + error.message + '\n\nSilakan coba refresh halaman dan ulangi.');
-                button.innerHTML = btnOriginalText;
-                button.disabled = false;
+                originalBtn.innerHTML = originalBtnText;
+                originalBtn.disabled = false;
             });
         });
     });

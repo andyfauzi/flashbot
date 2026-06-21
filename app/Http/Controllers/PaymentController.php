@@ -149,6 +149,7 @@ class PaymentController extends Controller
         $request->validate([
             'plan' => 'required|in:starter,pro,business',
             'duration' => 'nullable|in:monthly,yearly',
+            'payment_method' => 'nullable|in:midtrans,manual',
         ]);
 
         $duration = $request->input('duration', 'monthly');
@@ -221,6 +222,15 @@ class PaymentController extends Controller
             'commission_amount' => $commissionAmount,
         ]);
 
+        // Jika pengguna memilih manual, langsung kembalikan fallback JSON
+        if ($request->input('payment_method') === 'manual') {
+            return response()->json([
+                'fallback' => true,
+                'order_id' => $orderId,
+                'message' => 'Silakan lakukan pembayaran manual sesuai instruksi.'
+            ], 200);
+        }
+
         // Config Midtrans
         $serverKey = \App\Models\LandlordSetting::get('midtrans_server_key', env('MIDTRANS_SERVER_KEY'));
         $isProduction = \App\Models\LandlordSetting::get('midtrans_is_production', env('MIDTRANS_IS_PRODUCTION', false)) == '1';
@@ -230,7 +240,7 @@ class PaymentController extends Controller
             return response()->json([
                 'fallback' => true,
                 'order_id' => $orderId,
-                'message' => 'Midtrans belum dikonfigurasi. Silakan lakukan pembayaran manual.'
+                'message' => 'Sistem pembayaran otomatis belum tersedia saat ini. Silakan gunakan metode Transfer Manual.'
             ], 200);
         }
 
