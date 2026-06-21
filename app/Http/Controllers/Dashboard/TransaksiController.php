@@ -34,12 +34,12 @@ class TransaksiController extends Controller
         
         $statistik = [
             'pesanan_hari_ini' => Pesanan::whereDate('created_at', today())->count(),
-            'omzet_hari_ini'   => Pesanan::whereDate('created_at', today())->whereIn('status', ['lunas', 'selesai', 'dikirim'])->sum('total_biaya'),
+            'omzet_hari_ini'   => Pesanan::whereDate('created_at', today())->whereIn('status', ['lunas', 'selesai', 'dikirim', 'paid', 'completed'])->sum('total_biaya'),
         ];
 
         $grafikPenjualan = Pesanan::selectRaw('DATE(created_at) as tanggal, SUM(total_biaya) as total')
             ->where('created_at', '>=', now()->subDays(7))
-            ->whereIn('status', ['lunas', 'selesai', 'dikirim'])
+            ->whereIn('status', ['lunas', 'selesai', 'dikirim', 'paid', 'completed'])
             ->groupBy('tanggal')
             ->orderBy('tanggal')
             ->get();
