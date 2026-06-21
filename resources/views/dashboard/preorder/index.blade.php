@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Jadwal Pesanan')
+@section('title', 'Daftar Pesanan')
 
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark mb-0" style="font-family: var(--font-heading);">
-            <i class="fa-solid fa-calendar-check me-2"></i> Jadwal Pesanan (Pre-Order)
+            <i class="fa-solid fa-list-check me-2"></i> Daftar Pesanan (Kitchen)
         </h2>
     </div>
 
@@ -66,10 +66,12 @@
                             <td class="ps-4 fw-bold text-primary">{{ $p->nomor_order }}</td>
                             <td>
                                 <div>{{ $p->nama_penerima }}</div>
-                                @if(stripos($p->tipe_pengiriman, 'ambil') !== false)
-                                    <span class="badge bg-secondary" style="font-size: 0.75rem;"><i class="fa-solid fa-store me-1"></i> Ambil Sendiri</span>
+                                @if($p->tipe_pengiriman === 'dine_in' && isset($identitas) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
+                                    <span class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;"><i class="fa-solid fa-chair me-1"></i> Meja {{ $p->meja->nomor_meja ?? '?' }}</span>
+                                @elseif(stripos($p->tipe_pengiriman, 'ambil') !== false)
+                                    <span class="badge bg-secondary mt-1" style="font-size: 0.75rem;"><i class="fa-solid fa-store me-1"></i> Ambil Sendiri</span>
                                 @else
-                                    <span class="badge bg-info text-white" style="font-size: 0.75rem;"><i class="fa-solid fa-motorcycle me-1"></i> Kurir Toko</span>
+                                    <span class="badge bg-info text-white mt-1" style="font-size: 0.75rem;"><i class="fa-solid fa-motorcycle me-1"></i> Kurir Toko</span>
                                     @if($p->kurir)
                                         <div class="small text-muted mt-1"><i class="fa-solid fa-user-tag fa-xs me-1"></i> {{ $p->kurir->nama }}</div>
                                     @endif
@@ -154,8 +156,8 @@
                         @empty
                         <tr>
                             <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-calendar-xmark fa-3x mb-3 text-light"></i>
-                                <h5>Tidak ada jadwal pesanan untuk tanggal ini</h5>
+                                <i class="fa-solid fa-clipboard-check fa-3x mb-3 text-light"></i>
+                                <h5>Tidak ada pesanan aktif untuk tanggal ini</h5>
                             </td>
                         </tr>
                         @endforelse

@@ -252,6 +252,14 @@
                     
                     <!-- Form Pelanggan -->
                     <div class="mb-3">
+                        @if($identitas && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
+                        <select id="meja_id" class="form-select mb-2">
+                            <option value="">-- Pilih Meja (Opsional / Bawa Pulang) --</option>
+                            @foreach($mejas as $meja)
+                                <option value="{{ $meja->id }}">Meja {{ $meja->nomor_meja }} (Kap: {{ $meja->kapasitas }} org)</option>
+                            @endforeach
+                        </select>
+                        @endif
                         <input type="text" id="nama_penerima" class="form-control mb-2" placeholder="Nama Pelanggan (Opsional)">
                         <input type="text" id="nomor_wa" class="form-control" placeholder="Nomor WA Pelanggan (Opsional, cth: 0812...)">
                         <small class="text-muted" style="font-size: 11px;">Isi untuk mengirimkan struk via WhatsApp</small>
@@ -714,6 +722,12 @@
         const is_preorder = document.getElementById('is_preorder').checked;
         const tanggal_diambil = document.getElementById('tanggal_diambil').value;
         const uang_muka = document.getElementById('uang_muka').value;
+        
+        let meja_id = null;
+        const mejaSelect = document.getElementById('meja_id');
+        if (mejaSelect && mejaSelect.value !== "") {
+            meja_id = mejaSelect.value;
+        }
 
         if (is_preorder && !tanggal_diambil) {
             Swal.fire('Error', 'Tanggal pengambilan harus diisi untuk Pre-Order.', 'error');
@@ -745,6 +759,7 @@
                 is_preorder: is_preorder,
                 tanggal_diambil: tanggal_diambil,
                 uang_muka: uang_muka,
+                meja_id: meja_id,
                 cart: cartArray
             })
         })

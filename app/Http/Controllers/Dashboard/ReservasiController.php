@@ -94,8 +94,6 @@ class ReservasiController extends Controller
     public function simpanPengaturan(Request $request)
     {
         $validated = $request->validate([
-            'jam_buka' => 'nullable|date_format:H:i',
-            'jam_tutup' => 'nullable|date_format:H:i',
             'wajib_dp_reservasi' => 'nullable|boolean',
             'nominal_dp_reservasi' => 'nullable|numeric|min:0',
             'minimal_jam_reservasi' => 'nullable|integer|min:0|max:24',
@@ -111,7 +109,7 @@ class ReservasiController extends Controller
             \App\Models\IdentitasToko::create($validated);
         }
 
-        return redirect()->route('dashboard.reservasi.pengaturan')->with('sukses', 'Pengaturan reservasi dan operasional berhasil disimpan.');
+        return redirect()->route('dashboard.reservasi.pengaturan')->with('sukses', 'Pengaturan reservasi berhasil disimpan.');
     }
 
     public function approve(Reservasi $reservasi)

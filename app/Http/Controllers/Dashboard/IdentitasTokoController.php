@@ -34,6 +34,8 @@ class IdentitasTokoController extends Controller
             'tema_portal' => 'required|in:warm,cool,kalem',
             'tema_desktop' => 'required|in:warm,cool,kalem',
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
+            'jam_buka' => 'nullable|date_format:H:i',
+            'jam_tutup' => 'nullable|date_format:H:i',
         ]);
 
         $identitas = IdentitasToko::first() ?? new IdentitasToko();
@@ -46,7 +48,8 @@ class IdentitasTokoController extends Controller
         $identitas->tema_portal = $validated['tema_portal'];
         $identitas->tema_desktop = $validated['tema_desktop'];
         $identitas->jenis_layanan = $validated['jenis_layanan'];
-        $identitas->wajib_dp_reservasi = $request->has('wajib_dp_reservasi');
+        $identitas->jam_buka = $validated['jam_buka'] ?? null;
+        $identitas->jam_tutup = $validated['jam_tutup'] ?? null;
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists

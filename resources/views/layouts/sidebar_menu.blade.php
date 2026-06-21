@@ -39,8 +39,8 @@
                 </a>
                 @endif
                 @if(\App\Helpers\TenantPlanHelper::hasMenu('jadwal_pesanan'))
-                <a href="{{ route('dashboard.preorder.index') }}" class="{{ request()->routeIs('dashboard.preorder.*') ? 'active' : '' }}">
-                    <i data-lucide="calendar-check"></i><span>Jadwal Pesanan</span>
+                <a href="{{ route('dashboard.preorder.index') }}" class="sidebar-item {{ Request::is('dashboard/preorder*') ? 'active' : '' }}">
+                    <i data-lucide="list-ordered"></i><span>Daftar Pesanan</span>
                 </a>
                 @endif
             </div>

@@ -93,10 +93,24 @@ class CheckoutService
             }
 
             $isPreorder = $data['is_preorder'] ?? false;
+            $mejaId = $data['meja_id'] ?? null;
+            
             $tanggalDiambil = $isPreorder ? ($data['tanggal_diambil'] ?? null) : null;
             $uangMuka = $isPreorder ? (float)($data['uang_muka'] ?? 0) : $totalBiaya;
 
             $statusPesanan = 'completed';
+            $tipePengiriman = 'ambil_sendiri';
+            $alamatPenerima = 'Pembelian Langsung di Toko';
+
+            if ($mejaId) {
+                $tipePengiriman = 'dine_in';
+                // Jika pesanan dine-in via kasir, maka pesanan tersebut harus disiapkan oleh dapur.
+                // Atur tanggal diambil menjadi sekarang agar muncul di Daftar Pesanan.
+                $tanggalDiambil = now();
+                $statusPesanan = 'paid';
+                $alamatPenerima = 'Makan di Tempat';
+            }
+
             if ($isPreorder) {
                 if ($uangMuka >= $totalBiaya) {
                     $statusPesanan = 'paid';
@@ -113,8 +127,8 @@ class CheckoutService
                 'nomor_order' => 'POS-' . strtoupper(Str::random(8)),
                 'nomor_wa' => $nomor_wa,
                 'nama_penerima' => $data['nama_penerima'] ?? 'Pelanggan Toko',
-                'alamat_penerima' => 'Pembelian Langsung di Toko',
-                'tipe_pengiriman' => 'ambil_sendiri',
+                'alamat_penerima' => $alamatPenerima,
+                'tipe_pengiriman' => $tipePengiriman,
                 'tanggal_diambil' => $tanggalDiambil,
                 'biaya_barang' => $totalBiaya,
                 'biaya_pengantaran' => 0,
@@ -123,6 +137,7 @@ class CheckoutService
                 'metode_pembayaran' => $data['metode_pembayaran'],
                 'status' => $statusPesanan,
                 'source' => 'pos_offline',
+                'meja_id' => $mejaId,
             ]);
 
             // Simpan Pesanan Item & Kurangi Stok

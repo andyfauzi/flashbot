@@ -15,7 +15,7 @@ class PreOrderController extends Controller
         $search = $request->input('search');
 
         // Ambil pesanan yang belum selesai/dibatalkan pada tanggal tersebut
-        $query = Pesanan::with(['items.produk', 'kurir'])
+        $query = Pesanan::with(['items.produk', 'kurir', 'meja'])
             ->whereNotNull('tanggal_diambil')
             ->whereDate('tanggal_diambil', $tanggal)
             ->whereNotIn('status', ['cancelled']);
@@ -31,8 +31,9 @@ class PreOrderController extends Controller
         $pesanans = $query->orderBy('id', 'desc')->get();
 
         $kurirs = \App\Models\Kurir::orderBy('nama', 'asc')->get();
+        $identitas = \App\Models\IdentitasToko::first();
 
-        return view('dashboard.preorder.index', compact('pesanans', 'tanggal', 'kurirs', 'search'));
+        return view('dashboard.preorder.index', compact('pesanans', 'tanggal', 'kurirs', 'search', 'identitas'));
     }
 
     public function setDp(Request $request, Pesanan $pesanan)

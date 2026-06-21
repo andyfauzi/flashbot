@@ -16,26 +16,6 @@
             <div class="card-body p-4">
                 <form action="{{ route('dashboard.reservasi.pengaturan.simpan') }}" method="POST">
                     @csrf
-                    
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i> Jam Operasional Toko</h5>
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="jam_buka" class="form-label fw-semibold">Jam Buka</label>
-                            <input type="time" class="form-control @error('jam_buka') is-invalid @enderror" id="jam_buka" name="jam_buka" value="{{ old('jam_buka', $identitas->jam_buka ? \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i') : '') }}">
-                            @error('jam_buka') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6 mt-3 mt-md-0">
-                            <label for="jam_tutup" class="form-label fw-semibold">Jam Tutup</label>
-                            <input type="time" class="form-control @error('jam_tutup') is-invalid @enderror" id="jam_tutup" name="jam_tutup" value="{{ old('jam_tutup', $identitas->jam_tutup ? \Carbon\Carbon::parse($identitas->jam_tutup)->format('H:i') : '') }}">
-                            @error('jam_tutup') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-12 mt-2">
-                            <small class="text-muted">Jika diisi, pesanan yang masuk di luar jam ini akan otomatis diproses/dijadwalkan keesokan paginya saat toko buka kembali.</small>
-                        </div>
-                    </div>
-
-                    <hr class="mb-4">
-
                     <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-wave text-success me-2"></i> Pengaturan DP Reservasi</h5>
                     
                     <div class="card bg-light border-0 mb-3">
