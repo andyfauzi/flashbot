@@ -61,13 +61,13 @@ class PortalController extends Controller
             'nama_penerima'     => 'required|string|max:100',
             'nomor_wa'          => 'nullable|string|max:20', // nomor wa optional untuk dine-in
             'tipe_pengiriman'   => 'required|in:kurir_toko,kurir_customer,ambil_sendiri,dine_in',
-            'meja_id'           => 'nullable|exists:mejas,id',
+            'meja_id'           => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.mejas,id',
             'alamat_penerima'   => 'required_if:tipe_pengiriman,kurir_toko,kurir_customer|nullable|string',
             'tanggal_diambil'   => 'required_unless:tipe_pengiriman,dine_in|nullable|date',
             'metode_pembayaran' => 'required|in:cod,transfer,manual,midtrans', // cod = cash
             'cart'              => 'required|array|min:1',
-            'cart.*.id'         => 'required|exists:produks,id',
-            'cart.*.varian_id'  => 'nullable|exists:produk_varians,id',
+            'cart.*.id'         => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produks,id',
+            'cart.*.varian_id'  => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',
             'cart.*.qty'        => 'required|integer|min:1',
             'cart.*.addons'     => 'nullable|array',
         ]);
