@@ -517,6 +517,10 @@
                 </div>
             </div>
             <div class="border-top border-secondary mt-5 pt-4 text-center text-secondary opacity-75">
+                <div class="mb-2">
+                    <a href="{{ route('legal.terms') }}" class="text-light text-decoration-none me-3 hover-primary">Syarat & Ketentuan</a>
+                    <a href="{{ route('legal.privacy') }}" class="text-light text-decoration-none hover-primary">Kebijakan Privasi</a>
+                </div>
                 &copy; {{ date('Y') }} Tenanta.id SaaS. All rights reserved.
             </div>
         </div>
