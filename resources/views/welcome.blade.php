@@ -292,7 +292,13 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="pricing-card">
                         <h4 class="fw-bold text-success mb-3">Starter</h4>
-                        <div class="price-amount mb-4">{{ $settings['price_starter'] ?? 'Rp 99.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        <div class="price-amount mb-0">{{ $settings['price_starter'] ?? 'Rp 99.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        @php
+                            $discount_percent = (float)(\App\Models\LandlordSetting::get('discount_yearly_percent', 20));
+                            $starter_num = (int)preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000');
+                            $starter_yearly = $starter_num * 12 * (1 - ($discount_percent / 100));
+                        @endphp
+                        <div class="text-success small fw-bold mb-4 mt-1">Atau Rp{{ number_format($starter_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nFitur Kasir Dasar\nLaporan Standar") as $feature)
@@ -347,7 +353,12 @@
                     <div class="pricing-card popular">
                         <div class="popular-badge">Paling Populer</div>
                         <h4 class="fw-bold text-primary mb-3">Pro</h4>
-                        <div class="price-amount mb-4">{{ $settings['price_pro'] ?? 'Rp 199.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        <div class="price-amount mb-0">{{ $settings['price_pro'] ?? 'Rp 199.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        @php
+                            $pro_num = (int)preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
+                            $pro_yearly = $pro_num * 12 * (1 - ($discount_percent / 100));
+                        @endphp
+                        <div class="text-primary small fw-bold mb-4 mt-1">Atau Rp{{ number_format($pro_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nFitur Manufaktur\nBot WhatsApp") as $feature)
@@ -401,7 +412,12 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="pricing-card border-dark border-opacity-10">
                         <h4 class="fw-bold text-dark mb-3">Business</h4>
-                        <div class="price-amount mb-4">{{ $settings['price_business'] ?? 'Rp 499.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        <div class="price-amount mb-0">{{ $settings['price_business'] ?? 'Rp 499.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
+                        @php
+                            $business_num = (int)preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
+                            $business_yearly = $business_num * 12 * (1 - ($discount_percent / 100));
+                        @endphp
+                        <div class="text-dark small fw-bold mb-4 mt-1">Atau Rp{{ number_format($business_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nPrioritas Support\nWhite Label") as $feature)
