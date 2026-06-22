@@ -262,7 +262,7 @@
                     <h1 class="hero-title" style="font-size: {{ $settings['hero_title_size'] ?? '4rem' }};">{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}</h1>
                     <p class="hero-subtitle">{{ $settings['hero_subtitle'] ?? 'Kelola puluhan cabang toko Anda dalam satu pintu dengan teknologi cerdas.' }}</p>
                     <div class="d-flex gap-3">
-                        <a href="{{ $settings['cta_link'] ?? '#pricing' }}" class="btn btn-custom btn-lg px-5">{{ $settings['cta_text'] ?? 'Mulai Sekarang' }}</a>
+                        <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg px-5">Mulai Trial Gratis 30 Hari</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -339,11 +339,6 @@
                                 </span>
                             </li>
                         </ul>
-                        <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0']) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">Daftar Starter (Bulan)</a>
-                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_starter_yearly'] ?? 'Rp 990.000' }})</a>
-                            <a href="{{ route('auth.google', ['plan' => 'starter', 'trial' => '1']) }}" class="btn btn-light text-success w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 15 Hari</a>
-                        </div>
                     </div>
                 </div>
 
@@ -399,11 +394,6 @@
                                 </span>
                             </li>
                         </ul>
-                        <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0']) }}" class="btn btn-custom w-100 rounded-pill fw-bold py-2">Daftar Pro (Bulan)</a>
-                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-primary w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_pro_yearly'] ?? 'Rp 1.990.000' }})</a>
-                            <a href="{{ route('auth.google', ['plan' => 'pro', 'trial' => '1']) }}" class="btn btn-light text-primary w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 30 Hari</a>
-                        </div>
                     </div>
                 </div>
 
@@ -458,12 +448,17 @@
                                 </span>
                             </li>
                         </ul>
-                        <div class="d-flex flex-column gap-2 mt-3">
-                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0']) }}" class="btn btn-dark w-100 rounded-pill fw-bold py-2">Daftar Business (Bulan)</a>
-                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '0', 'cycle' => 'yearly']) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">Daftar 1 Tahun ({{ $settings['price_business_yearly'] ?? 'Rp 4.990.000' }})</a>
-                            <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-light text-dark w-100 rounded-pill fw-bold py-2 border">Uji Coba Gratis 30 Hari</a>
-                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Single Call To Action Button -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg" style="font-size: 1.15rem;">
+                        <i class="fa-solid fa-rocket me-2"></i> Mulai Trial Gratis 30 Hari (Akses Semua Fitur)
+                    </a>
+                    <p class="text-muted mt-3 small"><i class="fa-solid fa-shield-check me-1"></i> Tanpa kartu kredit. Bisa dibatalkan kapan saja.</p>
                 </div>
             </div>
         </div>
