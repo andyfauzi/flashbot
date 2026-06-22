@@ -296,9 +296,18 @@
                         @php
                             $discount_percent = (float)(\App\Models\LandlordSetting::get('discount_yearly_percent', 20));
                             $starter_num = (int)preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000');
-                            $starter_yearly = $starter_num * 12 * (1 - ($discount_percent / 100));
+                            $starter_yearly_normal = $starter_num * 12;
+                            $starter_yearly = $starter_yearly_normal * (1 - ($discount_percent / 100));
                         @endphp
-                        <div class="text-success small fw-bold mb-4 mt-1">Atau Rp{{ number_format($starter_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
+                        <div class="text-success small fw-bold mb-4 mt-1">
+                            Atau Rp{{ number_format($starter_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
+                            @if($discount_percent > 0)
+                                <div class="mt-1">
+                                    <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($starter_yearly_normal, 0, ',', '.') }}</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                </div>
+                            @endif
+                        </div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nFitur Kasir Dasar\nLaporan Standar") as $feature)
@@ -356,9 +365,18 @@
                         <div class="price-amount mb-0">{{ $settings['price_pro'] ?? 'Rp 199.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
                             $pro_num = (int)preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
-                            $pro_yearly = $pro_num * 12 * (1 - ($discount_percent / 100));
+                            $pro_yearly_normal = $pro_num * 12;
+                            $pro_yearly = $pro_yearly_normal * (1 - ($discount_percent / 100));
                         @endphp
-                        <div class="text-primary small fw-bold mb-4 mt-1">Atau Rp{{ number_format($pro_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
+                        <div class="text-primary small fw-bold mb-4 mt-1">
+                            Atau Rp{{ number_format($pro_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
+                            @if($discount_percent > 0)
+                                <div class="mt-1">
+                                    <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($pro_yearly_normal, 0, ',', '.') }}</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                </div>
+                            @endif
+                        </div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nFitur Manufaktur\nBot WhatsApp") as $feature)
@@ -415,9 +433,18 @@
                         <div class="price-amount mb-0">{{ $settings['price_business'] ?? 'Rp 499.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
                             $business_num = (int)preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
-                            $business_yearly = $business_num * 12 * (1 - ($discount_percent / 100));
+                            $business_yearly_normal = $business_num * 12;
+                            $business_yearly = $business_yearly_normal * (1 - ($discount_percent / 100));
                         @endphp
-                        <div class="text-dark small fw-bold mb-4 mt-1">Atau Rp{{ number_format($business_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span></div>
+                        <div class="text-dark small fw-bold mb-4 mt-1">
+                            Atau Rp{{ number_format($business_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
+                            @if($discount_percent > 0)
+                                <div class="mt-1">
+                                    <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($business_yearly_normal, 0, ',', '.') }}</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                </div>
+                            @endif
+                        </div>
                         <hr class="text-muted opacity-25">
                         <ul class="feature-list">
                             @foreach(explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nPrioritas Support\nWhite Label") as $feature)
