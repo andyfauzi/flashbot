@@ -24,13 +24,16 @@ class PosController extends Controller
         
         $identitas = \App\Models\IdentitasToko::first();
         $mejas = \App\Models\Meja::where('status', 'tersedia')->get();
+        $reservasis = \App\Models\Reservasi::where('status_pembayaran_dp', 'lunas')
+            ->whereNotIn('status', ['selesai', 'batal'])
+            ->get();
 
         $editOrder = null;
         if ($request->has('edit_order')) {
             $editOrder = \App\Models\Pesanan::with('items')->find($request->edit_order);
         }
 
-        return view('pos.index', compact('produks', 'kategoris', 'activeShift', 'editOrder', 'identitas', 'mejas'));
+        return view('pos.index', compact('produks', 'kategoris', 'activeShift', 'editOrder', 'identitas', 'mejas', 'reservasis'));
     }
 
     public function store(Request $request, \App\Services\CheckoutService $checkoutService)
@@ -44,6 +47,7 @@ class PosController extends Controller
                 'tanggal_diambil' => 'nullable|date',
                 'uang_muka' => 'nullable|numeric|min:0',
                 'meja_id' => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.mejas,id',
+                'gunakan_dp' => 'nullable|boolean',
                 'cart' => 'required|array',
                 'cart.*.id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produks,id',
                 'cart.*.varian_id' => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',

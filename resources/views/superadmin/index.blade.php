@@ -99,6 +99,19 @@
         font-family: monospace;
         font-size: 0.85rem;
     }
+    /* Fix form-check-input for switch so it's not cut off on localhost */
+    .form-check-input {
+        margin-left: -1.5em !important;
+        margin-top: 0.25em !important;
+    }
+    .form-switch .form-check-input {
+        width: 2em !important;
+        height: 1em !important;
+        margin-left: -2.5em !important;
+    }
+    .form-check {
+        padding-left: 2.5em !important;
+    }
 </style>
 @endsection
 
@@ -222,13 +235,47 @@
                 <div class="mb-4">
                     <label class="form-label fw-semibold">Paket Langganan (Plan)</label>
                     <select name="plan" class="form-select py-2" required>
+                        @if(\App\Models\LandlordSetting::get('plan_gratis_enabled', '1') == '1')
+                        <option value="gratis">Gratis (Trial)</option>
+                        @endif
+                        @if(\App\Models\LandlordSetting::get('plan_starter_enabled', '1') == '1')
                         <option value="starter">Starter Plan</option>
+                        @endif
+                        @if(\App\Models\LandlordSetting::get('plan_pro_enabled', '1') == '1')
                         <option value="pro">Pro Plan</option>
+                        @endif
+                        @if(\App\Models\LandlordSetting::get('plan_business_enabled', '1') == '1')
                         <option value="business">Business Plan</option>
+                        @endif
                     </select>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-circle-nodes me-2"></i>Buat & Inisialisasi Database</button>
+            </form>
+        </div>
+
+        <!-- Card Global Package Toggles -->
+        <div class="custom-card mt-4">
+            <h5 class="fw-bold mb-4"><i class="fa-solid fa-tags text-success me-2"></i>Ketersediaan Paket</h5>
+            <form action="{{ route('superadmin.update_settings') }}" method="POST">
+                @csrf
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="plan_gratis_enabled" value="1" id="planGratisEnabled" {{ \App\Models\LandlordSetting::get('plan_gratis_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="planGratisEnabled">Paket Gratis (Trial)</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="plan_starter_enabled" value="1" id="planStarterEnabled" {{ \App\Models\LandlordSetting::get('plan_starter_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="planStarterEnabled">Starter Plan</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="plan_pro_enabled" value="1" id="planProEnabled" {{ \App\Models\LandlordSetting::get('plan_pro_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="planProEnabled">Pro Plan</label>
+                </div>
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" name="plan_business_enabled" value="1" id="planBusinessEnabled" {{ \App\Models\LandlordSetting::get('plan_business_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="planBusinessEnabled">Business Plan</label>
+                </div>
+                <button type="submit" class="btn btn-sm btn-success w-100 fw-bold py-2"><i class="fa-solid fa-save me-2"></i>Simpan Ketersediaan</button>
             </form>
         </div>
     </div>
@@ -363,33 +410,7 @@
                                                             <small class="text-muted">Kosongkan jika ingin masa aktif tanpa batas (lifetime).</small>
                                                         </div>
 
-                                                        <!-- Fitur Flags -->
-                                                        <div class="mb-2 fw-semibold">Batasan Fitur Aktif</div>
-                                                        @php
-                                                            $flags = $tenant->feature_flags ?? [];
-                                                        @endphp
-                                                        <div class="card p-3 bg-light border-0">
-                                                            <div class="form-check form-switch mb-2">
-                                                                <input class="form-check-input" type="checkbox" name="features[pos]" value="1" id="featurePos{{ $tenant->id }}" {{ (!isset($flags['pos']) || $flags['pos']) ? 'checked' : '' }}>
-                                                                <label class="form-check-label" for="featurePos{{ $tenant->id }}">Point of Sale (POS) Kasir</label>
-                                                            </div>
-                                                            <div class="form-check form-switch mb-2">
-                                                                <input class="form-check-input" type="checkbox" name="features[chatbot]" value="1" id="featureChatbot{{ $tenant->id }}" {{ (!isset($flags['chatbot']) || $flags['chatbot']) ? 'checked' : '' }}>
-                                                                <label class="form-check-label" for="featureChatbot{{ $tenant->id }}">WhatsApp Chatbot & Auto-Reply</label>
-                                                            </div>
-                                                            <div class="form-check form-switch mb-2">
-                                                                <input class="form-check-input" type="checkbox" name="features[erp]" value="1" id="featureErp{{ $tenant->id }}" {{ (!isset($flags['erp']) || $flags['erp']) ? 'checked' : '' }}>
-                                                                <label class="form-check-label" for="featureErp{{ $tenant->id }}">Produksi Dapur (HPP & Resep)</label>
-                                                            </div>
-                                                            <div class="form-check form-switch mb-2">
-                                                                <input class="form-check-input" type="checkbox" name="features[finance]" value="1" id="featureFinance{{ $tenant->id }}" {{ (!isset($flags['finance']) || $flags['finance']) ? 'checked' : '' }}>
-                                                                <label class="form-check-label" for="featureFinance{{ $tenant->id }}">Buku Kas & Keuangan Platform</label>
-                                                            </div>
-                                                            <div class="form-check form-switch">
-                                                                <input class="form-check-input" type="checkbox" name="features[gemini_ai]" value="1" id="featureGemini{{ $tenant->id }}" {{ (!isset($flags['gemini_ai']) || $flags['gemini_ai']) ? 'checked' : '' }}>
-                                                                <label class="form-check-label" for="featureGemini{{ $tenant->id }}">AI Agent (Integrasi Gemini AI)</label>
-                                                            </div>
-                                                        </div>
+                                                        <!-- Fitur Flags dihapus (sekarang mengikuti paket secara otomatis) -->
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Batal</button>

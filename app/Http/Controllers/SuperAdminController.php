@@ -108,7 +108,7 @@ class SuperAdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'subdomain' => 'required|alpha_dash|unique:landlord.tenants,subdomain|max:50',
-            'plan' => 'required|in:starter,pro,business',
+            'plan' => 'required|in:gratis,starter,pro,business',
         ]);
 
         $subdomain = strtolower($request->subdomain);
@@ -151,6 +151,17 @@ class SuperAdminController extends Controller
                 'database_name' => $dbName,
                 'plan' => $request->plan,
                 'is_active' => true,
+            ]);
+
+            // Create initial TenantPayment record for the selected plan (Trial / Initial Setup)
+            \App\Models\TenantPayment::create([
+                'tenant_id' => $tenant->id,
+                'order_id' => 'INIT-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                'plan_name' => $request->plan,
+                'gross_amount' => 0,
+                'status' => 'settlement',
+                'payment_type' => 'manual',
+                'paid_at' => now(),
             ]);
 
             AuditLogger::record('tenant.created', "tenant:{$tenant->id}", [
@@ -270,7 +281,7 @@ class SuperAdminController extends Controller
         TenantManager::switchToLandlord();
 
         $request->validate([
-            'plan' => 'required|in:starter,pro,business',
+            'plan' => 'required|in:gratis,starter,pro,business',
             'plan_expires_at' => 'nullable|date',
             'features' => 'nullable|array',
         ]);
@@ -278,21 +289,12 @@ class SuperAdminController extends Controller
         $tenant = Tenant::findOrFail($id);
         $tenant->plan = $request->plan;
         $tenant->plan_expires_at = $request->plan_expires_at ? \Carbon\Carbon::parse($request->plan_expires_at) : null;
-
-        // Set feature flags based on checkbox inputs
-        $features = [
-            'chatbot' => isset($request->features['chatbot']),
-            'pos' => isset($request->features['pos']),
-            'erp' => isset($request->features['erp']),
-            'finance' => isset($request->features['finance']),
-            'gemini_ai' => isset($request->features['gemini_ai']),
-        ];
-        $tenant->feature_flags = $features;
+        
+        // Fitur flags dihapus, otomatis mengikuti plan
         $tenant->save();
 
         AuditLogger::record('tenant.plan_updated', "tenant:{$tenant->id}", [
             'plan' => $request->plan,
-            'features' => $features
         ]);
 
         return redirect()->back()->with('success', "Tenant {$tenant->name} subscription plan updated successfully.");
@@ -339,6 +341,14 @@ class SuperAdminController extends Controller
 
         if ($request->has('global_announcement_text')) {
             \App\Models\LandlordSetting::set('global_announcement_text', $request->global_announcement_text);
+        }
+
+        // Simpan Ketersediaan Paket
+        if ($request->has('plan_gratis_enabled') || $request->has('plan_starter_enabled') || $request->has('plan_pro_enabled') || $request->has('plan_business_enabled')) {
+            \App\Models\LandlordSetting::set('plan_gratis_enabled', $request->has('plan_gratis_enabled') ? '1' : '0');
+            \App\Models\LandlordSetting::set('plan_starter_enabled', $request->has('plan_starter_enabled') ? '1' : '0');
+            \App\Models\LandlordSetting::set('plan_pro_enabled', $request->has('plan_pro_enabled') ? '1' : '0');
+            \App\Models\LandlordSetting::set('plan_business_enabled', $request->has('plan_business_enabled') ? '1' : '0');
         }
 
         AuditLogger::record('superadmin.settings_updated', "system", [

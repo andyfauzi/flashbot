@@ -94,9 +94,32 @@ class CheckoutService
 
             $isPreorder = $data['is_preorder'] ?? false;
             $mejaId = $data['meja_id'] ?? null;
+            $gunakanDp = $data['gunakan_dp'] ?? false;
             
             $tanggalDiambil = $isPreorder ? ($data['tanggal_diambil'] ?? null) : null;
             $uangMuka = $isPreorder ? (float)($data['uang_muka'] ?? 0) : $totalBiaya;
+
+            $reservasiTerpakai = null;
+            $potonganDp = 0;
+
+            if ($gunakanDp && ($mejaId || $nomor_wa !== '-')) {
+                $query = \App\Models\Reservasi::where('status_pembayaran_dp', 'lunas')
+                    ->whereNotIn('status', ['selesai', 'batal']);
+                
+                if ($mejaId) {
+                    $query->where('meja_id', $mejaId);
+                } else {
+                    $query->where('nomor_telepon', 'like', "%{$nomor_wa}%");
+                }
+                
+                $reservasiTerpakai = $query->first();
+
+                if ($reservasiTerpakai) {
+                    $potonganDp = $reservasiTerpakai->nominal_dp;
+                    $uangMuka = max(0, $uangMuka - $potonganDp);
+                    $totalBiaya = max(0, $totalBiaya - $potonganDp); // Sisa yang harus dibayar customer
+                }
+            }
 
             $statusPesanan = 'completed';
             $tipePengiriman = 'ambil_sendiri';
@@ -138,7 +161,12 @@ class CheckoutService
                 'status' => $statusPesanan,
                 'source' => 'pos_offline',
                 'meja_id' => $mejaId,
+                'reservasi_id' => $reservasiTerpakai ? $reservasiTerpakai->id : null,
             ]);
+
+            if ($reservasiTerpakai) {
+                $reservasiTerpakai->update(['status' => 'selesai']);
+            }
 
             // Simpan Pesanan Item & Kurangi Stok
             foreach ($itemsData as $itemData) {

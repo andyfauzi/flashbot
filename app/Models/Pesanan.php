@@ -32,7 +32,8 @@ class Pesanan extends Model
         'kurir_id',
         'nomor_hp',
         'meja_id',
-        'nomor_antrian'
+        'nomor_antrian',
+        'reservasi_id'
     ];
 
     protected static function booted()
@@ -54,6 +55,11 @@ class Pesanan extends Model
     public function meja()
     {
         return $this->belongsTo(Meja::class, 'meja_id');
+    }
+
+    public function reservasi()
+    {
+        return $this->belongsTo(Reservasi::class, 'reservasi_id');
     }
 
     public function getNomorHpTampilAttribute()

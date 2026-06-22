@@ -59,7 +59,26 @@ class ReservasiController extends Controller
             'status_pembayaran_dp' => 'nullable|in:belum_bayar,lunas',
         ]);
 
+        $oldStatus = $reservasi->status_pembayaran_dp;
         $reservasi->update($validated);
+
+        if ($oldStatus !== 'lunas' && isset($validated['status_pembayaran_dp']) && $validated['status_pembayaran_dp'] === 'lunas' && $reservasi->nominal_dp > 0) {
+            $shift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+            if (config('flashbot.features.finance', true)) {
+                \App\Models\CashFlow::create([
+                    'user_id' => auth()->id(),
+                    'shift_id' => $shift ? $shift->id : null,
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'in',
+                    'kategori' => 'DP Reservasi',
+                    'nominal' => $reservasi->nominal_dp,
+                    'keterangan' => 'Pembayaran DP Reservasi untuk pelanggan ' . $reservasi->nama_pelanggan,
+                ]);
+            }
+            if ($shift) {
+                $shift->increment('total_penjualan_tunai', $reservasi->nominal_dp);
+            }
+        }
 
         // Jika status selesai atau batal, bebaskan meja
         if (in_array($validated['status'], ['selesai', 'batal'])) {

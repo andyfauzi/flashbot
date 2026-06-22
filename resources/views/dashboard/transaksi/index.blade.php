@@ -92,6 +92,9 @@
                             @if($trx->nomor_antrian)
                                 <span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Antrian: {{ $trx->nomor_antrian }}</span>
                             @endif
+                            @if($trx->reservasi_id)
+                                <a href="{{ route('dashboard.reservasi.index') }}" class="badge bg-info mt-1 text-decoration-none" style="font-size: 0.75rem;"><i class="fa-solid fa-calendar-check me-1"></i>Reservasi</a>
+                            @endif
                         </td>
                         <td>
                             <div class="small">{{ $trx->created_at->format('d M Y') }}</div>

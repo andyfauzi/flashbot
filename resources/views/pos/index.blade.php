@@ -295,6 +295,15 @@
                             <span class="fs-6" id="kembalianText">Rp 0</span>
                         </div>
 
+                        <!-- DP Reservasi Container -->
+                        <div class="form-check mb-3 d-none p-3 bg-light rounded border border-warning" id="dpContainer">
+                            <input class="form-check-input ms-0 me-2 mt-1" type="checkbox" id="gunakan_dp" checked onchange="renderCart()" style="transform: scale(1.2);">
+                            <label class="form-check-label fw-bold text-warning" for="gunakan_dp" style="color: #d97706 !important;">
+                                Gunakan DP Reservasi: <span id="dpText">Rp 0</span>
+                            </label>
+                            <div style="font-size: 11px;" class="text-muted mt-1 ms-4">Hapus centang untuk tidak memotong DP.</div>
+                        </div>
+
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" id="is_preorder" onchange="togglePreorderInputs()">
                             <label class="form-check-label fw-bold text-primary" for="is_preorder">Jadikan Pre-Order (Ambil Nanti)</label>
@@ -345,8 +354,19 @@
     let cart = {};
     let modalVarian;
     let currentTotal = 0;
+    const activeReservasis = @json($reservasis ?? []);
+    let potonganDp = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Reservasi listeners
+        const mejaSelect = document.getElementById('meja_id');
+        if (mejaSelect) {
+            mejaSelect.addEventListener('change', function() { checkReservasi(); renderCart(); });
+        }
+        const waInput = document.getElementById('nomor_wa');
+        if (waInput) {
+            waInput.addEventListener('input', function() { checkReservasi(); renderCart(); });
+        }
         // Initialize cart
         try {
             cart = JSON.parse(localStorage.getItem('pos_cart')) || {};
@@ -477,6 +497,26 @@
             container.classList.remove('view-list');
             btnGrid.classList.add('active');
             btnList.classList.remove('active');
+        }
+    }
+
+    function checkReservasi() {
+        const mejaId = document.getElementById('meja_id')?.value;
+        const nomorWa = document.getElementById('nomor_wa')?.value;
+        potonganDp = 0;
+        
+        let found = activeReservasis.find(r => 
+            (mejaId && r.meja_id == mejaId) || 
+            (nomorWa && nomorWa !== '' && r.nomor_telepon && r.nomor_telepon.includes(nomorWa))
+        );
+
+        const dpContainer = document.getElementById('dpContainer');
+        if (found) {
+            potonganDp = parseFloat(found.nominal_dp) || 0;
+            document.getElementById('dpText').innerText = formatRupiah(potonganDp);
+            dpContainer.classList.remove('d-none');
+        } else {
+            dpContainer.classList.add('d-none');
         }
     }
 
@@ -694,8 +734,23 @@
             saveCart();
         }
 
-        currentTotal = total;
-        totalBayarText.innerText = formatRupiah(total);
+        let dpApplied = 0;
+        const dpContainer = document.getElementById('dpContainer');
+        const checkboxDp = document.getElementById('gunakan_dp');
+        
+        if (!dpContainer.classList.contains('d-none') && checkboxDp && checkboxDp.checked) {
+            dpApplied = potonganDp;
+        }
+
+        currentTotal = total - dpApplied;
+        if (currentTotal < 0) currentTotal = 0;
+
+        if (dpApplied > 0) {
+            totalBayarText.innerHTML = `<del class="text-muted" style="font-size: 14px;">${formatRupiah(total)}</del> <br> ${formatRupiah(currentTotal)}`;
+        } else {
+            totalBayarText.innerText = formatRupiah(currentTotal);
+        }
+        
         hitungKembalian();
 
         if (count > 0) {
@@ -760,6 +815,7 @@
                 tanggal_diambil: tanggal_diambil,
                 uang_muka: uang_muka,
                 meja_id: meja_id,
+                gunakan_dp: !document.getElementById('dpContainer').classList.contains('d-none') && document.getElementById('gunakan_dp').checked,
                 cart: cartArray
             })
         })

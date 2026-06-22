@@ -131,6 +131,12 @@
                 <td width="60%">Total Belanja</td>
                 <td width="40%" class="text-right">Rp {{ number_format($pesanan->biaya_barang, 0, ',', '.') }}</td>
             </tr>
+            @if($pesanan->reservasi_id && $pesanan->reservasi)
+            <tr>
+                <td>DP Reservasi</td>
+                <td class="text-right">- Rp {{ number_format($pesanan->reservasi->nominal_dp, 0, ',', '.') }}</td>
+            </tr>
+            @endif
             <tr>
                 <td>Ongkir</td>
                 <td class="text-right">Rp {{ number_format($pesanan->biaya_pengantaran, 0, ',', '.') }}</td>
@@ -186,6 +192,12 @@
             let totalBelanjaVal = "{{ number_format($pesanan->biaya_barang, 0, ',', '.') }}";
             text += totalBelanja + " ".repeat(32 - totalBelanja.length - totalBelanjaVal.length) + totalBelanjaVal + "\n";
             
+            @if($pesanan->reservasi_id && $pesanan->reservasi)
+            let dpRes = "DP Reservasi:";
+            let dpResVal = "- {{ number_format($pesanan->reservasi->nominal_dp, 0, ',', '.') }}";
+            text += dpRes + " ".repeat(32 - dpRes.length - dpResVal.length) + dpResVal + "\n";
+            @endif
+
             let ongkir = "Ongkir:";
             let ongkirVal = "{{ number_format($pesanan->biaya_pengantaran, 0, ',', '.') }}";
             text += ongkir + " ".repeat(32 - ongkir.length - ongkirVal.length) + ongkirVal + "\n";
