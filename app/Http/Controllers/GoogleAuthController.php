@@ -108,7 +108,8 @@ class GoogleAuthController extends Controller
             $isTrial = session('google_reg_trial', '0') === '1';
             
             if ($isTrial) {
-                $days = $plan === 'pro' ? 30 : 15;
+                // Semua pendaftaran trial sekarang mendapatkan 30 hari akses
+                $days = 30;
                 $expiresAt = now()->addDays($days);
             } else {
                 // If not trial, it expires immediately (subDay) so they must pay

@@ -241,9 +241,9 @@
                     Kelola POS Penjualan, Keuangan Kasir, Resep Bahan Baku (HPP) otomatis, hingga WhatsApp Chatbot AI dalam satu platform terintegrasi. Buat akun toko Anda dalam hitungan detik.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ route('auth.google') }}" class="btn-google">
+                    <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn-google">
                         <img src="https://lh3.googleusercontent.com/COxitS7y0g8sHTxZ97_ypgFJnifh7pI5vy45GEwVm2xJ9ed573037g7515R7lk279w" alt="google" style="width: 22px;">
-                        Daftar Toko via Google
+                        Mulai Trial 30 Hari via Google
                     </a>
                 </div>
             </div>
@@ -307,7 +307,6 @@
                         <li class="text-muted"><i class="fa-solid fa-circle-xmark text-danger"></i> WhatsApp Chatbot</li>
                         <li class="text-muted"><i class="fa-solid fa-circle-xmark text-danger"></i> Kalkulator HPP & Resep</li>
                     </ul>
-                    <a href="{{ route('auth.google') }}" class="btn btn-outline-light w-100 py-2.5 rounded-3 fw-bold">Pilih Paket</a>
                 </div>
             </div>
 
@@ -323,7 +322,6 @@
                         <li><i class="fa-solid fa-circle-check"></i> WhatsApp Chatbot & Auto-Reply</li>
                         <li><i class="fa-solid fa-circle-check"></i> Kalkulator HPP & Resep</li>
                     </ul>
-                    <a href="{{ route('auth.google') }}" class="btn btn-primary bg-gradient w-100 py-2.5 rounded-3 fw-bold border-0" style="background: var(--accent-purple)">Pilih Paket</a>
                 </div>
             </div>
 
@@ -339,8 +337,17 @@
                         <li><i class="fa-solid fa-circle-check"></i> Prioritas CS Support 24/7</li>
                         <li><i class="fa-solid fa-circle-check"></i> Custom Fitur request</li>
                     </ul>
-                    <a href="{{ route('auth.google') }}" class="btn btn-outline-light w-100 py-2.5 rounded-3 fw-bold">Pilih Paket</a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Single Call To Action Button -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg" style="background: var(--accent-purple); border: none; font-size: 1.15rem;">
+                    <i class="fa-solid fa-rocket me-2"></i> Mulai Trial Gratis 30 Hari (Akses Semua Fitur)
+                </a>
+                <p class="text-muted mt-3 small"><i class="fa-solid fa-shield-check me-1"></i> Tanpa kartu kredit. Bisa dibatalkan kapan saja.</p>
             </div>
         </div>
     </div>

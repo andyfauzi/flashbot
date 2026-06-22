@@ -36,4 +36,23 @@ class TenantPlanHelper
 
         return in_array($menuKey, $menus);
     }
+
+    /**
+     * Mendapatkan paket minimum yang diperlukan untuk sebuah fitur.
+     */
+    public static function getMinimumPlan($menuKey)
+    {
+        $menu = Cache::remember('menu_minimum_plan_' . $menuKey, 1440, function () use ($menuKey) {
+            return PackageMenu::where('menu_key', $menuKey)->first();
+        });
+
+        if (!$menu) return 'PRO';
+
+        if ($menu->gratis_enabled) return 'GRATIS';
+        if ($menu->starter_enabled) return 'STARTER';
+        if ($menu->pro_enabled) return 'PRO';
+        if ($menu->business_enabled) return 'BUSINESS';
+
+        return 'PRO';
+    }
 }
