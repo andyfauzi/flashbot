@@ -112,8 +112,6 @@
                             <h6 class="fw-bold text-success">Paket Starter</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_starter" value="{{ $settings['price_starter'] ?? 'Rp 99.000' }}">
-                            <label class="form-label small">Harga / Tahun</label>
-                            <input type="text" class="form-control form-control-sm mb-2" name="price_starter_yearly" value="{{ $settings['price_starter_yearly'] ?? 'Rp 990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_starter" rows="3">{{ $settings['features_starter'] ?? "1 Cabang Toko\nFitur Kasir Dasar\nLaporan Standar" }}</textarea>
                         </div>
@@ -124,8 +122,6 @@
                             <h6 class="fw-bold text-primary">Paket Pro</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_pro" value="{{ $settings['price_pro'] ?? 'Rp 199.000' }}">
-                            <label class="form-label small">Harga / Tahun</label>
-                            <input type="text" class="form-control form-control-sm mb-2" name="price_pro_yearly" value="{{ $settings['price_pro_yearly'] ?? 'Rp 1.990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_pro" rows="3">{{ $settings['features_pro'] ?? "5 Cabang Toko\nFitur Manufaktur\nBot WhatsApp" }}</textarea>
                         </div>
@@ -136,8 +132,6 @@
                             <h6 class="fw-bold text-dark">Paket Business</h6>
                             <label class="form-label small mt-2">Harga / Bulan</label>
                             <input type="text" class="form-control form-control-sm mb-2" name="price_business" value="{{ $settings['price_business'] ?? 'Rp 499.000' }}">
-                            <label class="form-label small">Harga / Tahun</label>
-                            <input type="text" class="form-control form-control-sm mb-2" name="price_business_yearly" value="{{ $settings['price_business_yearly'] ?? 'Rp 4.990.000' }}">
                             <label class="form-label small">Deskripsi/Fitur</label>
                             <textarea class="form-control form-control-sm" name="features_business" rows="3">{{ $settings['features_business'] ?? "Unlimited Cabang\nPrioritas Support\nWhite Label" }}</textarea>
                         </div>
