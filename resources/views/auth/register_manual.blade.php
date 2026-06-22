@@ -97,7 +97,7 @@
             <div class="form-group" style="margin-top: 20px;">
                 <label style="font-weight: normal; display: flex; align-items: center; cursor: pointer;">
                     <input type="checkbox" name="terms_accepted" value="1" required style="margin-right: 10px;">
-                    Saya menyetujui Syarat & Ketentuan yang berlaku.
+                    Saya menyetujui <a href="{{ route('legal.terms') }}" target="_blank" style="color: #007bff; text-decoration: none;">Syarat & Ketentuan yang berlaku</a>.
                 </label>
             </div>
 
