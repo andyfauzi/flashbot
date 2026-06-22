@@ -102,8 +102,19 @@
             </div>
 
             <button type="submit" class="btn">Daftar Sekarang</button>
-            <div style="text-align: center; margin-top: 15px;">
-                <a href="/" style="color: #6c757d; text-decoration: none;">Kembali ke Beranda</a>
+            
+            <div style="text-align: center; margin: 20px 0; color: #6c757d; position: relative;">
+                <hr style="border: 0; border-top: 1px solid #e0e0e0; position: absolute; width: 100%; top: 50%; transform: translateY(-50%); margin: 0; z-index: 1;">
+                <span style="background: white; padding: 0 10px; position: relative; z-index: 2; font-size: 0.9em; color: #999;">ATAU</span>
+            </div>
+
+            <a href="{{ route('auth.google', ['plan' => $plan ?? 'business', 'trial' => $trial ?? '1']) }}" style="display: block; width: 100%; padding: 12px; background-color: #fff; color: #444; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; text-align: center; text-decoration: none; box-sizing: border-box; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px; vertical-align: middle; margin-right: 8px;">
+                Mulai Trial dengan Google
+            </a>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="/" style="color: #6c757d; text-decoration: none; font-size: 0.95em;">&larr; Kembali ke Beranda</a>
             </div>
         </form>
     </div>

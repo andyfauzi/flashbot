@@ -262,8 +262,7 @@
                     <h1 class="hero-title" style="font-size: {{ $settings['hero_title_size'] ?? '4rem' }};">{{ $settings['hero_title'] ?? 'Platform SaaS Kasir Pintar' }}</h1>
                     <p class="hero-subtitle">{{ $settings['hero_subtitle'] ?? 'Kelola puluhan cabang toko Anda dalam satu pintu dengan teknologi cerdas.' }}</p>
                     <div class="d-flex gap-3">
-                        <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg px-5">Mulai Trial dengan Google</a>
-                        <a href="{{ route('auth.register.manual', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-outline-primary btn-lg px-5 bg-white">Daftar Manual</a>
+                        <a href="{{ route('auth.register.manual', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg px-5">Mulai Trial Gratis 30 Hari</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -456,11 +455,8 @@
             <!-- Single Call To Action Button -->
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <a href="{{ route('auth.google', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg" style="font-size: 1.15rem;">
-                        <i class="fa-brands fa-google me-2"></i> Mulai Trial via Google
-                    </a>
-                    <a href="{{ route('auth.register.manual', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-outline-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-sm ms-md-2 mt-3 mt-md-0" style="font-size: 1.15rem;">
-                        <i class="fa-regular fa-envelope me-2"></i> Daftar Manual
+                    <a href="{{ route('auth.register.manual', ['plan' => 'business', 'trial' => '1']) }}" class="btn btn-custom btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg" style="font-size: 1.15rem;">
+                        <i class="fa-solid fa-rocket me-2"></i> Mulai Trial Gratis 30 Hari
                     </a>
                     <p class="text-muted mt-3 small"><i class="fa-solid fa-shield-check me-1"></i> Tanpa kartu kredit. Bisa dibatalkan kapan saja.</p>
                 </div>
