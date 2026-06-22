@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Services\AuditLogger;
-use App\Jobs\ProvisionTenantDatabaseJob;
+use App\Models\TenantRequest;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TenantRegistrationReceivedMail;
 
 class GoogleAuthController extends Controller
 {
@@ -83,10 +85,11 @@ class GoogleAuthController extends Controller
 
         $request->validate([
             'store_name' => 'required|string|max:255',
-            'subdomain' => ['required', 'alpha_dash', 'max:50', 'regex:/^[a-z0-9]+$/', 'not_in:www,api,admin,app,super-admin,superadmin,mail,ftp', 'unique:landlord.tenants,subdomain'],
+            'subdomain' => ['required', 'alpha_dash', 'max:50', 'regex:/^[a-z0-9]+$/', 'not_in:www,api,admin,app,super-admin,superadmin,mail,ftp', 'unique:landlord.tenants,subdomain', 'unique:landlord.tenant_requests,subdomain'],
             'owner_name' => 'required|string|max:255',
             'store_address' => 'required|string',
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
+            'skala_bisnis' => 'nullable|string|max:50',
             'whatsapp_number' => 'required|string|max:50',
             'terms_accepted' => 'accepted',
         ]);
@@ -116,19 +119,24 @@ class GoogleAuthController extends Controller
                 $expiresAt = now()->subDay();
             }
 
-            // 2. Create landlord tenant record but mark it as NOT active yet
+            // 2. Create TenantRequest record
             TenantManager::switchToLandlord();
-            $tenant = Tenant::create([
-                'name' => $request->store_name,
-                'owner_email' => $email,
+            $tenantRequest = TenantRequest::create([
+                'store_name' => $request->store_name,
+                'owner_name' => $name,
+                'email' => $email,
                 'subdomain' => $subdomain,
-                'database_name' => $dbName,
+                'store_address' => $request->store_address,
+                'whatsapp_number' => $request->whatsapp_number,
+                'jenis_layanan' => $request->jenis_layanan,
+                'skala_bisnis' => $request->skala_bisnis,
                 'plan' => $plan,
-                'is_active' => false, // Will be true after provisioning
-                'plan_expires_at' => $expiresAt,
+                'is_trial' => $isTrial,
+                'google_id' => $googleId,
+                'status' => 'pending',
             ]);
 
-            AuditLogger::record('tenant.registered_via_google', "tenant:{$tenant->id}", [
+            AuditLogger::record('tenant_request.created_via_google', "tenant_request:{$tenantRequest->id}", [
                 'name' => $request->store_name,
                 'subdomain' => $subdomain,
                 'email' => $email,
@@ -137,20 +145,11 @@ class GoogleAuthController extends Controller
             // Clear registration session
             session()->forget(['google_reg_email', 'google_reg_name', 'google_reg_id', 'google_reg_plan', 'google_reg_trial']);
 
-            // 2. Dispatch the Provisioning Job
-            ProvisionTenantDatabaseJob::dispatch(
-                $tenant->id,
-                $dbName,
-                $name,
-                $email,
-                $googleId,
-                $request->store_address,
-                $request->whatsapp_number,
-                $request->jenis_layanan
-            );
+            // 3. Send Email
+            Mail::to($email)->send(new TenantRegistrationReceivedMail($tenantRequest));
 
-            // Redirect to loading screen
-            return redirect()->route('auth.google.provisioning', ['tenant_id' => $tenant->id]);
+            // Redirect to pending approval screen
+            return redirect()->route('auth.pending_approval')->with('success', 'Pendaftaran berhasil dikirim dan sedang menunggu persetujuan.');
 
         } catch (\Exception $e) {
             Log::error("Google Registration Completion Error: " . $e->getMessage());

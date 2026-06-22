@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tenant;
+use App\Models\TenantRequest;
 use App\Services\TenantManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Services\AuditLogger;
+use App\Jobs\ProvisionTenantDatabaseJob;
+use App\Mail\TenantRejectedMail;
 
 class SuperAdminController extends Controller
 {
@@ -51,6 +55,90 @@ class SuperAdminController extends Controller
         TenantManager::switchToLandlord();
 
         return view('superadmin.index', compact('tenants', 'totalTenants', 'activeTenants', 'suspendedTenants', 'monthlyRevenue'));
+    }
+
+    public function tenantRequests()
+    {
+        TenantManager::switchToLandlord();
+        $requests = TenantRequest::orderBy('created_at', 'desc')->get();
+        return view('superadmin.requests', compact('requests'));
+    }
+
+    public function approveTenantRequest($id)
+    {
+        TenantManager::switchToLandlord();
+        $tenantRequest = TenantRequest::findOrFail($id);
+
+        if ($tenantRequest->status !== 'pending') {
+            return redirect()->back()->withErrors(['error' => 'Pendaftaran ini sudah tidak berstatus pending.']);
+        }
+
+        try {
+            // 1. Determine Plan Expiration
+            $isTrial = $tenantRequest->is_trial;
+            if ($isTrial) {
+                $days = 30;
+                $expiresAt = now()->addDays($days);
+            } else {
+                $expiresAt = now()->subDay();
+            }
+
+            $dbName = 'tenant_' . $tenantRequest->subdomain;
+
+            // 2. Create Tenant record
+            $tenant = Tenant::create([
+                'name' => $tenantRequest->store_name,
+                'owner_email' => $tenantRequest->email,
+                'subdomain' => $tenantRequest->subdomain,
+                'database_name' => $dbName,
+                'plan' => $tenantRequest->plan,
+                'is_active' => false,
+                'plan_expires_at' => $expiresAt,
+            ]);
+
+            // 3. Update Request Status
+            $tenantRequest->update(['status' => 'approved']);
+
+            AuditLogger::record('tenant_request.approved', "tenant_request:{$tenantRequest->id}", [
+                'tenant_id' => $tenant->id
+            ]);
+
+            // 4. Dispatch Provisioning Job
+            ProvisionTenantDatabaseJob::dispatch(
+                $tenant->id,
+                $dbName,
+                $tenantRequest->owner_name,
+                $tenantRequest->email,
+                $tenantRequest->google_id,
+                $tenantRequest->store_address,
+                $tenantRequest->whatsapp_number,
+                $tenantRequest->jenis_layanan
+            );
+
+            return redirect()->back()->with('success', 'Pendaftaran disetujui. Database tenant sedang dibuat dalam antrean.');
+        } catch (\Exception $e) {
+            Log::error("Approve Tenant Request Error: " . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Gagal menyetujui pendaftaran: ' . $e->getMessage()]);
+        }
+    }
+
+    public function rejectTenantRequest($id)
+    {
+        TenantManager::switchToLandlord();
+        $tenantRequest = TenantRequest::findOrFail($id);
+
+        if ($tenantRequest->status !== 'pending') {
+            return redirect()->back()->withErrors(['error' => 'Pendaftaran ini sudah tidak berstatus pending.']);
+        }
+
+        $tenantRequest->update(['status' => 'rejected']);
+
+        AuditLogger::record('tenant_request.rejected', "tenant_request:{$tenantRequest->id}");
+
+        // Send Email
+        Mail::to($tenantRequest->email)->send(new TenantRejectedMail($tenantRequest));
+
+        return redirect()->back()->with('success', 'Pendaftaran ditolak dan email pemberitahuan telah dikirim.');
     }
 
     public function showMetaSettings()

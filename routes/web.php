@@ -368,6 +368,12 @@ Route::prefix('super-admin')
     ->middleware(['auth', 'super.admin', 'throttle:60,1'])
     ->group(function () {
         Route::get('/', [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('superadmin.index');
+        
+        // Tenant Requests
+        Route::get('/requests', [\App\Http\Controllers\SuperAdminController::class, 'tenantRequests'])->name('superadmin.requests');
+        Route::post('/requests/{id}/approve', [\App\Http\Controllers\SuperAdminController::class, 'approveTenantRequest'])->name('superadmin.requests.approve');
+        Route::post('/requests/{id}/reject', [\App\Http\Controllers\SuperAdminController::class, 'rejectTenantRequest'])->name('superadmin.requests.reject');
+        
         Route::post('/store', [\App\Http\Controllers\SuperAdminController::class, 'store'])->name('superadmin.store');
         Route::post('/{id}/toggle', [\App\Http\Controllers\SuperAdminController::class, 'toggleActive'])->name('superadmin.toggle');
         Route::post('/{id}/update-plan', [\App\Http\Controllers\SuperAdminController::class, 'updatePlan'])->name('superadmin.update_plan');
@@ -430,6 +436,15 @@ Route::prefix('super-admin')
     Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback']);
     Route::get('/auth/google/cancel', [\App\Http\Controllers\GoogleAuthController::class, 'cancelRegistration'])->name('auth.google.cancel');
     Route::post('/auth/google/complete-registration', [\App\Http\Controllers\GoogleAuthController::class, 'completeRegistration'])->name('auth.google.complete');
+
+    // Manual Registration
+    Route::get('/register', [\App\Http\Controllers\ManualRegistrationController::class, 'showRegistrationForm'])->name('auth.register.manual');
+    Route::post('/register', [\App\Http\Controllers\ManualRegistrationController::class, 'submitRegistration'])->name('auth.register.submit');
+
+    // Pending Approval Screen
+    Route::get('/auth/pending-approval', function () {
+        return view('auth.pending_approval');
+    })->name('auth.pending_approval');
 
 Route::get('/auth/google/provisioning', function (\Illuminate\Http\Request $request) {
     \App\Services\TenantManager::switchToLandlord();

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TenantApprovedMail;
 
 class ProvisionTenantDatabaseJob implements ShouldQueue
 {
@@ -104,8 +106,18 @@ class ProvisionTenantDatabaseJob implements ShouldQueue
                 // We use is_active flag as ready state since it was initially false
                 $tenant->update(['is_active' => true]);
                 
-                // Save temp password in cache for provisioning view
-                \Illuminate\Support\Facades\Cache::put('tenant_provision_password_' . $this->tenantId, $tempPassword, now()->addMinutes(60));
+                $appHost = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+                $scheme  = request()->getScheme() ?? 'http';
+                $port    = request()->getPort();
+                $portStr = ($port && $port != 80 && $port != 443) ? ':' . $port : '';
+                $subdomainUrl = $scheme . '://' . $tenant->subdomain . '.' . $appHost . $portStr . '/login';
+                
+                Mail::to($this->ownerEmail)->send(new TenantApprovedMail(
+                    $tenant->name,
+                    $subdomainUrl,
+                    $this->ownerEmail,
+                    $tempPassword
+                ));
             }
 
         } catch (\Exception $e) {

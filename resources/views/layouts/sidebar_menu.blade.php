@@ -327,6 +327,9 @@
                 <a href="{{ route('superadmin.index') }}" class="{{ request()->routeIs('superadmin.index') ? 'active' : '' }}">
                     <i data-lucide="users-gear"></i><span>Daftar Tenant</span>
                 </a>
+                <a href="{{ route('superadmin.requests') }}" class="{{ request()->routeIs('superadmin.requests') ? 'active' : '' }}">
+                    <i data-lucide="clipboard-list"></i><span>Pendaftaran Tenant</span>
+                </a>
                 <a href="{{ route('superadmin.landing_page') }}" class="{{ request()->routeIs('superadmin.landing_page') ? 'active' : '' }}">
                     <i data-lucide="monitor-play"></i><span>Pengaturan Landing</span>
                 </a>

@@ -29,3 +29,4 @@
 -[ ]***masa trial** pastikan masa trial tidak menggangu data keuangan super admin
 -[ ]***buatkan skema untuk plan gratis*** perencanaan jika busines plan tidak laku,busines plan akan di hapus dan digantikan dengan pro plan dengan akses ke semua menu
 - [ ] **Analisis Lingkungan Server**: Lakukan pengecekan dan analisis mendalam untuk mencari tahu mengapa manajemen paket tenant di server lokal (localhost) memiliki perilaku atau sinkronisasi data yang berbeda dibandingkan saat dijalankan di server *live/production*. (Cek *database migration state*, *cache*, dan versi *codebase*).
+-[ ] super admin bisa membatasi jumlah pendaftar melalui dashboard
