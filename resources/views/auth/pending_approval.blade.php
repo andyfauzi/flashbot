@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Berhasil - Flashbot</title>
+    <title>Pendaftaran Berhasil - Tenanta.id</title>
     <!-- Add basic styling or link to your app.css -->
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
@@ -19,7 +19,7 @@
     <div class="card">
         <div class="icon">✓</div>
         <h1>Pendaftaran Sedang Diproses!</h1>
-        <p>Terima kasih telah mendaftar di Flashbot. Permohonan Anda telah kami terima dan saat ini sedang menunggu persetujuan dari tim kami.</p>
+        <p>Terima kasih telah mendaftar di Tenanta.id. Permohonan Anda telah kami terima dan saat ini sedang menunggu persetujuan dari tim kami.</p>
         <p>Silakan periksa email Anda (termasuk folder spam) untuk informasi lebih lanjut. Kami akan mengirimkan email konfirmasi segera setelah permohonan Anda disetujui.</p>
         <a href="/" class="btn">Kembali ke Beranda</a>
     </div>
