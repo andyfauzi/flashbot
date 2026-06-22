@@ -100,7 +100,7 @@
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
                                     <div class="small text-success fw-bold mb-3">
-                                        Tahunan: Rp {{ number_format($priceStarterYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                        Tahunan: Rp {{ number_format($priceStarterYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentStarter }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresStarter as $feature)
@@ -167,7 +167,7 @@
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
                                     <div class="small text-primary fw-bold mb-3">
-                                        Tahunan: Rp {{ number_format($priceProYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                        Tahunan: Rp {{ number_format($priceProYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentPro }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresPro as $feature)
@@ -245,7 +245,7 @@
                                         <small class="text-muted duration-label">/bln</small>
                                     </h5>
                                     <div class="small text-dark fw-bold mb-3">
-                                        Tahunan: Rp {{ number_format($priceBusinessYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercent }}%)
+                                        Tahunan: Rp {{ number_format($priceBusinessYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentBusiness }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
                                         @foreach($featuresBusiness as $feature)

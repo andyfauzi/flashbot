@@ -68,12 +68,13 @@ class PaymentController extends Controller
         $pricePro = (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
         $priceBusiness = (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
 
-        $discountPercent = (int) ($settings['discount_yearly_percent'] ?? 20);
-        $multiplier = 12 * (1 - ($discountPercent / 100));
+        $discountPercentStarter = (int) ($settings['discount_yearly_starter'] ?? 20);
+        $discountPercentPro = (int) ($settings['discount_yearly_pro'] ?? 20);
+        $discountPercentBusiness = (int) ($settings['discount_yearly_business'] ?? 20);
 
-        $priceStarterYearly = $priceStarter * $multiplier;
-        $priceProYearly = $pricePro * $multiplier;
-        $priceBusinessYearly = $priceBusiness * $multiplier;
+        $priceStarterYearly = $priceStarter * 12 * (1 - ($discountPercentStarter / 100));
+        $priceProYearly = $pricePro * 12 * (1 - ($discountPercentPro / 100));
+        $priceBusinessYearly = $priceBusiness * 12 * (1 - ($discountPercentBusiness / 100));
 
         $featuresStarter = array_filter(array_map('trim', explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nMaks 50 Produk\nMaks 3 Kasir")));
         $featuresPro = array_filter(array_map('trim', explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nMaks 500 Produk\nMaks 10 Kasir")));
@@ -81,7 +82,7 @@ class PaymentController extends Controller
 
         $packageMenus = \App\Models\PackageMenu::all();
 
-        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'discountPercent', 'featuresStarter', 'featuresPro', 'featuresBusiness', 'settings', 'packageMenus'));
+        return view('dashboard.billing.index', compact('tenant', 'payments', 'priceStarter', 'pricePro', 'priceBusiness', 'priceStarterYearly', 'priceProYearly', 'priceBusinessYearly', 'discountPercentStarter', 'discountPercentPro', 'discountPercentBusiness', 'featuresStarter', 'featuresPro', 'featuresBusiness', 'settings', 'packageMenus'));
     }
 
     public function startTrial(Request $request)
@@ -168,14 +169,15 @@ class PaymentController extends Controller
         }
 
         $settings = \App\Models\LandlordSetting::pluck('value', 'key')->toArray();
-        $discountPercent = (int) ($settings['discount_yearly_percent'] ?? 20);
-        $multiplier = 12 * (1 - ($discountPercent / 100));
+        $discountPercentStarter = (int) ($settings['discount_yearly_starter'] ?? 20);
+        $discountPercentPro = (int) ($settings['discount_yearly_pro'] ?? 20);
+        $discountPercentBusiness = (int) ($settings['discount_yearly_business'] ?? 20);
 
         if ($duration === 'yearly') {
             $priceMap = [
-                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000') * $multiplier,
-                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000') * $multiplier,
-                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000') * $multiplier,
+                'starter'  => (int) preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000') * 12 * (1 - ($discountPercentStarter / 100)),
+                'pro'      => (int) preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000') * 12 * (1 - ($discountPercentPro / 100)),
+                'business' => (int) preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000') * 12 * (1 - ($discountPercentBusiness / 100)),
             ];
         } else {
             $priceMap = [

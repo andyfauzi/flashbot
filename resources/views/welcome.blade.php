@@ -294,17 +294,17 @@
                         <h4 class="fw-bold text-success mb-3">Starter</h4>
                         <div class="price-amount mb-0">{{ $settings['price_starter'] ?? 'Rp 99.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
-                            $discount_percent = (float)(\App\Models\LandlordSetting::get('discount_yearly_percent', 20));
+                            $discount_percent_starter = (float)(\App\Models\LandlordSetting::get('discount_yearly_starter', 20));
                             $starter_num = (int)preg_replace('/[^0-9]/', '', $settings['price_starter'] ?? '99000');
                             $starter_yearly_normal = $starter_num * 12;
-                            $starter_yearly = $starter_yearly_normal * (1 - ($discount_percent / 100));
+                            $starter_yearly = $starter_yearly_normal * (1 - ($discount_percent_starter / 100));
                         @endphp
                         <div class="text-success small fw-bold mb-4 mt-1">
                             Atau Rp{{ number_format($starter_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
-                            @if($discount_percent > 0)
+                            @if($discount_percent_starter > 0)
                                 <div class="mt-1">
                                     <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($starter_yearly_normal, 0, ',', '.') }}</span>
-                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent_starter }}%</span>
                                 </div>
                             @endif
                         </div>
@@ -364,16 +364,17 @@
                         <h4 class="fw-bold text-primary mb-3">Pro</h4>
                         <div class="price-amount mb-0">{{ $settings['price_pro'] ?? 'Rp 199.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
+                            $discount_percent_pro = (float)(\App\Models\LandlordSetting::get('discount_yearly_pro', 20));
                             $pro_num = (int)preg_replace('/[^0-9]/', '', $settings['price_pro'] ?? '199000');
                             $pro_yearly_normal = $pro_num * 12;
-                            $pro_yearly = $pro_yearly_normal * (1 - ($discount_percent / 100));
+                            $pro_yearly = $pro_yearly_normal * (1 - ($discount_percent_pro / 100));
                         @endphp
                         <div class="text-primary small fw-bold mb-4 mt-1">
                             Atau Rp{{ number_format($pro_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
-                            @if($discount_percent > 0)
+                            @if($discount_percent_pro > 0)
                                 <div class="mt-1">
                                     <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($pro_yearly_normal, 0, ',', '.') }}</span>
-                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent_pro }}%</span>
                                 </div>
                             @endif
                         </div>
@@ -432,16 +433,17 @@
                         <h4 class="fw-bold text-dark mb-3">Business</h4>
                         <div class="price-amount mb-0">{{ $settings['price_business'] ?? 'Rp 499.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
+                            $discount_percent_business = (float)(\App\Models\LandlordSetting::get('discount_yearly_business', 20));
                             $business_num = (int)preg_replace('/[^0-9]/', '', $settings['price_business'] ?? '499000');
                             $business_yearly_normal = $business_num * 12;
-                            $business_yearly = $business_yearly_normal * (1 - ($discount_percent / 100));
+                            $business_yearly = $business_yearly_normal * (1 - ($discount_percent_business / 100));
                         @endphp
                         <div class="text-dark small fw-bold mb-4 mt-1">
                             Atau Rp{{ number_format($business_yearly, 0, ',', '.') }} <span class="fw-normal">/tahun</span>
-                            @if($discount_percent > 0)
+                            @if($discount_percent_business > 0)
                                 <div class="mt-1">
                                     <span class="text-muted text-decoration-line-through fw-normal" style="font-size: 0.85em;">Rp{{ number_format($business_yearly_normal, 0, ',', '.') }}</span>
-                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent }}%</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75em;">Hemat {{ $discount_percent_business }}%</span>
                                 </div>
                             @endif
                         </div>

@@ -188,17 +188,31 @@
             <!-- Tambahan: Harga Paket Tahunan (Berdasarkan Diskon) -->
             <div class="mt-5 mb-4">
                 <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-tags me-2"></i> Pengaturan Harga Paket Langganan Tahunan (1 Tahun)</h5>
-                <p class="text-muted small">Tentukan persentase diskon untuk pelanggan yang memilih langganan tahunan. Harga tahunan akan otomatis dihitung: <code>(Harga Bulanan * 12) - Diskon</code>.</p>
+                <p class="text-muted small">Tentukan persentase diskon untuk pelanggan yang memilih langganan tahunan pada masing-masing paket. Harga tahunan akan otomatis dihitung: <code>(Harga Bulanan * 12) - Diskon</code>.</p>
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Diskon Paket Tahunan (%)</label>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Diskon Paket Starter (%)</label>
                         <div class="input-group">
-                            <input type="number" class="form-control" name="discount_yearly_percent" value="{{ \App\Models\LandlordSetting::get('discount_yearly_percent', '20') }}" min="0" max="100">
+                            <input type="number" class="form-control" name="discount_yearly_starter" value="{{ \App\Models\LandlordSetting::get('discount_yearly_starter', '20') }}" min="0" max="100">
                             <span class="input-group-text">%</span>
                         </div>
-                        <small class="text-muted">Misal: 20 (berarti diskon 20%)</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Diskon Paket Pro (%)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="discount_yearly_pro" value="{{ \App\Models\LandlordSetting::get('discount_yearly_pro', '20') }}" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Diskon Paket Business (%)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="discount_yearly_business" value="{{ \App\Models\LandlordSetting::get('discount_yearly_business', '20') }}" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
                     </div>
                 </div>
+                <small class="text-muted mt-2 d-block">Misal: 20 (berarti diskon 20%). Isi 0 jika tidak ada diskon.</small>
             </div>
 
             <!-- Tambahan: Fallback Pembayaran Manual (Midtrans Error) -->

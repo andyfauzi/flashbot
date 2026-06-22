@@ -536,9 +536,15 @@ class SuperAdminController extends Controller
             \App\Models\LandlordSetting::set('limit_device_business', $request->limit_device_business);
         }
 
-        // Save Yearly Discount Percent
-        if ($request->has('discount_yearly_percent')) {
-            \App\Models\LandlordSetting::set('discount_yearly_percent', $request->discount_yearly_percent);
+        // Save Yearly Discount Percent per Package
+        if ($request->has('discount_yearly_starter')) {
+            \App\Models\LandlordSetting::set('discount_yearly_starter', $request->discount_yearly_starter);
+        }
+        if ($request->has('discount_yearly_pro')) {
+            \App\Models\LandlordSetting::set('discount_yearly_pro', $request->discount_yearly_pro);
+        }
+        if ($request->has('discount_yearly_business')) {
+            \App\Models\LandlordSetting::set('discount_yearly_business', $request->discount_yearly_business);
         }
 
         // Save Show Package Menus
