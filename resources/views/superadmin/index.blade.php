@@ -257,7 +257,7 @@
         <!-- Card Global Package Toggles -->
         <div class="custom-card mt-4">
             <h5 class="fw-bold mb-4"><i class="fa-solid fa-tags text-success me-2"></i>Ketersediaan Paket</h5>
-            <form action="{{ route('superadmin.update_settings') }}" method="POST">
+            <form action="{{ route('superadmin.settings.update') }}" method="POST">
                 @csrf
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" name="plan_gratis_enabled" value="1" id="planGratisEnabled" {{ \App\Models\LandlordSetting::get('plan_gratis_enabled', '1') == '1' ? 'checked' : '' }}>
