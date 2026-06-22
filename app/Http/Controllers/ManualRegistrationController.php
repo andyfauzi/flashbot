@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Models\TenantRequest;
 use App\Services\TenantManager;
 use Illuminate\Support\Facades\Mail;
@@ -36,7 +37,25 @@ class ManualRegistrationController extends Controller
             'terms_accepted' => 'accepted',
             'plan' => 'required|string',
             'trial' => 'required|in:0,1',
+            'g-recaptcha-response' => 'required',
+        ], [
+            'g-recaptcha-response.required' => 'Silakan centang kotak "Saya bukan robot".',
         ]);
+
+        $recaptchaResponse = $request->input('g-recaptcha-response');
+        $recaptchaSecret = env('RECAPTCHA_SECRET_KEY');
+
+        if ($recaptchaSecret) {
+            $verifyResponse = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => $recaptchaSecret,
+                'response' => $recaptchaResponse,
+                'remoteip' => $request->ip()
+            ]);
+
+            if (!$verifyResponse->json('success')) {
+                return redirect()->back()->withInput()->withErrors(['g-recaptcha-response' => 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.']);
+            }
+        }
 
         $subdomain = strtolower($request->subdomain);
         $isTrial = $request->trial === '1';

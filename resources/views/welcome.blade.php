@@ -599,6 +599,20 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Skala Bisnis (Estimasi Pelanggan per Hari)</label>
+                            <select name="skala_bisnis" class="form-select form-select-lg @error('skala_bisnis') is-invalid @enderror" required>
+                                <option value="" disabled {{ old('skala_bisnis') ? '' : 'selected' }}>-- Pilih Skala Bisnis --</option>
+                                <option value="1-50" {{ old('skala_bisnis') == '1-50' ? 'selected' : '' }}>1 - 50 Pelanggan</option>
+                                <option value="51-100" {{ old('skala_bisnis') == '51-100' ? 'selected' : '' }}>51 - 100 Pelanggan</option>
+                                <option value="101-500" {{ old('skala_bisnis') == '101-500' ? 'selected' : '' }}>101 - 500 Pelanggan</option>
+                                <option value=">500" {{ old('skala_bisnis') == '>500' ? 'selected' : '' }}>Lebih dari 500 Pelanggan</option>
+                            </select>
+                            @error('skala_bisnis')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-semibold">Nomor WhatsApp</label>

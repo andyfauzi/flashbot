@@ -101,6 +101,15 @@
                 </label>
             </div>
 
+            @if(env('RECAPTCHA_SITE_KEY'))
+            <div class="form-group" style="margin-top: 20px;">
+                <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
+                @error('g-recaptcha-response')
+                    <div style="color: #dc3545; font-size: 14px; margin-top: 5px;">{{ $message }}</div>
+                @enderror
+            </div>
+            @endif
+
             <button type="submit" class="btn">Daftar Sekarang</button>
             
             <div style="text-align: center; margin: 20px 0; color: #6c757d; position: relative;">
