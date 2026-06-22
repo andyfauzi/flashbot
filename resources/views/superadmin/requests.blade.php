@@ -156,11 +156,19 @@
 
                                         <form action="{{ route('superadmin.requests.reject', $req->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-semibold" onclick="return confirm('Apakah Anda yakin ingin menolak pendaftaran ini?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-semibold me-1" onclick="return confirm('Apakah Anda yakin ingin menolak pendaftaran ini?')">
                                                 <i class="fa-solid fa-xmark me-1"></i> Reject
                                             </button>
                                         </form>
                                         @endif
+                                        
+                                        <form action="{{ route('superadmin.requests.destroy', $req->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger px-3 rounded-pill fw-semibold" onclick="return confirm('Apakah Anda yakin ingin menghapus data pendaftaran ini selamanya?')">
+                                                <i class="fa-solid fa-trash me-1"></i> Hapus
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
 

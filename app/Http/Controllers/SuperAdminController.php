@@ -141,6 +141,18 @@ class SuperAdminController extends Controller
         return redirect()->back()->with('success', 'Pendaftaran ditolak dan email pemberitahuan telah dikirim.');
     }
 
+    public function destroyTenantRequest($id)
+    {
+        TenantManager::switchToLandlord();
+        $tenantRequest = TenantRequest::findOrFail($id);
+
+        $tenantRequest->delete();
+
+        AuditLogger::record('tenant_request.deleted', "tenant_request:{$id}");
+
+        return redirect()->back()->with('success', 'Data pendaftaran berhasil dihapus.');
+    }
+
     public function showMetaSettings()
     {
         TenantManager::switchToLandlord();

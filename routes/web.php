@@ -373,6 +373,7 @@ Route::prefix('super-admin')
         Route::get('/requests', [\App\Http\Controllers\SuperAdminController::class, 'tenantRequests'])->name('superadmin.requests');
         Route::post('/requests/{id}/approve', [\App\Http\Controllers\SuperAdminController::class, 'approveTenantRequest'])->name('superadmin.requests.approve');
         Route::post('/requests/{id}/reject', [\App\Http\Controllers\SuperAdminController::class, 'rejectTenantRequest'])->name('superadmin.requests.reject');
+        Route::delete('/requests/{id}', [\App\Http\Controllers\SuperAdminController::class, 'destroyTenantRequest'])->name('superadmin.requests.destroy');
         
         Route::post('/store', [\App\Http\Controllers\SuperAdminController::class, 'store'])->name('superadmin.store');
         Route::post('/{id}/toggle', [\App\Http\Controllers\SuperAdminController::class, 'toggleActive'])->name('superadmin.toggle');
