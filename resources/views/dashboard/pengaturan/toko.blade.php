@@ -98,6 +98,7 @@
                                     <option value="keduanya" {{ old('jenis_layanan', $identitas->jenis_layanan ?? 'keduanya') == 'keduanya' ? 'selected' : '' }}>Melayani Keduanya</option>
                                 </select>
                                 <div class="form-text text-muted">Mengubah jenis layanan akan menyesuaikan fitur yang muncul di Dashboard (seperti Manajemen Meja dan Reservasi).</div>
+                                @error('jenis_layanan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
                     </div>
@@ -123,24 +124,6 @@
                                     <small class="text-muted">Jika diisi, pesanan yang masuk di luar jam ini akan otomatis diproses/dijadwalkan keesokan paginya saat toko buka kembali. Berlaku untuk pesanan ambil di toko maupun pesan antar (delivery).</small>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card border border-info shadow-sm rounded-4 mb-4 bg-light">
-                        <div class="card-header bg-info text-white border-bottom-0 py-3 rounded-top-4">
-                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-store-slash me-2"></i> Pengaturan Model Bisnis (Dine-in / Take Away)</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <label for="jenis_layanan" class="form-label fw-bold text-dark">Jenis Layanan F&B</label>
-                                <select class="form-select @error('jenis_layanan') is-invalid @enderror" id="jenis_layanan" name="jenis_layanan" required>
-                                    <option value="dine_in" {{ old('jenis_layanan', $identitas->jenis_layanan ?? 'keduanya') == 'dine_in' ? 'selected' : '' }}>Hanya Dine-in (Makan di Tempat)</option>
-                                    <option value="take_away" {{ old('jenis_layanan', $identitas->jenis_layanan ?? 'keduanya') == 'take_away' ? 'selected' : '' }}>Hanya Take Away / Delivery</option>
-                                    <option value="keduanya" {{ old('jenis_layanan', $identitas->jenis_layanan ?? 'keduanya') == 'keduanya' ? 'selected' : '' }}>Melayani Keduanya</option>
-                                </select>
-                                <div class="form-text text-muted">Mengubah jenis layanan akan menyesuaikan fitur yang muncul di Dashboard (seperti Manajemen Meja dan Reservasi).</div>
-                                @error('jenis_layanan') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
                         </div>
                     </div>
 
