@@ -266,6 +266,11 @@
                     @if(!$hMenu) <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.6rem;">{{ $reqPlan }}</span> @endif
                 </a>
                 
+                <a href="{{ $hMenu ? route('dashboard.pengaturan.landing_page') : '#' }}" class="{{ request()->routeIs('dashboard.pengaturan.landing_page') ? 'active' : '' }} {{ !$hMenu ? 'opacity-50' : '' }}" {!! !$hMenu ? 'onclick="event.preventDefault(); Swal.fire(\'Fitur Terkunci\', \'Silakan upgrade ke paket '.$reqPlan.' untuk mengakses Pengaturan Landing Page.\', \'info\');"' : '' !!}>
+                    <i data-lucide="globe"></i><span>Pengaturan Landing Page</span>
+                    @if(!$hMenu) <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.6rem;">{{ $reqPlan }}</span> @endif
+                </a>
+                
                 @php $hMenu = \App\Helpers\TenantPlanHelper::hasMenu('tagihan_paket'); $reqPlan = \App\Helpers\TenantPlanHelper::getMinimumPlan('tagihan_paket'); @endphp
                 <a href="{{ $hMenu ? route('dashboard.billing.index') : '#' }}" class="{{ request()->routeIs('dashboard.billing.*') ? 'active' : '' }} {{ !$hMenu ? 'opacity-50' : '' }}" {!! !$hMenu ? 'onclick="event.preventDefault(); Swal.fire(\'Fitur Terkunci\', \'Silakan upgrade ke paket '.$reqPlan.' untuk mengakses Tagihan & Paket.\', \'info\');"' : '' !!}>
                     <i data-lucide="credit-card"></i><span>Tagihan & Paket</span>

@@ -309,6 +309,10 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
         Route::get('/pengaturan/toko', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'index'])->name('dashboard.pengaturan.toko');
         Route::post('/pengaturan/toko', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'update'])->name('dashboard.pengaturan.toko.update');
 
+        // Pengaturan Landing Page
+        Route::get('/pengaturan/landing-page', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'landingPage'])->name('dashboard.pengaturan.landing_page');
+        Route::post('/pengaturan/landing-page', [\App\Http\Controllers\Dashboard\IdentitasTokoController::class, 'updateLandingPage'])->name('dashboard.pengaturan.landing_page.update');
+
         // Pengaturan Payment Gateway
         Route::get('/pengaturan/payment', [\App\Http\Controllers\Dashboard\PaymentGatewayController::class, 'index'])->name('dashboard.pengaturan.payment');
         Route::post('/pengaturan/payment', [\App\Http\Controllers\Dashboard\PaymentGatewayController::class, 'update'])->name('dashboard.pengaturan.payment.update');

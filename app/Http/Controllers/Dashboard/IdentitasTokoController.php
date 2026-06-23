@@ -31,16 +31,10 @@ class IdentitasTokoController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
             'nomor_rekening' => 'nullable|string',
             'qris' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
-            'tema_portal' => 'required|in:warm,cool,kalem',
             'tema_desktop' => 'required|in:warm,cool,kalem',
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
             'jam_buka' => 'nullable|date_format:H:i',
             'jam_tutup' => 'nullable|date_format:H:i',
-            'syarat_ketentuan_portal' => 'nullable|string',
-            'kontak_portal' => 'nullable|string',
-            'deskripsi_toko' => 'nullable|string',
-            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB
-            'galeri.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072', // max 3MB per file
         ]);
 
         $identitas = IdentitasToko::first() ?? new IdentitasToko();
@@ -50,45 +44,12 @@ class IdentitasTokoController extends Controller
         $identitas->nomor_telepon = $validated['nomor_telepon'];
         $identitas->pesan_footer = $validated['pesan_footer'];
         $identitas->nomor_rekening = $validated['nomor_rekening'];
-        $identitas->tema_portal = $validated['tema_portal'];
         $identitas->tema_desktop = $validated['tema_desktop'];
         $identitas->jenis_layanan = $validated['jenis_layanan'];
         $identitas->jam_buka = $validated['jam_buka'] ?? null;
         $identitas->jam_tutup = $validated['jam_tutup'] ?? null;
-        $identitas->syarat_ketentuan_portal = $validated['syarat_ketentuan_portal'] ?? null;
-        $identitas->kontak_portal = $validated['kontak_portal'] ?? null;
-        $identitas->deskripsi_toko = $validated['deskripsi_toko'] ?? null;
 
-        if ($request->hasFile('hero_image')) {
-            if ($identitas->hero_image_path && Storage::disk('public')->exists($identitas->hero_image_path)) {
-                Storage::disk('public')->delete($identitas->hero_image_path);
-            }
-            $path = $request->file('hero_image')->store('identitas_toko/hero', 'public');
-            $identitas->hero_image_path = $path;
-        }
 
-        if ($request->hasFile('galeri')) {
-            $existingGaleri = is_array($identitas->galeri_paths) ? $identitas->galeri_paths : [];
-            $newGaleriPaths = [];
-            foreach ($request->file('galeri') as $file) {
-                if ($file->isValid()) {
-                    $newGaleriPaths[] = $file->store('identitas_toko/galeri', 'public');
-                }
-            }
-            // Append or replace? Let's just replace the whole gallery for simplicity, 
-            // or we could append. In most simple implementations, uploading new files appends them.
-            // For this, let's just append to existing to make it simple, or user can clear them.
-            // But wait, there is no UI to delete individual images. So let's replace them if they upload new ones.
-            // If they upload, we replace the old ones.
-            if (count($existingGaleri) > 0) {
-                foreach ($existingGaleri as $oldPath) {
-                    if (Storage::disk('public')->exists($oldPath)) {
-                        Storage::disk('public')->delete($oldPath);
-                    }
-                }
-            }
-            $identitas->galeri_paths = $newGaleriPaths;
-        }
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
@@ -113,5 +74,67 @@ class IdentitasTokoController extends Controller
         $identitas->save();
 
         return redirect()->route('dashboard.pengaturan.toko')->with('sukses', 'Identitas toko berhasil diperbarui!');
+    }
+
+    public function landingPage()
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized action. Halaman ini sangat privat dan hanya dapat diakses oleh Admin.');
+        }
+        $identitas = IdentitasToko::first();
+        return view('dashboard.pengaturan.landing_page', compact('identitas'));
+    }
+
+    public function updateLandingPage(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'tema_portal' => 'required|in:warm,cool,kalem',
+            'syarat_ketentuan_portal' => 'nullable|string',
+            'kontak_portal' => 'nullable|string',
+            'deskripsi_toko' => 'nullable|string',
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'galeri.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+        ]);
+
+        $identitas = IdentitasToko::first() ?? new IdentitasToko();
+
+        $identitas->tema_portal = $validated['tema_portal'];
+        $identitas->syarat_ketentuan_portal = $validated['syarat_ketentuan_portal'] ?? null;
+        $identitas->kontak_portal = $validated['kontak_portal'] ?? null;
+        $identitas->deskripsi_toko = $validated['deskripsi_toko'] ?? null;
+
+        if ($request->hasFile('hero_image')) {
+            if ($identitas->hero_image_path && Storage::disk('public')->exists($identitas->hero_image_path)) {
+                Storage::disk('public')->delete($identitas->hero_image_path);
+            }
+            $path = $request->file('hero_image')->store('identitas_toko/hero', 'public');
+            $identitas->hero_image_path = $path;
+        }
+
+        if ($request->hasFile('galeri')) {
+            $existingGaleri = is_array($identitas->galeri_paths) ? $identitas->galeri_paths : [];
+            $newGaleriPaths = [];
+            foreach ($request->file('galeri') as $file) {
+                if ($file->isValid()) {
+                    $newGaleriPaths[] = $file->store('identitas_toko/galeri', 'public');
+                }
+            }
+            if (count($existingGaleri) > 0) {
+                foreach ($existingGaleri as $oldPath) {
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+            }
+            $identitas->galeri_paths = $newGaleriPaths;
+        }
+
+        $identitas->save();
+
+        return redirect()->route('dashboard.pengaturan.landing_page')->with('sukses', 'Pengaturan Landing Page berhasil diperbarui!');
     }
 }
