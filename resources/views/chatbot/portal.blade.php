@@ -1626,13 +1626,15 @@
             // Transition UI sections
             document.getElementById('sectionKategori').style.display = 'none';
             document.getElementById('sectionProduk').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Scroll ke bagian produk
+            document.getElementById('katalog').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function showCategoriesSection() {
             document.getElementById('sectionProduk').style.display = 'none';
             document.getElementById('sectionKategori').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('katalog').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // Layout Toggle (Grid vs List)
