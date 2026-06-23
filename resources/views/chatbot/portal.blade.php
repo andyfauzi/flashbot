@@ -303,7 +303,7 @@
         /* Categories Grid (Awal) */
         .categories-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
             margin-top: 10px;
         }
@@ -311,12 +311,12 @@
         .category-card {
             background: var(--card-bg);
             border-radius: 18px;
-            padding: 28px 20px;
+            padding: 24px 20px;
             text-align: center;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -326,19 +326,34 @@
         }
 
         .category-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
             border-color: var(--primary);
-            box-shadow: 0 15px 30px rgba(124, 58, 237, 0.1);
+            box-shadow: 0 12px 24px rgba(31, 122, 92, 0.15);
         }
 
         .category-card-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-            transition: var(--transition);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: rgba(31, 122, 92, 0.1); /* Primary color low opacity */
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .category-card-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke-width: 2px;
         }
 
         .category-card:hover .category-card-icon {
-            transform: scale(1.15);
+            transform: scale(1.1);
+            background-color: var(--primary);
+            color: #ffffff;
         }
 
         .category-card-title {
@@ -351,6 +366,16 @@
         .category-card-count {
             font-size: 12px;
             color: var(--text-muted);
+        }
+
+        .category-card.active {
+            border-color: var(--primary);
+            background-color: rgba(31, 122, 92, 0.05); /* Primary color low opacity */
+        }
+
+        .category-card.active .category-card-icon {
+            background-color: var(--primary);
+            color: #ffffff;
         }
 
         /* Products Grid (Default) */
@@ -1245,16 +1270,30 @@
         <div id="sectionKategori">
             <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--text-main); text-align: center;">Pilih Kategori Menu</h2>
             <div class="categories-grid">
-                <div class="category-card" onclick="selectCategory('all', 'Semua Menu')">
-                    <div class="category-card-icon">🌟</div>
+                <div class="category-card" onclick="selectCategory('all', 'Semua Menu', this)">
+                    <div class="category-card-icon"><i data-lucide="layout-grid"></i></div>
                     <div class="category-card-title">Semua Menu</div>
                     <div class="category-card-count">{{ $kategoris->sum(function($k){ return $k->produks->count(); }) + $produkTanpaKategori->count() }} Produk</div>
                 </div>
 
+                @php
+                    function getLucideIcon($name) {
+                        $n = strtolower($name);
+                        if (str_contains($n, 'minum')) return 'coffee';
+                        if (str_contains($n, 'makan')) return 'utensils';
+                        if (str_contains($n, 'dessert') || str_contains($n, 'kue') || str_contains($n, 'cake') || str_contains($n, 'pastry') || str_contains($n, 'snack')) return 'cake-slice';
+                        if (str_contains($n, 'paket') || str_contains($n, 'bundling')) return 'package';
+                        if (str_contains($n, 'promo') || str_contains($n, 'diskon')) return 'tag';
+                        if (str_contains($n, 'baru') || str_contains($n, 'new')) return 'sparkles';
+                        if (str_contains($n, 'spesial') || str_contains($n, 'special')) return 'star';
+                        return 'layout-grid'; // fallback
+                    }
+                @endphp
+
                 @foreach($kategoris as $kat)
                     @if($kat->produks->count() > 0)
-                        <div class="category-card" onclick="selectCategory('cat-{{ $kat->id }}', '{{ $kat->nama }}')">
-                            <div class="category-card-icon">🧁</div>
+                        <div class="category-card" onclick="selectCategory('cat-{{ $kat->id }}', '{{ $kat->nama }}', this)">
+                            <div class="category-card-icon"><i data-lucide="{{ getLucideIcon($kat->nama) }}"></i></div>
                             <div class="category-card-title">{{ $kat->nama }}</div>
                             <div class="category-card-count">{{ $kat->produks->count() }} Produk</div>
                         </div>
@@ -1262,8 +1301,8 @@
                 @endforeach
 
                 @if($produkTanpaKategori->count() > 0)
-                    <div class="category-card" onclick="selectCategory('cat-uncategorized', 'Lainnya')">
-                        <div class="category-card-icon">📦</div>
+                    <div class="category-card" onclick="selectCategory('cat-uncategorized', 'Lainnya', this)">
+                        <div class="category-card-icon"><i data-lucide="package"></i></div>
                         <div class="category-card-title">Lainnya</div>
                         <div class="category-card-count">{{ $produkTanpaKategori->count() }} Produk</div>
                     </div>
@@ -1560,8 +1599,15 @@
         let cart = [];
 
         // Category Screen Navigation
-        function selectCategory(catClass, catName) {
+        function selectCategory(catClass, catName, element = null) {
             document.getElementById('activeCategoryTitle').textContent = catName;
+
+            // Handle active class if element is provided
+            if (element) {
+                const allCards = document.querySelectorAll('.category-card');
+                allCards.forEach(card => card.classList.remove('active'));
+                element.classList.add('active');
+            }
 
             // Toggle cards visibility
             const cards = document.querySelectorAll('.product-card');
@@ -2212,5 +2258,11 @@
     @if(isset($identitas) && $identitas->is_midtrans_active && $identitas->midtrans_client_key)
         <script src="{{ $identitas->midtrans_is_production ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ $identitas->midtrans_client_key }}"></script>
     @endif
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
