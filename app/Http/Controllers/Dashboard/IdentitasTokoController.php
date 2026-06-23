@@ -38,6 +38,9 @@ class IdentitasTokoController extends Controller
             'jam_tutup' => 'nullable|date_format:H:i',
             'syarat_ketentuan_portal' => 'nullable|string',
             'kontak_portal' => 'nullable|string',
+            'deskripsi_toko' => 'nullable|string',
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB
+            'galeri.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072', // max 3MB per file
         ]);
 
         $identitas = IdentitasToko::first() ?? new IdentitasToko();
@@ -54,6 +57,38 @@ class IdentitasTokoController extends Controller
         $identitas->jam_tutup = $validated['jam_tutup'] ?? null;
         $identitas->syarat_ketentuan_portal = $validated['syarat_ketentuan_portal'] ?? null;
         $identitas->kontak_portal = $validated['kontak_portal'] ?? null;
+        $identitas->deskripsi_toko = $validated['deskripsi_toko'] ?? null;
+
+        if ($request->hasFile('hero_image')) {
+            if ($identitas->hero_image_path && Storage::disk('public')->exists($identitas->hero_image_path)) {
+                Storage::disk('public')->delete($identitas->hero_image_path);
+            }
+            $path = $request->file('hero_image')->store('identitas_toko/hero', 'public');
+            $identitas->hero_image_path = $path;
+        }
+
+        if ($request->hasFile('galeri')) {
+            $existingGaleri = is_array($identitas->galeri_paths) ? $identitas->galeri_paths : [];
+            $newGaleriPaths = [];
+            foreach ($request->file('galeri') as $file) {
+                if ($file->isValid()) {
+                    $newGaleriPaths[] = $file->store('identitas_toko/galeri', 'public');
+                }
+            }
+            // Append or replace? Let's just replace the whole gallery for simplicity, 
+            // or we could append. In most simple implementations, uploading new files appends them.
+            // For this, let's just append to existing to make it simple, or user can clear them.
+            // But wait, there is no UI to delete individual images. So let's replace them if they upload new ones.
+            // If they upload, we replace the old ones.
+            if (count($existingGaleri) > 0) {
+                foreach ($existingGaleri as $oldPath) {
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+            }
+            $identitas->galeri_paths = $newGaleriPaths;
+        }
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists

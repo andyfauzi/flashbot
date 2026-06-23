@@ -74,6 +74,7 @@ class ProdukController extends Controller
                 'foto' => $fotoPath,
                 'aktif' => $request->has('aktif'),
                 'is_made_to_order' => $request->has('is_made_to_order'),
+                'is_favorite' => $request->has('is_favorite'),
                 'promo_min_qty' => $request->promo_min_qty,
                 'promo_harga' => $request->promo_harga
             ]);
@@ -237,6 +238,7 @@ class ProdukController extends Controller
                 'foto' => $fotoPath,
                 'aktif' => $request->has('aktif'),
                 'is_made_to_order' => $request->has('is_made_to_order'),
+                'is_favorite' => $request->has('is_favorite'),
                 'promo_min_qty' => $request->promo_min_qty,
                 'promo_harga' => $request->promo_harga
             ]);
@@ -279,6 +281,7 @@ class ProdukController extends Controller
             $newProduk->stok = 0; // reset stock
             $newProduk->promo_min_qty = $produk->promo_min_qty;
             $newProduk->promo_harga = $produk->promo_harga;
+            $newProduk->is_favorite = $produk->is_favorite;
             $newProduk->save();
 
             // Duplicate Varians

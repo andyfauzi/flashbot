@@ -38,6 +38,9 @@ class IdentitasToko extends Model
         'nominal_dp_reservasi',
         'syarat_ketentuan_portal',
         'kontak_portal',
+        'hero_image_path',
+        'deskripsi_toko',
+        'galeri_paths',
     ];
 
     protected $casts = [
@@ -45,5 +48,6 @@ class IdentitasToko extends Model
         'wajib_dp_reservasi' => 'boolean',
         'midtrans_is_production' => 'boolean',
         'is_midtrans_active' => 'boolean',
+        'galeri_paths' => 'array',
     ];
 }

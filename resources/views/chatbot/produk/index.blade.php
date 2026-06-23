@@ -34,7 +34,12 @@
                         @forelse($produks as $produk)
                         <tr>
                             <td class="px-4"><span class="badge bg-secondary">{{ $produk->kode }}</span></td>
-                            <td class="fw-bold">{{ $produk->nama }}</td>
+                            <td class="fw-bold">
+                                {{ $produk->nama }}
+                                @if($produk->is_favorite)
+                                    <i class="fa-solid fa-star text-warning ms-1" title="Menu Favorit"></i>
+                                @endif
+                            </td>
                             <td><span class="badge bg-light text-dark border">{{ $produk->kategori->nama ?? '-' }}</span></td>
                             <td>Rp {{ number_format($produk->harga, 0, ',', '.') }}</td>
                             <td>

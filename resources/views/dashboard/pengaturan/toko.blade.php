@@ -183,6 +183,38 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="mb-4">
+                                <label for="deskripsi_toko" class="form-label fw-bold text-dark">Deskripsi Tempat / Tentang Kami</label>
+                                <textarea class="form-control @error('deskripsi_toko') is-invalid @enderror" id="deskripsi_toko" name="deskripsi_toko" rows="3" placeholder="Tuliskan cerita singkat atau suasana tempat Anda di sini...">{{ old('deskripsi_toko', $identitas->deskripsi_toko ?? '') }}</textarea>
+                                @error('deskripsi_toko') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="hero_image" class="form-label fw-bold text-dark">Gambar Banner Utama (Hero Image)</label>
+                                @if(isset($identitas->hero_image_path) && $identitas->hero_image_path)
+                                    <div class="mb-2">
+                                        <img src="{{ asset('storage/' . $identitas->hero_image_path) }}" alt="Hero Image" class="img-thumbnail" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                    </div>
+                                @endif
+                                <input class="form-control @error('hero_image') is-invalid @enderror" type="file" id="hero_image" name="hero_image" accept="image/jpeg, image/png, image/jpg, image/webp">
+                                <div class="form-text text-muted">Gambar ini akan menjadi background paling atas di portal Anda. Resolusi disarankan: 1920x1080 (Landscape). Maks 5MB.</div>
+                                @error('hero_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="galeri" class="form-label fw-bold text-dark">Galeri Suasana Tempat (Maksimal 6 Foto)</label>
+                                @if(isset($identitas->galeri_paths) && is_array($identitas->galeri_paths) && count($identitas->galeri_paths) > 0)
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        @foreach($identitas->galeri_paths as $galeri)
+                                            <img src="{{ asset('storage/' . $galeri) }}" alt="Galeri" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;">
+                                        @endforeach
+                                    </div>
+                                @endif
+                                <input class="form-control @error('galeri.*') is-invalid @enderror" type="file" id="galeri" name="galeri[]" multiple accept="image/jpeg, image/png, image/jpg, image/webp">
+                                <div class="form-text text-muted">Unggah beberapa foto suasana tempat untuk menarik pengunjung. Jika Anda mengunggah ulang, foto lama akan tertimpa. Maks 3MB per file.</div>
+                                @error('galeri.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-4">
                                 <label for="kontak_portal" class="form-label fw-bold text-dark">Informasi Kontak Portal</label>
                                 <textarea class="form-control @error('kontak_portal') is-invalid @enderror" id="kontak_portal" name="kontak_portal" rows="4" placeholder="Contoh:&#10;Email: halo@toko.com&#10;Alamat: Jl. Sudirman No 123&#10;WhatsApp: 08123456789">{{ old('kontak_portal', $identitas->kontak_portal ?? '') }}</textarea>
                                 <div class="form-text text-muted">Informasi ini akan ditampilkan pada bagian 'Kontak' di halaman landing page pelanggan.</div>

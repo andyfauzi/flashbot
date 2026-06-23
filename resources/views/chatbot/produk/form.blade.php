@@ -52,12 +52,20 @@
                           <label class="form-label fw-bold">Harga Pokok (Rp)</label>
                           <input type="number" name="harga" class="form-control form-control-premium" value="{{ old('harga', isset($produk) ? (int)$produk->harga : '') }}" required placeholder="Contoh: 50000" min="0">
                       </div>
-                      <div class="col-md-4 mb-3">
+                      <div class="col-md-3 mb-3">
                           <label class="form-label fw-bold">Tipe Produksi</label>
                           <div class="form-check form-switch mt-2">
                               <input class="form-check-input" type="checkbox" name="is_made_to_order" value="1" style="transform: scale(1.3); margin-left: -2em;" 
                                   {{ old('is_made_to_order', $produk->is_made_to_order ?? false) ? 'checked' : '' }}>
-                              <label class="form-check-label ms-2" title="Jika aktif, bahan baku akan dipotong saat dipesan. Jika tidak, stok produk jadi yang akan dipotong.">Made-to-Order</label>
+                              <label class="form-check-label ms-2" title="Jika aktif, bahan baku akan dipotong saat dipesan.">Made-to-Order</label>
+                          </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label class="form-label fw-bold">Menu Favorit</label>
+                          <div class="form-check form-switch mt-2">
+                              <input class="form-check-input" type="checkbox" name="is_favorite" value="1" style="transform: scale(1.3); margin-left: -2em;" 
+                                  {{ old('is_favorite', $produk->is_favorite ?? false) ? 'checked' : '' }}>
+                              <label class="form-check-label ms-2" title="Produk favorit akan ditampilkan di bagian atas Landing Page.">Jadikan Favorit</label>
                           </div>
                       </div>
                       <div class="col-md-4 mb-3">

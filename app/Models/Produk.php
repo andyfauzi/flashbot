@@ -41,7 +41,8 @@ class Produk extends Model
         'stok_proses_dapur',
         'aktif',
         'promo_min_qty',
-        'promo_harga'
+        'promo_harga',
+        'is_favorite'
     ];
 
     protected $casts = [
@@ -51,7 +52,8 @@ class Produk extends Model
         'aktif' => 'boolean',
         'is_made_to_order' => 'boolean',
         'promo_min_qty' => 'integer',
-        'promo_harga' => 'float'
+        'promo_harga' => 'float',
+        'is_favorite' => 'boolean'
     ];
 
     public function varians()

@@ -129,6 +129,155 @@
             background: var(--primary-light);
         }
 
+        /* Hero Image Section */
+        .hero-section {
+            position: relative;
+            height: 400px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #ffffff;
+            overflow: hidden;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 24px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .hero-content h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: -0.5px;
+        }
+
+        .hero-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            opacity: 0.9;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-btn {
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            border: none;
+        }
+
+        .hero-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .hero-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .hero-btn-secondary {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .hero-btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* Gallery CSS */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .gallery-item {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            aspect-ratio: 4/3;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            transition: var(--transition);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .sticky-navbar a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            transition: var(--transition);
+        }
+
+        .sticky-navbar a:hover, .sticky-navbar a.active {
+            color: var(--primary-dark);
+            background: var(--primary-light);
+        }
+
         /* Section Styling */
         .page-section {
             padding-top: 40px;
@@ -1027,43 +1176,69 @@
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header id="beranda">
-        <h1>{{ $identitas->nama_toko ?? 'Toko NINSKY' }}</h1>
-        @if(isset($meja))
-            <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 6px 16px; border-radius: 100px; font-weight: 700; margin-bottom: 12px; font-size: 14px;">
-                🍽️ Pesan untuk Meja: {{ $meja->nomor_meja }}
-            </div>
-            <p>Pindai kode meja berhasil. Silakan pesan menu favorit Anda, pesanan akan langsung diproses ke meja ini.</p>
-        @else
-            <p>Silakan pesan menu favorit Anda secara mandiri di bawah ini. Cepat, mudah, dan langsung diproses!</p>
+    <!-- Hero Section -->
+    <header id="beranda" class="hero-section" style="@if(isset($identitas->hero_image_path)) background-image: url('{{ asset('storage/' . $identitas->hero_image_path) }}'); @else background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); @endif">
+        @if(isset($identitas->hero_image_path))
+            <div class="hero-overlay"></div>
         @endif
+        <div class="hero-content">
+            <h1>{{ $identitas->nama_toko ?? 'Toko NINSKY' }}</h1>
+            @if(isset($meja))
+                <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 8px 20px; border-radius: 100px; font-weight: 700; margin-bottom: 16px; font-size: 15px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+                    🍽️ Pesan untuk Meja: {{ $meja->nomor_meja }}
+                </div>
+                <p>Pindai kode meja berhasil. Silakan pesan menu favorit Anda, pesanan akan langsung diproses ke meja ini.</p>
+            @else
+                <p>Silakan pesan menu favorit Anda secara mandiri di bawah ini. Cepat, mudah, dan langsung diproses!</p>
+            @endif
+
+            <div class="hero-buttons">
+                @if(!isset($meja) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
+                    <button onclick="openReservasiModal()" class="hero-btn hero-btn-primary">📅 Reservasi Meja</button>
+                @endif
+                <a href="#katalog" class="hero-btn hero-btn-secondary">Lihat Menu</a>
+            </div>
+        </div>
     </header>
 
     <!-- Sticky Navbar -->
     <nav class="sticky-navbar">
         <a href="#beranda" class="nav-link active">Beranda</a>
+        @if(isset($identitas->deskripsi_toko) || isset($identitas->galeri_paths))
+            <a href="#tentang" class="nav-link">Tentang Kami</a>
+        @endif
         <a href="#katalog" class="nav-link">Katalog</a>
         <a href="#kontak" class="nav-link">Kontak</a>
-        <a href="#syarat_ketentuan" class="nav-link">Syarat & Ketentuan</a>
+        <a href="#syarat_ketentuan" class="nav-link">S&K</a>
     </nav>
 
     <!-- Main Container -->
     <div class="container">
         
-        @if(!isset($meja) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
-        <div class="page-section" style="padding-top: 20px;">
-            <div style="background: var(--card-bg); padding: 16px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Ingin Makan di Tempat?</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Reservasi meja Anda sekarang tanpa antre!</p>
+        @if(isset($identitas->deskripsi_toko) || !empty($identitas->galeri_paths))
+        <section id="tentang" class="page-section">
+            @if(isset($identitas->deskripsi_toko))
+                <h2 class="section-title">Tentang {{ $identitas->nama_toko ?? 'Kami' }}</h2>
+                <div style="background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); font-size: 15px; line-height: 1.8; color: var(--text-muted); white-space: pre-line; margin-bottom: 32px; text-align: center;">
+                    {{ $identitas->deskripsi_toko }}
                 </div>
-                <button onclick="openReservasiModal()" style="background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-                    📅 Booking Meja
-                </button>
-            </div>
-        </div>
+            @endif
+
+            @if(!empty($identitas->galeri_paths) && is_array($identitas->galeri_paths) && count($identitas->galeri_paths) > 0)
+                <h2 class="section-title">Galeri Suasana</h2>
+                <div class="gallery-grid">
+                    @foreach($identitas->galeri_paths as $imgPath)
+                        <div class="gallery-item">
+                            <img src="{{ asset('storage/' . $imgPath) }}" alt="Galeri {{ $identitas->nama_toko }}" loading="lazy">
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </section>
         @endif
+
+        
+
 
         <!-- Section Katalog -->
         <section id="katalog" class="page-section">
@@ -1094,6 +1269,21 @@
                     </div>
                 @endif
             </div>
+
+            @php
+                $favoriteProducts = \App\Models\Produk::where('aktif', true)->where('is_favorite', true)->with(['varians', 'addons', 'kategori'])->get();
+            @endphp
+
+            @if($favoriteProducts->count() > 0)
+            <div id="sectionFavorit" style="margin-top: 48px; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--text-main); text-align: center;">⭐ Menu Favorit Pilihan</h2>
+                <div class="products-grid">
+                    @foreach($favoriteProducts as $prod)
+                        @include('chatbot.portal_product_card', ['produk' => $prod, 'catId' => 'cat-fav'])
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Section Produk (Disembunyikan di Awal) -->
@@ -1317,7 +1507,7 @@
                     </div>
                     <div class="form-group">
                         <label for="resPax">Jumlah Orang (Pax)</label>
-                        <input type="number" class="form-control" id="resPax" required min="1" value="2">
+                        <input type="number" class="form-control" id="resPax" required min="1" value="2" oninput="checkTableAvailability()">
                     </div>
                 </div>
 
@@ -1329,11 +1519,12 @@
                 <!-- Table Availability Container -->
                 <div class="form-group" id="tableAvailabilityContainer" style="display: none;">
                     <label>Pilih Meja Tersedia</label>
+                    <div id="ketersediaanMsg" style="margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--primary);"></div>
                     <div id="tableGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 8px;">
                         <!-- Meja buttons will be injected here via JS -->
                     </div>
                     <input type="hidden" id="resMejaId">
-                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih meja terdekat lalu tambahkan catatan.</small>
+                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih salah satu meja terdekat lalu tambahkan catatan.</small>
                 </div>
 
                 <div class="form-group">
@@ -1884,15 +2075,26 @@
 
         function checkTableAvailability() {
             const tanggal = document.getElementById('resTanggal').value;
+            const pax = document.getElementById('resPax').value;
+            
             if(!tanggal) return;
 
-            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggal))
+            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggal) + '&pax=' + pax)
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
                     const container = document.getElementById('tableAvailabilityContainer');
                     const grid = document.getElementById('tableGrid');
+                    const msgContainer = document.getElementById('ketersediaanMsg');
+                    
                     grid.innerHTML = '';
+                    
+                    if (data.ketersediaan && data.ketersediaan.rekomendasi_msg) {
+                        msgContainer.textContent = data.ketersediaan.rekomendasi_msg;
+                        msgContainer.style.display = 'block';
+                    } else {
+                        msgContainer.style.display = 'none';
+                    }
                     
                     data.mejas.forEach(meja => {
                         const btn = document.createElement('button');
@@ -1901,9 +2103,23 @@
                         btn.style.padding = '10px 4px';
                         btn.style.border = '1px solid var(--border)';
                         btn.style.borderRadius = '8px';
-                        btn.style.background = meja.is_available ? '#ffffff' : '#f87171';
-                        btn.style.color = meja.is_available ? 'var(--text-main)' : '#ffffff';
-                        btn.style.cursor = meja.is_available ? 'pointer' : 'not-allowed';
+                        
+                        // Style for recommended vs available vs unavailable
+                        if (meja.is_recommended) {
+                            btn.style.background = '#fef08a'; // Yellow highlight
+                            btn.style.color = '#854d0e';
+                            btn.style.border = '2px solid #eab308';
+                            btn.style.cursor = 'pointer';
+                        } else if (meja.is_available) {
+                            btn.style.background = '#ffffff';
+                            btn.style.color = 'var(--text-main)';
+                            btn.style.cursor = 'pointer';
+                        } else {
+                            btn.style.background = '#f87171'; // Red
+                            btn.style.color = '#ffffff';
+                            btn.style.cursor = 'not-allowed';
+                        }
+                        
                         btn.style.fontSize = '12px';
                         btn.style.fontWeight = '700';
                         btn.innerHTML = `Meja ${meja.nomor_meja}<br><small style="font-weight:400;font-size:10px;">${meja.kapasitas} Pax</small>`;
