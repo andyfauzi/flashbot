@@ -357,6 +357,7 @@ Route::middleware(['portal.active'])->group(function () {
     Route::get('/portal/{nama_toko_slug}', [\App\Http\Controllers\Chatbot\PortalController::class, 'index'])->name('portal.index');
     Route::post('/portal/{nama_toko_slug}/checkout', [\App\Http\Controllers\Chatbot\PortalController::class, 'checkout'])->name('portal.checkout');
     Route::post('/portal/{nama_toko_slug}/reservasi', [\App\Http\Controllers\Chatbot\PortalController::class, 'submitReservasi'])->name('portal.reservasi');
+    Route::get('/portal/{nama_toko_slug}/check-meja', [\App\Http\Controllers\Chatbot\PortalController::class, 'checkTableAvailability'])->name('portal.check_meja');
     Route::get('/portal/{nama_toko_slug}/success', [\App\Http\Controllers\Chatbot\PortalController::class, 'success'])->name('portal.success');
 });
 

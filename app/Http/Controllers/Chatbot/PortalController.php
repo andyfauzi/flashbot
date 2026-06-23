@@ -293,6 +293,7 @@ class PortalController extends Controller
             'nomor_telepon'  => 'required|string|max:50',
             'tanggal_waktu'  => 'required|date',
             'jumlah_orang'   => 'required|integer|min:1',
+            'meja_id'        => 'nullable|exists:mejas,id',
             'catatan'        => 'nullable|string'
         ]);
 
@@ -337,6 +338,7 @@ class PortalController extends Controller
             'nomor_telepon'  => $validated['nomor_telepon'],
             'tanggal_waktu'  => $validated['tanggal_waktu'],
             'jumlah_orang'   => $validated['jumlah_orang'],
+            'meja_id'        => $validated['meja_id'] ?? null,
             'catatan'        => $validated['catatan'] ?? null,
             'is_dp_required' => $wajibDp,
             'nominal_dp'     => $wajibDp ? $nominalDp : 0,
@@ -351,6 +353,43 @@ class PortalController extends Controller
             'wajib_dp'    => $wajibDp,
             'nominal_dp'  => $wajibDp ? $nominalDp : 0,
             'rekening'    => $identitas->rekening ?? ''
+        ]);
+    }
+
+    public function checkTableAvailability(Request $request, $nama_toko_slug)
+    {
+        $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
+        \App\Services\TenantManager::switchTo($tenant);
+        
+        $tanggalWaktu = $request->input('tanggal_waktu');
+        if (!$tanggalWaktu) {
+            return response()->json(['status' => 'error', 'message' => 'Tanggal dan waktu tidak valid.'], 400);
+        }
+
+        $waktuCari = \Carbon\Carbon::parse($tanggalWaktu);
+        
+        // Asumsi rata-rata orang makan 2 jam. Kita cari reservasi yang overlap.
+        $waktuMulai = $waktuCari->copy()->subHours(2);
+        $waktuSelesai = $waktuCari->copy()->addHours(2);
+
+        $reservasis = \App\Models\Reservasi::whereBetween('tanggal_waktu', [$waktuMulai, $waktuSelesai])
+            ->whereIn('status', ['menunggu', 'diterima'])
+            ->pluck('meja_id')
+            ->filter()
+            ->toArray();
+
+        $mejas = \App\Models\Meja::orderBy('nomor_meja')->get()->map(function($meja) use ($reservasis) {
+            return [
+                'id' => $meja->id,
+                'nomor_meja' => $meja->nomor_meja,
+                'kapasitas' => $meja->kapasitas,
+                'is_available' => !in_array($meja->id, $reservasis) && $meja->status !== 'terisi'
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'mejas' => $mejas
         ]);
     }
 }

@@ -39,6 +39,9 @@
             <span>{{ number_format($rating, 1) }}</span>
             <span class="review-count">({{ $reviews }} ulasan)</span>
         </div>
+        <div class="rating-source" style="font-size: 10px; color: var(--text-muted); margin-top: -6px; margin-bottom: 8px;">
+            <i class="fa-solid fa-circle-info" style="font-size: 9px; margin-right: 3px;"></i> Bersumber dari ulasan pelanggan toko
+        </div>
 
         <h3 class="product-title">{{ $produk->nama }}</h3>
         

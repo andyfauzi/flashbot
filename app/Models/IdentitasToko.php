@@ -36,6 +36,8 @@ class IdentitasToko extends Model
         'jam_buka',
         'jam_tutup',
         'nominal_dp_reservasi',
+        'syarat_ketentuan_portal',
+        'kontak_portal',
     ];
 
     protected $casts = [

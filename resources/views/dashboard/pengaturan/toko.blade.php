@@ -176,6 +176,26 @@
                                 </div>
                             </div>
                         </div>
+                    <!-- Pengaturan Landing Page Portal -->
+                    <div class="card border border-success shadow-sm rounded-4 mb-4 bg-light">
+                        <div class="card-header bg-success text-white border-bottom-0 py-3 rounded-top-4">
+                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-globe me-2"></i> Pengaturan Landing Page Portal</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <label for="kontak_portal" class="form-label fw-bold text-dark">Informasi Kontak Portal</label>
+                                <textarea class="form-control @error('kontak_portal') is-invalid @enderror" id="kontak_portal" name="kontak_portal" rows="4" placeholder="Contoh:&#10;Email: halo@toko.com&#10;Alamat: Jl. Sudirman No 123&#10;WhatsApp: 08123456789">{{ old('kontak_portal', $identitas->kontak_portal ?? '') }}</textarea>
+                                <div class="form-text text-muted">Informasi ini akan ditampilkan pada bagian 'Kontak' di halaman landing page pelanggan.</div>
+                                @error('kontak_portal') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-0">
+                                <label for="syarat_ketentuan_portal" class="form-label fw-bold text-dark">Syarat & Ketentuan Portal / Reservasi</label>
+                                <textarea class="form-control @error('syarat_ketentuan_portal') is-invalid @enderror" id="syarat_ketentuan_portal" name="syarat_ketentuan_portal" rows="4" placeholder="Tuliskan syarat dan ketentuan pemesanan atau reservasi toko Anda di sini...">{{ old('syarat_ketentuan_portal', $identitas->syarat_ketentuan_portal ?? '') }}</textarea>
+                                <div class="form-text text-muted">Informasi ini akan ditampilkan pada bagian 'Syarat & Ketentuan' di halaman landing page pelanggan.</div>
+                                @error('syarat_ketentuan_portal') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="text-end">

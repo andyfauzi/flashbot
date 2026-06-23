@@ -96,6 +96,54 @@
             line-height: 1.6;
         }
 
+        /* Sticky Navbar Styling */
+        .sticky-navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            transition: var(--transition);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .sticky-navbar a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            transition: var(--transition);
+        }
+
+        .sticky-navbar a:hover, .sticky-navbar a.active {
+            color: var(--primary-dark);
+            background: var(--primary-light);
+        }
+
+        /* Section Styling */
+        .page-section {
+            padding-top: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
         .container {
             max-width: 1100px;
             width: 100%;
@@ -980,7 +1028,7 @@
 <body>
 
     <!-- Header Section -->
-    <header>
+    <header id="beranda">
         <h1>{{ $identitas->nama_toko ?? 'Toko NINSKY' }}</h1>
         @if(isset($meja))
             <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 6px 16px; border-radius: 100px; font-weight: 700; margin-bottom: 12px; font-size: 14px;">
@@ -992,22 +1040,33 @@
         @endif
     </header>
 
+    <!-- Sticky Navbar -->
+    <nav class="sticky-navbar">
+        <a href="#beranda" class="nav-link active">Beranda</a>
+        <a href="#katalog" class="nav-link">Katalog</a>
+        <a href="#kontak" class="nav-link">Kontak</a>
+        <a href="#syarat_ketentuan" class="nav-link">Syarat & Ketentuan</a>
+    </nav>
+
     <!-- Main Container -->
     <div class="container">
         
         @if(!isset($meja) && in_array($identitas->jenis_layanan ?? 'keduanya', ['dine_in', 'keduanya']))
-        <div style="background: var(--card-bg); padding: 16px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Ingin Makan di Tempat?</h3>
-                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Reservasi meja Anda sekarang tanpa antre!</p>
+        <div class="page-section" style="padding-top: 20px;">
+            <div style="background: var(--card-bg); padding: 16px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Ingin Makan di Tempat?</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Reservasi meja Anda sekarang tanpa antre!</p>
+                </div>
+                <button onclick="openReservasiModal()" style="background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                    📅 Booking Meja
+                </button>
             </div>
-            <button onclick="openReservasiModal()" style="background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-                📅 Booking Meja
-            </button>
         </div>
         @endif
 
-        <!-- Section Kategori (Awal) -->
+        <!-- Section Katalog -->
+        <section id="katalog" class="page-section">
         <div id="sectionKategori">
             <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--text-main); text-align: center;">Pilih Kategori Menu</h2>
             <div class="categories-grid">
@@ -1069,6 +1128,52 @@
                 @endforeach
             </div>
         </div>
+        </section>
+
+        <!-- Section Kontak -->
+        <section id="kontak" class="page-section">
+            <h2 class="section-title">Kontak & Informasi Toko</h2>
+            <div style="background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border);">
+                @if(!empty($identitas->kontak_portal))
+                    <div style="white-space: pre-line; line-height: 1.6; color: var(--text-main);">
+                        {{ $identitas->kontak_portal }}
+                    </div>
+                @else
+                    <div style="line-height: 1.6; color: var(--text-main);">
+                        <strong>Jam Operasional:</strong><br>
+                        {{ $identitas->jam_buka ? \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i') : '-' }} s/d {{ $identitas->jam_tutup ? \Carbon\Carbon::parse($identitas->jam_tutup)->format('H:i') : '-' }}<br><br>
+                        
+                        <strong>Telepon / WhatsApp:</strong><br>
+                        {{ $identitas->nomor_telepon ?? '-' }}<br><br>
+                        
+                        <strong>Alamat:</strong><br>
+                        {{ $identitas->alamat_toko ?? '-' }}
+                    </div>
+                @endif
+                
+                @if(!empty($identitas->nomor_telepon))
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $identitas->nomor_telepon) }}" target="_blank" style="display: inline-block; margin-top: 16px; background: #25D366; color: white; padding: 10px 20px; border-radius: 100px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
+                        <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp
+                    </a>
+                @endif
+            </div>
+        </section>
+
+        <!-- Section Syarat & Ketentuan -->
+        <section id="syarat_ketentuan" class="page-section">
+            <h2 class="section-title">Syarat & Ketentuan</h2>
+            <div style="background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); font-size: 14px; color: var(--text-muted); line-height: 1.6; white-space: pre-line;">
+                @if(!empty($identitas->syarat_ketentuan_portal))
+                    {{ $identitas->syarat_ketentuan_portal }}
+                @else
+                    1. Pemesanan yang sudah dibayar tidak dapat dibatalkan.
+                    2. Untuk reservasi dine-in, harap datang tepat waktu sesuai jadwal yang ditentukan.
+                    3. Keterlambatan lebih dari 30 menit dapat menyebabkan reservasi dibatalkan otomatis tanpa pengembalian dana (jika ada DP).
+                    4. Segala bentuk kerusakan fasilitas oleh pengunjung menjadi tanggung jawab pengunjung.
+                    5. Syarat dan ketentuan dapat berubah sewaktu-waktu sesuai kebijakan toko.
+                @endif
+            </div>
+        </section>
 
     </div>
 
@@ -1218,7 +1323,17 @@
 
                 <div class="form-group">
                     <label for="resTanggal">Jadwal Reservasi (H-{{ $identitas->minimal_jam_reservasi ?? 2 }} Jam)</label>
-                    <input type="datetime-local" class="form-control" id="resTanggal" required>
+                    <input type="datetime-local" class="form-control" id="resTanggal" required onchange="checkTableAvailability()">
+                </div>
+
+                <!-- Table Availability Container -->
+                <div class="form-group" id="tableAvailabilityContainer" style="display: none;">
+                    <label>Pilih Meja Tersedia</label>
+                    <div id="tableGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 8px;">
+                        <!-- Meja buttons will be injected here via JS -->
+                    </div>
+                    <input type="hidden" id="resMejaId">
+                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih meja terdekat lalu tambahkan catatan.</small>
                 </div>
 
                 <div class="form-group">
@@ -1767,6 +1882,60 @@
             document.getElementById('reservasiOverlay').classList.remove('open');
         }
 
+        function checkTableAvailability() {
+            const tanggal = document.getElementById('resTanggal').value;
+            if(!tanggal) return;
+
+            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggal))
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const container = document.getElementById('tableAvailabilityContainer');
+                    const grid = document.getElementById('tableGrid');
+                    grid.innerHTML = '';
+                    
+                    data.mejas.forEach(meja => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'table-select-btn';
+                        btn.style.padding = '10px 4px';
+                        btn.style.border = '1px solid var(--border)';
+                        btn.style.borderRadius = '8px';
+                        btn.style.background = meja.is_available ? '#ffffff' : '#f87171';
+                        btn.style.color = meja.is_available ? 'var(--text-main)' : '#ffffff';
+                        btn.style.cursor = meja.is_available ? 'pointer' : 'not-allowed';
+                        btn.style.fontSize = '12px';
+                        btn.style.fontWeight = '700';
+                        btn.innerHTML = `Meja ${meja.nomor_meja}<br><small style="font-weight:400;font-size:10px;">${meja.kapasitas} Pax</small>`;
+                        
+                        if(meja.is_available) {
+                            btn.onclick = () => selectTable(meja.id, btn);
+                        }
+                        
+                        grid.appendChild(btn);
+                    });
+                    
+                    document.getElementById('resMejaId').value = ''; // Reset selection
+                    container.style.display = 'block';
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function selectTable(id, btnElement) {
+            document.getElementById('resMejaId').value = id;
+            document.querySelectorAll('.table-select-btn').forEach(btn => {
+                if(btn.style.cursor === 'pointer') {
+                    btn.style.background = '#ffffff';
+                    btn.style.color = 'var(--text-main)';
+                    btn.style.border = '1px solid var(--border)';
+                }
+            });
+            btnElement.style.background = 'var(--primary)';
+            btnElement.style.color = '#ffffff';
+            btnElement.style.border = '1px solid var(--primary)';
+        }
+
         function submitReservasi(event) {
             event.preventDefault();
 
@@ -1780,6 +1949,7 @@
                 nomor_telepon: document.getElementById('resPhone').value,
                 tanggal_waktu: document.getElementById('resTanggal').value,
                 jumlah_orang: document.getElementById('resPax').value,
+                meja_id: document.getElementById('resMejaId').value || null,
                 catatan: document.getElementById('resCatatan').value,
                 _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             };
