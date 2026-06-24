@@ -286,8 +286,7 @@ class PortalController extends Controller
 
     public function submitReservasi(Request $request, $nama_toko_slug)
     {
-        $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
-        \App\Services\TenantManager::switchTo($tenant);
+        $tenant = $this->requireTenant();
         
         $validated = $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
@@ -420,8 +419,7 @@ class PortalController extends Controller
     public function checkTableAvailability(Request $request, $nama_toko_slug)
     {
         try {
-            $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
-            \App\Services\TenantManager::switchTo($tenant);
+            $tenant = $this->requireTenant();
             
             $tanggalWaktu = $request->input('tanggal_waktu');
             $pax = (int) $request->input('pax', 0);
