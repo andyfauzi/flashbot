@@ -46,11 +46,33 @@
                     <div class="mb-4">
                         <label for="minimal_jam_reservasi" class="form-label fw-semibold">Batas Minimum Reservasi (H- Jam)</label>
                         <div class="input-group">
-                            <input type="number" class="form-control @error('minimal_jam_reservasi') is-invalid @enderror" id="minimal_jam_reservasi" name="minimal_jam_reservasi" value="{{ old('minimal_jam_reservasi', $identitas->minimal_jam_reservasi ?? 2) }}" min="0" max="24" step="1">
+                            <input type="number" class="form-control @error('minimal_jam_reservasi') is-invalid @enderror" id="minimal_jam_reservasi" name="minimal_jam_reservasi" value="{{ old('minimal_jam_reservasi', $identitas->minimal_jam_reservasi ?? 2) }}" min="0" max="72" step="1">
                             <span class="input-group-text bg-light">Jam Sebelumnya</span>
                         </div>
                         <div class="form-text">Contoh: Jika diisi '2', maka pelanggan hanya bisa memesan meja untuk jam yang minimal berjarak 2 jam dari waktu saat ini. Isi '0' jika membolehkan reservasi mendadak.</div>
                         @error('minimal_jam_reservasi') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="hold_duration_hours" class="form-label fw-semibold">Batas Waktu Kedaluwarsa (Jam)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control @error('hold_duration_hours') is-invalid @enderror" id="hold_duration_hours" name="hold_duration_hours" value="{{ old('hold_duration_hours', $identitas->hold_duration_hours ?? 2) }}" min="1" max="72" step="1">
+                                <span class="input-group-text bg-light">Jam</span>
+                            </div>
+                            <div class="form-text">Berapa lama reservasi akan tertahan menunggu konfirmasi dari pihak restoran sebelum kedaluwarsa secara otomatis.</div>
+                            @error('hold_duration_hours') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="max_pax_per_reservation" class="form-label fw-semibold">Maksimal Tamu per Reservasi</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control @error('max_pax_per_reservation') is-invalid @enderror" id="max_pax_per_reservation" name="max_pax_per_reservation" value="{{ old('max_pax_per_reservation', $identitas->max_pax_per_reservation ?? 20) }}" min="1" max="500" step="1">
+                                <span class="input-group-text bg-light">Orang</span>
+                            </div>
+                            <div class="form-text">Batas maksimal jumlah tamu yang bisa direservasi dalam satu pesanan.</div>
+                            @error('max_pax_per_reservation') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
                     </div>
 
                     <div class="text-end mt-4">

@@ -36,6 +36,9 @@ class Kernel extends ConsoleKernel
 
         // Masking data privasi pelanggan sesuai UU PDP (Setiap malam jam 02:00)
         $schedule->command('app:pdp-data-masking')->dailyAt('02:00')->name('pdp-data-masking');
+
+        // Bersihkan reservasi yang kedaluwarsa (Setiap 15 menit)
+        $schedule->command('reservations:clean-expired')->everyFifteenMinutes()->name('clean-expired-reservations')->withoutOverlapping();
     }
 
     protected function commands()

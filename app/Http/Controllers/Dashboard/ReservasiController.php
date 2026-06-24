@@ -116,10 +116,14 @@ class ReservasiController extends Controller
             'wajib_dp_reservasi' => 'nullable|boolean',
             'nominal_dp_reservasi' => 'nullable|numeric|min:0',
             'minimal_jam_reservasi' => 'nullable|integer|min:0|max:24',
+            'hold_duration_hours' => 'nullable|integer|min:1|max:72',
+            'max_pax_per_reservation' => 'nullable|integer|min:1|max:500',
         ]);
 
         $validated['wajib_dp_reservasi'] = $request->has('wajib_dp_reservasi');
         $validated['minimal_jam_reservasi'] = $request->minimal_jam_reservasi ?? 0;
+        $validated['hold_duration_hours'] = $request->hold_duration_hours ?? 2;
+        $validated['max_pax_per_reservation'] = $request->max_pax_per_reservation ?? 20;
 
         $identitas = \App\Models\IdentitasToko::first();
         if ($identitas) {

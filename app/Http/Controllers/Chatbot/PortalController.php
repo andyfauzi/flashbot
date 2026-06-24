@@ -287,6 +287,7 @@ class PortalController extends Controller
     public function submitReservasi(Request $request, $nama_toko_slug)
     {
         $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
+        \App\Services\TenantManager::switchTo($tenant);
         
         $validated = $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
@@ -299,6 +300,16 @@ class PortalController extends Controller
 
         $identitas = \App\Models\IdentitasToko::first();
         
+        // Cek max pax
+        if ($identitas && $identitas->max_pax_per_reservation > 0) {
+            if ($validated['jumlah_orang'] > $identitas->max_pax_per_reservation) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Maksimal tamu per reservasi adalah {$identitas->max_pax_per_reservation} orang."
+                ], 400);
+            }
+        }
+
         // Cek minimal jam reservasi
         if ($identitas && $identitas->minimal_jam_reservasi > 0) {
             $minJam = $identitas->minimal_jam_reservasi;
@@ -332,28 +343,78 @@ class PortalController extends Controller
 
         $wajibDp = $identitas->wajib_dp_reservasi ?? false;
         $nominalDp = $identitas->nominal_dp_reservasi ?? 50000;
+        $holdDuration = $identitas->hold_duration_hours ?? 2;
 
-        $reservasi = \App\Models\Reservasi::create([
-            'nama_pelanggan' => $validated['nama_pelanggan'],
-            'nomor_telepon'  => $validated['nomor_telepon'],
-            'tanggal_waktu'  => $validated['tanggal_waktu'],
-            'jumlah_orang'   => $validated['jumlah_orang'],
-            'meja_id'        => $validated['meja_id'] ?? null,
-            'catatan'        => $validated['catatan'] ?? null,
-            'is_dp_required' => $wajibDp,
-            'nominal_dp'     => $wajibDp ? $nominalDp : 0,
-            'status_pembayaran_dp' => $wajibDp ? 'belum_bayar' : null,
-            'status'         => 'menunggu'
-        ]);
+        try {
+            $reservasi = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $wajibDp, $nominalDp, $holdDuration) {
+                // Lock meja untuk menghindari race condition
+                if (!empty($validated['meja_id'])) {
+                    $meja = \App\Models\Meja::where('id', $validated['meja_id'])->lockForUpdate()->first();
+                    if (!$meja->isAvailableFor(\Carbon\Carbon::parse($validated['tanggal_waktu'])->format('Y-m-d'), \Carbon\Carbon::parse($validated['tanggal_waktu'])->format('H:i:s'), $validated['jumlah_orang'])) {
+                        throw new \Exception("Maaf, meja ini baru saja direservasi oleh orang lain.");
+                    }
+                    $meja->update(['status' => 'direservasi']);
+                }
 
-        return response()->json([
-            'status'      => 'success',
-            'message'     => 'Reservasi berhasil dikirim!',
-            'reservasi_id'=> $reservasi->id,
-            'wajib_dp'    => $wajibDp,
-            'nominal_dp'  => $wajibDp ? $nominalDp : 0,
-            'rekening'    => $identitas->rekening ?? ''
-        ]);
+                $reservasi = \App\Models\Reservasi::create([
+                    'nama_pelanggan' => $validated['nama_pelanggan'],
+                    'nomor_telepon'  => $validated['nomor_telepon'],
+                    'tanggal_waktu'  => $validated['tanggal_waktu'],
+                    'jumlah_orang'   => $validated['jumlah_orang'],
+                    'meja_id'        => $validated['meja_id'] ?? null,
+                    'catatan'        => $validated['catatan'] ?? null,
+                    'is_dp_required' => $wajibDp,
+                    'nominal_dp'     => $wajibDp ? $nominalDp : 0,
+                    'status_pembayaran_dp' => $wajibDp ? 'belum_bayar' : null,
+                    'status'         => 'on_hold',
+                    'hold_expires_at' => now()->addHours($holdDuration)
+                ]);
+
+                return $reservasi;
+            });
+
+            // Dispatch job
+            \App\Jobs\ExpireReservationJob::dispatch($reservasi->id)->delay(now()->addHours($holdDuration));
+
+            $namaToko = $identitas ? $identitas->nama_toko : 'Toko';
+            
+            // Notif Customer
+            $pesanCustomer = "Halo {$reservasi->nama_pelanggan}, reservasi Anda di {$namaToko} sedang menunggu konfirmasi dari toko. Kami akan menghubungi Anda segera. Terima kasih!";
+            \App\Jobs\SendWhatsAppMessageJob::dispatch($reservasi->nomor_telepon, $pesanCustomer);
+
+            // Notif Owner
+            $sellerGroupId = config('chatbot.whatsapp_group_id_seller', '');
+            if ($sellerGroupId) {
+                $mejaStr = $reservasi->meja ? $reservasi->meja->nomor_meja : 'Belum dipilih';
+                $pesanOwner = "🔔 *Reservasi Baru - {$namaToko}*\n\n" .
+                    "Nama: {$reservasi->nama_pelanggan}\n" .
+                    "WA: {$reservasi->nomor_telepon}\n" .
+                    "Tanggal: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('d/m/Y') . "\n" .
+                    "Jam: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('H:i') . "\n" .
+                    "Pax: {$reservasi->jumlah_orang} orang\n" .
+                    "Meja: {$mejaStr}\n" .
+                    "Catatan: {$reservasi->catatan}\n\n" .
+                    "Balas dengan perintah:\n" .
+                    "✅ `!setuju-reservasi {$reservasi->id}` untuk konfirmasi\n" .
+                    "❌ `!tolak-reservasi {$reservasi->id} [alasan]` untuk menolak";
+                \App\Jobs\SendWhatsAppMessageJob::dispatch($sellerGroupId, $pesanOwner);
+            }
+
+            return response()->json([
+                'status'      => 'success',
+                'message'     => 'Reservasi berhasil dikirim!',
+                'reservasi_id'=> $reservasi->id,
+                'wajib_dp'    => $wajibDp,
+                'nominal_dp'  => $wajibDp ? $nominalDp : 0,
+                'rekening'    => $identitas->rekening ?? ''
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
     public function checkTableAvailability(Request $request, $nama_toko_slug)
@@ -370,15 +431,8 @@ class PortalController extends Controller
 
         $waktuCari = \Carbon\Carbon::parse($tanggalWaktu);
         
-        // Asumsi rata-rata orang makan 2 jam. Kita cari reservasi yang overlap.
-        $waktuMulai = $waktuCari->copy()->subHours(2);
-        $waktuSelesai = $waktuCari->copy()->addHours(2);
-
-        $reservasis = \App\Models\Reservasi::whereBetween('tanggal_waktu', [$waktuMulai, $waktuSelesai])
-            ->whereIn('status', ['menunggu', 'diterima'])
-            ->pluck('meja_id')
-            ->filter()
-            ->toArray();
+        $tanggal = $waktuCari->format('Y-m-d');
+        $jam = $waktuCari->format('H:i:s');
 
         $semuaMeja = \App\Models\Meja::orderBy('nomor_meja')->get();
         
@@ -387,11 +441,13 @@ class PortalController extends Controller
 
         $mejasList = [];
         foreach ($semuaMeja as $meja) {
-            $isAvailable = !in_array($meja->id, $reservasis) && $meja->status !== 'terisi';
+            // Jika pax = 0, isAvailableFor tetap bisa ngecek konflik tanpa batasan kapasitas
+            $isAvailable = $meja->isAvailableFor($tanggal, $jam, $pax);
             $mejasList[] = [
                 'id' => $meja->id,
-                'nomor_meja' => $meja->nomor_meja,
+                'nomor_meja' => $meja->nama_meja ?? $meja->nomor_meja,
                 'kapasitas' => $meja->kapasitas,
+                'deskripsi' => $meja->deskripsi,
                 'is_available' => $isAvailable,
                 'is_recommended' => false
             ];
