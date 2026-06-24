@@ -2169,7 +2169,11 @@
             btn.disabled = true;
 
             const tanggalWaktu = tanggal + 'T' + jam;
-            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggalWaktu) + '&pax=' + pax)
+            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggalWaktu) + '&pax=' + pax, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
             .then(res => res.json())
             .then(data => {
                 btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cek Ketersediaan Meja';
@@ -2178,6 +2182,7 @@
                 if(data.status === 'success') {
                     const grid = document.getElementById('tableGrid');
                     const msgContainer = document.getElementById('ketersediaanMsg');
+
 
                     grid.innerHTML = '';
 
@@ -2234,12 +2239,15 @@
                     });
 
                     document.getElementById('resMejaId').value = ''; // Reset selection
+                } else {
+                    alert(data.message || 'Gagal mengecek ketersediaan meja.');
                 }
             })
             .catch(err => {
                 document.getElementById('btnCekMeja').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cek Ketersediaan Meja';
                 document.getElementById('btnCekMeja').disabled = false;
                 console.error(err);
+                alert('Gagal terhubung ke server atau terjadi kesalahan internal.');
             });
         }
 

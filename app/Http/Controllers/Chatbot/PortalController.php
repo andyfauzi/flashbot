@@ -419,120 +419,128 @@ class PortalController extends Controller
 
     public function checkTableAvailability(Request $request, $nama_toko_slug)
     {
-        $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
-        \App\Services\TenantManager::switchTo($tenant);
-        
-        $tanggalWaktu = $request->input('tanggal_waktu');
-        $pax = (int) $request->input('pax', 0);
-        
-        if (!$tanggalWaktu) {
-            return response()->json(['status' => 'error', 'message' => 'Tanggal dan waktu tidak valid.'], 400);
-        }
-
-        $waktuCari = \Carbon\Carbon::parse($tanggalWaktu);
-        
-        $tanggal = $waktuCari->format('Y-m-d');
-        $jam = $waktuCari->format('H:i:s');
-
-        $semuaMeja = \App\Models\Meja::orderBy('nomor_meja')->get();
-        
-        $totalKapasitasTersedia = 0;
-        $totalKapasitasKeseluruhan = 0;
-
-        $mejasList = [];
-        foreach ($semuaMeja as $meja) {
-            // Jika pax = 0, isAvailableFor tetap bisa ngecek konflik tanpa batasan kapasitas
-            $isAvailable = $meja->isAvailableFor($tanggal, $jam, $pax);
-            $mejasList[] = [
-                'id' => $meja->id,
-                'nomor_meja' => $meja->nama_meja ?? $meja->nomor_meja,
-                'kapasitas' => $meja->kapasitas,
-                'deskripsi' => $meja->deskripsi,
-                'is_available' => $isAvailable,
-                'is_recommended' => false
-            ];
+        try {
+            $tenant = \App\Models\Tenant::where('slug', $nama_toko_slug)->firstOrFail();
+            \App\Services\TenantManager::switchTo($tenant);
             
-            $totalKapasitasKeseluruhan += $meja->kapasitas;
-            if ($isAvailable) {
-                $totalKapasitasTersedia += $meja->kapasitas;
+            $tanggalWaktu = $request->input('tanggal_waktu');
+            $pax = (int) $request->input('pax', 0);
+            
+            if (!$tanggalWaktu) {
+                return response()->json(['status' => 'error', 'message' => 'Tanggal dan waktu tidak valid.'], 400);
             }
-        }
 
-        // Logic Rekomendasi Meja jika Pax ditentukan
-        $recommendedTableIds = [];
-        $recommendationMessage = '';
+            $waktuCari = \Carbon\Carbon::parse($tanggalWaktu);
+            
+            $tanggal = $waktuCari->format('Y-m-d');
+            $jam = $waktuCari->format('H:i:s');
 
-        if ($pax > 0) {
-            // Jika ada meja tunggal yang muat
-            $singleTableMatch = collect($mejasList)
-                ->where('is_available', true)
-                ->where('kapasitas', '>=', $pax)
-                ->sortBy('kapasitas')
-                ->first();
+            $semuaMeja = \App\Models\Meja::orderBy('nomor_meja')->get();
+            
+            $totalKapasitasTersedia = 0;
+            $totalKapasitasKeseluruhan = 0;
 
-            if ($singleTableMatch) {
-                $recommendedTableIds = [$singleTableMatch['id']];
-                $recommendationMessage = "Kami merekomendasikan Meja " . $singleTableMatch['nomor_meja'] . " untuk " . $pax . " orang.";
-            } else {
-                // Cari gabungan meja berurutan
-                $availableTables = collect($mejasList)->where('is_available', true)->values()->all();
-                $foundCombination = false;
+            $mejasList = [];
+            foreach ($semuaMeja as $meja) {
+                // Jika pax = 0, isAvailableFor tetap bisa ngecek konflik tanpa batasan kapasitas
+                $isAvailable = $meja->isAvailableFor($tanggal, $jam, $pax);
+                $mejasList[] = [
+                    'id' => $meja->id,
+                    'nomor_meja' => $meja->nama_meja ?? $meja->nomor_meja,
+                    'kapasitas' => $meja->kapasitas,
+                    'deskripsi' => $meja->deskripsi,
+                    'is_available' => $isAvailable,
+                    'is_recommended' => false
+                ];
                 
-                for ($i = 0; $i < count($availableTables); $i++) {
-                    $comboKapasitas = 0;
-                    $comboIds = [];
-                    $comboNames = [];
+                $totalKapasitasKeseluruhan += $meja->kapasitas;
+                if ($isAvailable) {
+                    $totalKapasitasTersedia += $meja->kapasitas;
+                }
+            }
+
+            // Logic Rekomendasi Meja jika Pax ditentukan
+            $recommendedTableIds = [];
+            $recommendationMessage = '';
+
+            if ($pax > 0) {
+                // Jika ada meja tunggal yang muat
+                $singleTableMatch = collect($mejasList)
+                    ->where('is_available', true)
+                    ->where('kapasitas', '>=', $pax)
+                    ->sortBy('kapasitas')
+                    ->first();
+
+                if ($singleTableMatch) {
+                    $recommendedTableIds = [$singleTableMatch['id']];
+                    $recommendationMessage = "Kami merekomendasikan Meja " . $singleTableMatch['nomor_meja'] . " untuk " . $pax . " orang.";
+                } else {
+                    // Cari gabungan meja berurutan
+                    $availableTables = collect($mejasList)->where('is_available', true)->values()->all();
+                    $foundCombination = false;
                     
-                    for ($j = $i; $j < count($availableTables); $j++) {
-                        // Pastikan meja berurutan (misal Meja 1 dan Meja 2) - simulasi berdasarkan index jika urut
-                        if ($j > $i) {
-                            // Cek selisih string nomor meja, walau sederhana
-                            $prevNum = (int) preg_replace('/\D/', '', $availableTables[$j-1]['nomor_meja']);
-                            $currNum = (int) preg_replace('/\D/', '', $availableTables[$j]['nomor_meja']);
-                            
-                            // Toleransi perbedaan nomor 1 (e.g 1->2)
-                            if (abs($currNum - $prevNum) > 1) {
-                                break; // Tidak berurutan, hentikan kombinasi
+                    for ($i = 0; $i < count($availableTables); $i++) {
+                        $comboKapasitas = 0;
+                        $comboIds = [];
+                        $comboNames = [];
+                        
+                        for ($j = $i; $j < count($availableTables); $j++) {
+                            // Pastikan meja berurutan (misal Meja 1 dan Meja 2) - simulasi berdasarkan index jika urut
+                            if ($j > $i) {
+                                // Cek selisih string nomor meja, walau sederhana
+                                $prevNum = (int) preg_replace('/\D/', '', $availableTables[$j-1]['nomor_meja']);
+                                $currNum = (int) preg_replace('/\D/', '', $availableTables[$j]['nomor_meja']);
+                                
+                                // Toleransi perbedaan nomor 1 (e.g 1->2)
+                                if (abs($currNum - $prevNum) > 1) {
+                                    break; // Tidak berurutan, hentikan kombinasi
+                                }
+                            }
+
+                            $comboKapasitas += $availableTables[$j]['kapasitas'];
+                            $comboIds[] = $availableTables[$j]['id'];
+                            $comboNames[] = $availableTables[$j]['nomor_meja'];
+
+                            if ($comboKapasitas >= $pax) {
+                                $foundCombination = true;
+                                $recommendedTableIds = $comboIds;
+                                $recommendationMessage = "Kami merekomendasikan gabungan Meja " . implode(', ', $comboNames) . " agar rombongan Anda bisa duduk berdekatan.";
+                                break 2;
                             }
                         }
-
-                        $comboKapasitas += $availableTables[$j]['kapasitas'];
-                        $comboIds[] = $availableTables[$j]['id'];
-                        $comboNames[] = $availableTables[$j]['nomor_meja'];
-
-                        if ($comboKapasitas >= $pax) {
-                            $foundCombination = true;
-                            $recommendedTableIds = $comboIds;
-                            $recommendationMessage = "Kami merekomendasikan gabungan Meja " . implode(', ', $comboNames) . " agar rombongan Anda bisa duduk berdekatan.";
-                            break 2;
-                        }
+                    }
+                    
+                    if (!$foundCombination && $totalKapasitasTersedia >= $pax) {
+                        $recommendationMessage = "Kapasitas tersedia, namun kami tidak menemukan meja berdekatan yang pas. Silakan pilih meja terpisah dan tambahkan catatan.";
+                    } elseif ($totalKapasitasTersedia < $pax) {
+                        $recommendationMessage = "Maaf, sisa kapasitas (" . $totalKapasitasTersedia . " pax) tidak mencukupi untuk rombongan Anda.";
                     }
                 }
-                
-                if (!$foundCombination && $totalKapasitasTersedia >= $pax) {
-                    $recommendationMessage = "Kapasitas tersedia, namun kami tidak menemukan meja berdekatan yang pas. Silakan pilih meja terpisah dan tambahkan catatan.";
-                } elseif ($totalKapasitasTersedia < $pax) {
-                    $recommendationMessage = "Maaf, sisa kapasitas (" . $totalKapasitasTersedia . " pax) tidak mencukupi untuk rombongan Anda.";
+            }
+
+            // Apply recommendation status
+            foreach ($mejasList as &$m) {
+                if (in_array($m['id'], $recommendedTableIds)) {
+                    $m['is_recommended'] = true;
                 }
             }
-        }
 
-        // Apply recommendation status
-        foreach ($mejasList as &$m) {
-            if (in_array($m['id'], $recommendedTableIds)) {
-                $m['is_recommended'] = true;
-            }
+            return response()->json([
+                'status' => 'success',
+                'mejas' => $mejasList,
+                'ketersediaan' => [
+                    'total_kapasitas' => $totalKapasitasKeseluruhan,
+                    'tersedia' => $totalKapasitasTersedia,
+                    'rekomendasi_msg' => $recommendationMessage,
+                    'recommended_ids' => $recommendedTableIds
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'mejas' => $mejasList,
-            'ketersediaan' => [
-                'total_kapasitas' => $totalKapasitasKeseluruhan,
-                'tersedia' => $totalKapasitasTersedia,
-                'rekomendasi_msg' => $recommendationMessage,
-                'recommended_ids' => $recommendedTableIds
-            ]
-        ]);
     }
+
 }
