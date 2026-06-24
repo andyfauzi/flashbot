@@ -45,6 +45,7 @@ class IdentitasToko extends Model
         'deskripsi_toko',
         'galeri_paths',
         'zona_waktu',
+        'gemini_usage_count',
     ];
 
     protected $casts = [

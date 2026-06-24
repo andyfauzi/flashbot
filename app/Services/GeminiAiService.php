@@ -176,6 +176,12 @@ class GeminiAiService
             return "Mohon maaf, sistem AI sedang mengalami gangguan.";
         }
 
+        // Increment Usage Count
+        $identitas = \App\Models\IdentitasToko::first();
+        if ($identitas) {
+            $identitas->increment('gemini_usage_count');
+        }
+
         $data = $response->json();
         
         if (!isset($data['candidates'][0]['content']['parts'][0])) {

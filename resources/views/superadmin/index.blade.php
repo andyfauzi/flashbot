@@ -297,6 +297,7 @@
                                 <th class="text-muted border-0 pb-3" style="font-weight: 600;">Tenant / Toko</th>
                                 <th class="text-muted border-0 pb-3" style="font-weight: 600;">Gateway</th>
                                 <th class="text-muted border-0 pb-3" style="font-weight: 600;">Paket</th>
+                                <th class="text-muted border-0 pb-3" style="font-weight: 600;">Pemakaian AI</th>
                                 <th class="text-muted border-0 pb-3" style="font-weight: 600;">Payment Gateway</th>
                                 <th class="text-muted border-0 pb-3" style="font-weight: 600;">Status</th>
                                 <th class="text-muted border-0 pb-3 text-end" style="font-weight: 600;">Aksi</th>
@@ -319,6 +320,11 @@
                                     <td>
                                         <span class="badge-premium badge-{{ $tenant->plan }}">
                                             {{ $tenant->plan }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1">
+                                            <i class="fa-solid fa-microchip me-1"></i> {{ number_format($tenant->gemini_usage_count) }} kali
                                         </span>
                                     </td>
                                     <td>

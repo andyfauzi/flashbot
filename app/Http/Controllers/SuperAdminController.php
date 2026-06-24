@@ -45,10 +45,12 @@ class SuperAdminController extends Controller
                 $tenant->is_broadcast_approved = $identitas ? (bool)$identitas->is_broadcast_approved : false;
                 $tenant->whatsapp_gateway = $identitas ? $identitas->whatsapp_gateway : 'baileys';
                 $tenant->is_payment_gateway_active = $identitas ? (bool)$identitas->is_payment_gateway_active : false;
+                $tenant->gemini_usage_count = $identitas ? ($identitas->gemini_usage_count ?? 0) : 0;
             } catch (\Exception $e) {
                 $tenant->is_broadcast_approved = false;
                 $tenant->whatsapp_gateway = 'baileys';
                 $tenant->is_payment_gateway_active = false;
+                $tenant->gemini_usage_count = 0;
             }
         }
         
