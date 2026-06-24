@@ -1546,30 +1546,57 @@
                     </div>
                     <div class="form-group">
                         <label for="resPax">Jumlah Orang (Pax)</label>
-                        <input type="number" class="form-control" id="resPax" required min="1" value="2" oninput="checkTableAvailability()">
+                        <input type="number" class="form-control" id="resPax" required min="1" value="2">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="resTanggal">Tanggal Reservasi</label>
-                        <input type="date" class="form-control" id="resTanggal" required onchange="checkTableAvailability()">
+                        <input type="date" class="form-control" id="resTanggal" required>
                     </div>
                     <div class="form-group">
                         <label for="resJam">Jam Reservasi</label>
-                        <input type="time" class="form-control" id="resJam" required onchange="checkTableAvailability()">
+                        <input type="time" class="form-control" id="resJam" required>
                     </div>
                 </div>
 
+                <!-- Tombol Cek Ketersediaan -->
+                <div class="form-group">
+                    <button type="button" id="btnCekMeja" onclick="checkTableAvailability()" style="
+                        width: 100%;
+                        padding: 12px;
+                        background: var(--primary-light);
+                        color: var(--primary-dark);
+                        border: 1.5px dashed var(--primary);
+                        border-radius: 12px;
+                        font-weight: 700;
+                        font-size: 14px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        Cek Ketersediaan Meja
+                    </button>
+                </div>
+
                 <!-- Table Availability Container -->
-                <div class="form-group" id="tableAvailabilityContainer" style="display: none;">
-                    <label>Pilih Meja Tersedia <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(Opsional)</span></label>
+                <div class="form-group" id="tableAvailabilityContainer">
+                    <label>Pilih Meja <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(Opsional)</span></label>
                     <div id="ketersediaanMsg" style="margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--primary);"></div>
                     <div id="tableGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 8px;">
-                        <!-- Meja buttons will be injected here via JS -->
+                        <!-- Placeholder state sebelum dicek -->
+                        <div id="tablePlaceholder" style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; background: #f8fafc; border-radius: 10px; border: 1px dashed var(--border);">
+                            <span style="font-size: 28px; display: block; margin-bottom: 6px;">🪑</span>
+                            Klik tombol di atas untuk melihat ketersediaan meja
+                        </div>
                     </div>
                     <input type="hidden" id="resMejaId">
-                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih salah satu lalu tambahkan catatan.</small>
+                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika butuh meja berdekatan, pilih salah satu lalu tambahkan catatan.</small>
                 </div>
 
                 <div class="form-group">
@@ -2131,40 +2158,52 @@
             const tanggal = document.getElementById('resTanggal').value;
             const jam = document.getElementById('resJam').value;
             const pax = document.getElementById('resPax').value;
-            
-            // Butuh keduanya sebelum fetch
-            if (!tanggal || !jam) return;
 
-            // Gabungkan jadi format datetime-local: "YYYY-MM-DDTHH:MM"
+            if (!tanggal || !jam) {
+                alert('Mohon isi tanggal dan jam reservasi terlebih dahulu.');
+                return;
+            }
+
+            const btn = document.getElementById('btnCekMeja');
+            btn.textContent = 'Memuat...';
+            btn.disabled = true;
+
             const tanggalWaktu = tanggal + 'T' + jam;
             fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggalWaktu) + '&pax=' + pax)
             .then(res => res.json())
             .then(data => {
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cek Ketersediaan Meja';
+                btn.disabled = false;
+
                 if(data.status === 'success') {
-                    const container = document.getElementById('tableAvailabilityContainer');
                     const grid = document.getElementById('tableGrid');
                     const msgContainer = document.getElementById('ketersediaanMsg');
-                    
+
                     grid.innerHTML = '';
-                    
+
                     if (data.ketersediaan && data.ketersediaan.rekomendasi_msg) {
                         msgContainer.textContent = data.ketersediaan.rekomendasi_msg;
                         msgContainer.style.display = 'block';
                     } else {
                         msgContainer.style.display = 'none';
                     }
-                    
+
+                    if (!data.mejas || data.mejas.length === 0) {
+                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:13px;background:#f8fafc;border-radius:10px;border:1px dashed var(--border);">Tidak ada data meja yang terdaftar.</div>';
+                        return;
+                    }
+
                     data.mejas.forEach(meja => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'table-select-btn';
-                        btn.style.padding = '10px 4px';
+                        btn.style.padding = '10px 6px';
                         btn.style.border = '1px solid var(--border)';
                         btn.style.borderRadius = '8px';
-                        
+
                         // Style for recommended vs available vs unavailable
                         if (meja.is_recommended) {
-                            btn.style.background = '#fef08a'; // Yellow highlight
+                            btn.style.background = '#fef08a';
                             btn.style.color = '#854d0e';
                             btn.style.border = '2px solid #eab308';
                             btn.style.cursor = 'pointer';
@@ -2173,11 +2212,11 @@
                             btn.style.color = 'var(--text-main)';
                             btn.style.cursor = 'pointer';
                         } else {
-                            btn.style.background = '#f87171'; // Red
+                            btn.style.background = '#f87171';
                             btn.style.color = '#ffffff';
                             btn.style.cursor = 'not-allowed';
                         }
-                        
+
                         btn.style.fontSize = '12px';
                         btn.style.fontWeight = '700';
                         btn.style.textAlign = 'center';
@@ -2186,19 +2225,22 @@
                         const namaMeja = meja.nomor_meja;
                         const deskripsi = meja.deskripsi ? `<br><span style="font-weight:400;font-size:10px;opacity:0.75;">${meja.deskripsi}</span>` : '';
                         btn.innerHTML = `<strong>${namaMeja}</strong><br><span style="font-weight:400;font-size:10px;">${meja.kapasitas} Pax</span>${deskripsi}`;
-                        
-                        if(meja.is_available) {
+
+                        if (meja.is_available) {
                             btn.onclick = () => selectTable(meja.id, btn);
                         }
-                        
+
                         grid.appendChild(btn);
                     });
-                    
+
                     document.getElementById('resMejaId').value = ''; // Reset selection
-                    container.style.display = 'block';
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                document.getElementById('btnCekMeja').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cek Ketersediaan Meja';
+                document.getElementById('btnCekMeja').disabled = false;
+                console.error(err);
+            });
         }
 
         function selectTable(id, btnElement) {
