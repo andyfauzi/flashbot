@@ -23,9 +23,14 @@ class MejaController extends Controller
     {
         $validated = $request->validate([
             'nomor_meja' => 'required|string|max:50|unique:mejas,nomor_meja',
-            'kapasitas' => 'required|integer|min:1',
-            'status' => 'required|in:tersedia,direservasi,terisi',
+            'nama_meja'  => 'nullable|string|max:100',
+            'kapasitas'  => 'required|integer|min:1',
+            'deskripsi'  => 'nullable|string|max:255',
+            'is_active'  => 'nullable|boolean',
+            'status'     => 'required|in:tersedia,direservasi,terisi',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         Meja::create($validated);
 
@@ -41,9 +46,14 @@ class MejaController extends Controller
     {
         $validated = $request->validate([
             'nomor_meja' => 'required|string|max:50|unique:mejas,nomor_meja,' . $meja->id,
-            'kapasitas' => 'required|integer|min:1',
-            'status' => 'required|in:tersedia,direservasi,terisi',
+            'nama_meja'  => 'nullable|string|max:100',
+            'kapasitas'  => 'required|integer|min:1',
+            'deskripsi'  => 'nullable|string|max:255',
+            'is_active'  => 'nullable|boolean',
+            'status'     => 'required|in:tersedia,direservasi,terisi',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         $meja->update($validated);
 

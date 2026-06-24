@@ -2170,7 +2170,12 @@
                         
                         btn.style.fontSize = '12px';
                         btn.style.fontWeight = '700';
-                        btn.innerHTML = `Meja ${meja.nomor_meja}<br><small style="font-weight:400;font-size:10px;">${meja.kapasitas} Pax</small>`;
+                        btn.style.textAlign = 'center';
+                        btn.style.lineHeight = '1.4';
+                        btn.style.minWidth = '90px';
+                        const namaMeja = meja.nomor_meja;
+                        const deskripsi = meja.deskripsi ? `<br><span style="font-weight:400;font-size:10px;opacity:0.75;">${meja.deskripsi}</span>` : '';
+                        btn.innerHTML = `<strong>${namaMeja}</strong><br><span style="font-weight:400;font-size:10px;">${meja.kapasitas} Pax</span>${deskripsi}`;
                         
                         if(meja.is_available) {
                             btn.onclick = () => selectTable(meja.id, btn);
