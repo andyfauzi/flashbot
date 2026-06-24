@@ -31,7 +31,6 @@ class IdentitasTokoController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
             'nomor_rekening' => 'nullable|string',
             'qris' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
-            'tema_desktop' => 'required|in:warm,cool,kalem',
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
             'jam_buka' => 'nullable|date_format:H:i',
             'jam_tutup' => 'nullable|date_format:H:i',
@@ -45,7 +44,6 @@ class IdentitasTokoController extends Controller
         $identitas->nomor_telepon = $validated['nomor_telepon'];
         $identitas->pesan_footer = $validated['pesan_footer'];
         $identitas->nomor_rekening = $validated['nomor_rekening'];
-        $identitas->tema_desktop = $validated['tema_desktop'];
         $identitas->jenis_layanan = $validated['jenis_layanan'];
         $identitas->jam_buka = $validated['jam_buka'] ?? null;
         $identitas->jam_tutup = $validated['jam_tutup'] ?? null;
