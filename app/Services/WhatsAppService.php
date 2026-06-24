@@ -684,6 +684,9 @@ class WhatsAppService
         if ($langkahUser && !in_array(strtolower($langkahUser), ['menu', 'halo', '0'])) {
             $fallbackMsg = "⚠️ Maaf, format atau pilihan tidak sesuai.\n\nSilakan pilih sesuai instruksi sebelumnya, atau ketik *batal* untuk kembali ke menu utama.";
             $this->kirimPesan($nomor, $fallbackMsg, null, null, $deviceId);
+        } else {
+            $fallbackMsg = "Halo! Maaf, pesan *{$pesan}* tidak dikenali sistem.\n\nSilakan ketik *menu* atau *halo* untuk melihat daftar layanan kami.";
+            $this->kirimPesan($nomor, $fallbackMsg, null, null, $deviceId);
         }
         
         return;
