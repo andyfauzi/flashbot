@@ -26,7 +26,6 @@ class MejaController extends Controller
             'nama_meja'  => 'nullable|string|max:100',
             'kapasitas'  => 'required|integer|min:1',
             'deskripsi'  => 'nullable|string|max:255',
-            'is_active'  => 'nullable|boolean',
             'status'     => 'required|in:tersedia,direservasi,terisi',
         ]);
 
@@ -49,7 +48,6 @@ class MejaController extends Controller
             'nama_meja'  => 'nullable|string|max:100',
             'kapasitas'  => 'required|integer|min:1',
             'deskripsi'  => 'nullable|string|max:255',
-            'is_active'  => 'nullable|boolean',
             'status'     => 'required|in:tersedia,direservasi,terisi',
         ]);
 
