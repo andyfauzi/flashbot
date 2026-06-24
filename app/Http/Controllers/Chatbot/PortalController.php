@@ -377,26 +377,33 @@ class PortalController extends Controller
 
             $namaToko = $identitas ? $identitas->nama_toko : 'Toko';
             
-            // Notif Customer
-            $pesanCustomer = "Halo {$reservasi->nama_pelanggan}, reservasi Anda di {$namaToko} sedang menunggu konfirmasi dari toko. Kami akan menghubungi Anda segera. Terima kasih!";
-            \App\Jobs\SendWhatsAppMessageJob::dispatch($reservasi->nomor_telepon, $pesanCustomer);
+            // Notifikasi WA (Bungkus di try-catch agar kegagalan kirim WA tidak membuat status order gagal)
+            try {
+                $waService = app(\App\Services\WhatsAppService::class);
+                
+                // Notif Customer
+                $pesanCustomer = "Halo {$reservasi->nama_pelanggan}, reservasi Anda di {$namaToko} sedang menunggu konfirmasi dari toko. Kami akan menghubungi Anda segera. Terima kasih!";
+                $waService->kirimPesan($reservasi->nomor_telepon, $pesanCustomer);
 
-            // Notif Owner
-            $sellerGroupId = config('chatbot.whatsapp_group_id_seller', '');
-            if ($sellerGroupId) {
-                $mejaStr = $reservasi->meja ? $reservasi->meja->nomor_meja : 'Belum dipilih';
-                $pesanOwner = "🔔 *Reservasi Baru - {$namaToko}*\n\n" .
-                    "Nama: {$reservasi->nama_pelanggan}\n" .
-                    "WA: {$reservasi->nomor_telepon}\n" .
-                    "Tanggal: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('d/m/Y') . "\n" .
-                    "Jam: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('H:i') . "\n" .
-                    "Pax: {$reservasi->jumlah_orang} orang\n" .
-                    "Meja: {$mejaStr}\n" .
-                    "Catatan: {$reservasi->catatan}\n\n" .
-                    "Balas dengan perintah:\n" .
-                    "✅ `!setuju-reservasi {$reservasi->id}` untuk konfirmasi\n" .
-                    "❌ `!tolak-reservasi {$reservasi->id} [alasan]` untuk menolak";
-                \App\Jobs\SendWhatsAppMessageJob::dispatch($sellerGroupId, $pesanOwner);
+                // Notif Owner
+                $sellerGroupId = config('chatbot.whatsapp_group_id_seller', '');
+                if ($sellerGroupId) {
+                    $mejaStr = $reservasi->meja ? $reservasi->meja->nomor_meja : 'Belum dipilih';
+                    $pesanOwner = "🔔 *Reservasi Baru - {$namaToko}*\n\n" .
+                        "Nama: {$reservasi->nama_pelanggan}\n" .
+                        "WA: {$reservasi->nomor_telepon}\n" .
+                        "Tanggal: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('d/m/Y') . "\n" .
+                        "Jam: " . \Carbon\Carbon::parse($reservasi->tanggal_waktu)->format('H:i') . "\n" .
+                        "Pax: {$reservasi->jumlah_orang} orang\n" .
+                        "Meja: {$mejaStr}\n" .
+                        "Catatan: {$reservasi->catatan}\n\n" .
+                        "Balas dengan perintah:\n" .
+                        "✅ `!setuju-reservasi {$reservasi->id}` untuk konfirmasi\n" .
+                        "❌ `!tolak-reservasi {$reservasi->id} [alasan]` untuk menolak";
+                    $waService->kirimPesan($sellerGroupId, $pesanOwner);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim notif reservasi: ' . $e->getMessage());
             }
 
             return response()->json([
