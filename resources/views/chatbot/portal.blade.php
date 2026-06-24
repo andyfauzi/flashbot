@@ -1550,20 +1550,26 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="resTanggal">Jadwal Reservasi (H-{{ $identitas->minimal_jam_reservasi ?? 2 }} Jam)</label>
-                    <input type="datetime-local" class="form-control" id="resTanggal" required onchange="checkTableAvailability()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="resTanggal">Tanggal Reservasi</label>
+                        <input type="date" class="form-control" id="resTanggal" required onchange="checkTableAvailability()">
+                    </div>
+                    <div class="form-group">
+                        <label for="resJam">Jam Reservasi</label>
+                        <input type="time" class="form-control" id="resJam" required onchange="checkTableAvailability()">
+                    </div>
                 </div>
 
                 <!-- Table Availability Container -->
                 <div class="form-group" id="tableAvailabilityContainer" style="display: none;">
-                    <label>Pilih Meja Tersedia</label>
+                    <label>Pilih Meja Tersedia <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(Opsional)</span></label>
                     <div id="ketersediaanMsg" style="margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--primary);"></div>
-                    <div id="tableGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 8px;">
+                    <div id="tableGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 8px;">
                         <!-- Meja buttons will be injected here via JS -->
                     </div>
                     <input type="hidden" id="resMejaId">
-                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih salah satu meja terdekat lalu tambahkan catatan.</small>
+                    <small class="text-muted" style="display: block; margin-top: 6px; font-size: 11px;">Jika Anda butuh meja berdekatan, pilih salah satu lalu tambahkan catatan.</small>
                 </div>
 
                 <div class="form-group">
@@ -2123,11 +2129,15 @@
 
         function checkTableAvailability() {
             const tanggal = document.getElementById('resTanggal').value;
+            const jam = document.getElementById('resJam').value;
             const pax = document.getElementById('resPax').value;
             
-            if(!tanggal) return;
+            // Butuh keduanya sebelum fetch
+            if (!tanggal || !jam) return;
 
-            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggal) + '&pax=' + pax)
+            // Gabungkan jadi format datetime-local: "YYYY-MM-DDTHH:MM"
+            const tanggalWaktu = tanggal + 'T' + jam;
+            fetch('{{ route("portal.check_meja", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}?tanggal_waktu=' + encodeURIComponent(tanggalWaktu) + '&pax=' + pax)
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
@@ -2213,10 +2223,21 @@
             btnSubmit.textContent = 'Memproses...';
             btnSubmit.setAttribute('disabled', 'true');
 
+            const tanggal = document.getElementById('resTanggal').value;
+            const jam = document.getElementById('resJam').value;
+            const tanggalWaktu = tanggal && jam ? (tanggal + ' ' + jam + ':00') : '';
+
+            if (!tanggalWaktu) {
+                alert('Mohon lengkapi tanggal dan jam reservasi.');
+                btnSubmit.textContent = originalBtnText;
+                btnSubmit.removeAttribute('disabled');
+                return;
+            }
+
             const payload = {
                 nama_pelanggan: document.getElementById('resName').value,
                 nomor_telepon: document.getElementById('resPhone').value,
-                tanggal_waktu: document.getElementById('resTanggal').value,
+                tanggal_waktu: tanggalWaktu,
                 jumlah_orang: document.getElementById('resPax').value,
                 meja_id: document.getElementById('resMejaId').value || null,
                 catatan: document.getElementById('resCatatan').value,

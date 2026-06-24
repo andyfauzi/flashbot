@@ -29,9 +29,15 @@ class Meja extends Model
         return $this->hasMany(Reservasi::class);
     }
 
-    public function isAvailableFor($date, $time, $pax)
+    public function isAvailableFor($date, $time, $pax = 0)
     {
-        if (!$this->is_active || $this->kapasitas < $pax) {
+        // Jika meja nonaktif, langsung tolak
+        if (!($this->is_active ?? true)) {
+            return false;
+        }
+
+        // Jika pax > 0, cek kapasitas
+        if ($pax > 0 && $this->kapasitas < $pax) {
             return false;
         }
 
