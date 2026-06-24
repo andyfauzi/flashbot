@@ -44,6 +44,7 @@ class IdentitasToko extends Model
         'hero_image_path',
         'deskripsi_toko',
         'galeri_paths',
+        'zona_waktu',
     ];
 
     protected $casts = [

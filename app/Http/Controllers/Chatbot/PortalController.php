@@ -310,10 +310,12 @@ class PortalController extends Controller
         }
 
         // Cek minimal jam reservasi
+        $zonaWaktu = $identitas->zona_waktu ?? 'Asia/Jakarta';
+
         if ($identitas && $identitas->minimal_jam_reservasi > 0) {
             $minJam = $identitas->minimal_jam_reservasi;
-            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu']);
-            $minWaktu = \Carbon\Carbon::now()->addHours($minJam);
+            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu'], $zonaWaktu);
+            $minWaktu = \Carbon\Carbon::now($zonaWaktu)->addHours($minJam);
             if ($waktuReservasi->lessThan($minWaktu)) {
                 return response()->json([
                     'status' => 'error',
@@ -324,13 +326,13 @@ class PortalController extends Controller
 
         // Cek jam operasional
         if ($identitas && $identitas->jam_buka && $identitas->jam_tutup) {
-            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu']);
-            $jamBuka = \Carbon\Carbon::parse($identitas->jam_buka);
-            $jamTutup = \Carbon\Carbon::parse($identitas->jam_tutup);
+            $waktuReservasi = \Carbon\Carbon::parse($validated['tanggal_waktu'], $zonaWaktu);
+            $jamBuka = \Carbon\Carbon::parse($identitas->jam_buka, $zonaWaktu);
+            $jamTutup = \Carbon\Carbon::parse($identitas->jam_tutup, $zonaWaktu);
             
-            $waktuTime = \Carbon\Carbon::createFromTime($waktuReservasi->hour, $waktuReservasi->minute, 0);
-            $bukaTime = \Carbon\Carbon::createFromTime($jamBuka->hour, $jamBuka->minute, 0);
-            $tutupTime = \Carbon\Carbon::createFromTime($jamTutup->hour, $jamTutup->minute, 0);
+            $waktuTime = \Carbon\Carbon::createFromTime($waktuReservasi->hour, $waktuReservasi->minute, 0, $zonaWaktu);
+            $bukaTime = \Carbon\Carbon::createFromTime($jamBuka->hour, $jamBuka->minute, 0, $zonaWaktu);
+            $tutupTime = \Carbon\Carbon::createFromTime($jamTutup->hour, $jamTutup->minute, 0, $zonaWaktu);
 
             if ($waktuTime->lessThan($bukaTime) || $waktuTime->greaterThan($tutupTime)) {
                 return response()->json([

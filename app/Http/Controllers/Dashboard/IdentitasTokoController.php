@@ -35,6 +35,7 @@ class IdentitasTokoController extends Controller
             'jenis_layanan' => 'required|in:dine_in,take_away,keduanya',
             'jam_buka' => 'nullable|date_format:H:i',
             'jam_tutup' => 'nullable|date_format:H:i',
+            'zona_waktu' => 'required|in:Asia/Jakarta,Asia/Makassar,Asia/Jayapura',
         ]);
 
         $identitas = IdentitasToko::first() ?? new IdentitasToko();
@@ -48,6 +49,7 @@ class IdentitasTokoController extends Controller
         $identitas->jenis_layanan = $validated['jenis_layanan'];
         $identitas->jam_buka = $validated['jam_buka'] ?? null;
         $identitas->jam_tutup = $validated['jam_tutup'] ?? null;
+        $identitas->zona_waktu = $validated['zona_waktu'];
 
 
 

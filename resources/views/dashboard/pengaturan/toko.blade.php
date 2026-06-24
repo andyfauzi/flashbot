@@ -110,7 +110,16 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12 mb-3">
+                                    <label for="zona_waktu" class="form-label fw-bold">Zona Waktu Lokasi Toko</label>
+                                    <select class="form-select @error('zona_waktu') is-invalid @enderror" id="zona_waktu" name="zona_waktu">
+                                        <option value="Asia/Jakarta" {{ old('zona_waktu', $identitas->zona_waktu) == 'Asia/Jakarta' ? 'selected' : '' }}>WIB - Waktu Indonesia Barat (Asia/Jakarta)</option>
+                                        <option value="Asia/Makassar" {{ old('zona_waktu', $identitas->zona_waktu) == 'Asia/Makassar' ? 'selected' : '' }}>WITA - Waktu Indonesia Tengah (Asia/Makassar)</option>
+                                        <option value="Asia/Jayapura" {{ old('zona_waktu', $identitas->zona_waktu) == 'Asia/Jayapura' ? 'selected' : '' }}>WIT - Waktu Indonesia Timur (Asia/Jayapura)</option>
+                                    </select>
+                                    @error('zona_waktu') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6 mt-3 mt-md-0">
                                     <label for="jam_buka" class="form-label fw-bold">Jam Buka</label>
                                     <input type="time" class="form-control @error('jam_buka') is-invalid @enderror" id="jam_buka" name="jam_buka" value="{{ old('jam_buka', $identitas->jam_buka ? \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i') : '') }}">
                                     @error('jam_buka') <div class="invalid-feedback">{{ $message }}</div> @enderror
