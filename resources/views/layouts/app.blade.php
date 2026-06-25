@@ -11,72 +11,85 @@
     <title>@yield('title', isset($identitasToko) ? $identitasToko->nama_toko : 'NINSKY') | Panel Admin</title>
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#D97757">
+    <meta name="theme-color" content="#0F172A">
     <link rel="icon" type="image/png" href="{{ asset('img/tenanta.png') }}?v=4">
     <link rel="apple-touch-icon" href="{{ asset('img/tenanta.png') }}?v=4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ninsky">
 
+    <!-- Inter Font Preload (Premium SaaS Typography) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+
     <!-- Bootstrap 5 & FontAwesome CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom Premium Stylesheet -->
     <link href="{{ asset('css/dashboard.css') }}?v={{ filemtime(public_path('css/dashboard.css')) }}" rel="stylesheet">
-    
-    <!-- Dynamic Theme Overrides Removed (Monochrome Premium Theme Applied) -->
 
     @yield('styles')
 </head>
 <body>
 
-<!-- Navbar Premium -->
-<nav class="navbar navbar-light navbar-premium px-3 px-md-4 d-flex justify-content-between align-items-center">
+<!-- ======================================================
+     NAVBAR PREMIUM — Dark Glass 68px
+     ====================================================== -->
+<nav class="navbar-premium px-3 px-md-4 d-flex justify-content-between align-items-center" style="height:68px; position:sticky; top:0; z-index:1030;">
+
+    <!-- LEFT: Hamburger (mobile) + Brand -->
     <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-light d-md-none me-1 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-            <i data-lucide="menu" class="fs-5"></i>
+        <button class="nav-icon-btn d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.09); color:rgba(255,255,255,0.7);">
+            <i data-lucide="menu" style="width:18px;height:18px;"></i>
         </button>
-        <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="{{ route('chatbot.dashboard') }}">
+
+        <a class="navbar-brand m-0" href="{{ route('chatbot.dashboard') }}">
             @if(isset($identitasToko) && $identitasToko->logo_path)
-                <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 30px; object-fit: contain;">
-                <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ strtoupper($identitasToko->nama_toko) }}</span>
+                <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height:30px; width:30px; object-fit:cover; border-radius:8px; border:1.5px solid rgba(255,255,255,0.15);">
             @else
-                <div class="d-flex align-items-center justify-content-center rounded" style="width:30px;height:30px;background:rgba(79,70,229,0.12);">
-                    <i class="fa-solid fa-bolt" style="color:#4F46E5;font-size:15px;"></i>
+                <div class="brand-logo-wrap">
+                    <i class="fa-solid fa-bolt" style="color:#fff; font-size:14px;"></i>
                 </div>
-                <span class="fw-bold tracking-tight d-none d-sm-block" style="color: #3A3A3A; font-family: 'Poppins', sans-serif;">{{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}</span>
             @endif
+            <span class="brand-name d-none d-sm-block">
+                {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}
+            </span>
         </a>
     </div>
-    
-    <div class="d-flex align-items-center gap-2 gap-md-3">
-        <!-- Toggle UI Mode -->
+
+    <!-- RIGHT: Actions -->
+    <div class="d-flex align-items-center gap-2">
+
+        <!-- UI Mode Toggle -->
         @auth
         <form action="{{ route('dashboard.ui_mode.toggle') }}" method="POST" class="m-0">
             @csrf
-            <button type="submit" class="btn btn-light border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;" title="Ubah Tampilan (List/Grid)">
-                <i data-lucide="{{ auth()->user()->ui_mode === 'grid' ? 'list' : 'layout-grid' }}" class="text-secondary" style="width: 18px; height: 18px;"></i>
+            <button type="submit" class="nav-icon-btn" title="Ubah Tampilan">
+                <i data-lucide="{{ auth()->user()->ui_mode === 'grid' ? 'list' : 'layout-grid' }}" style="width:16px;height:16px;"></i>
             </button>
         </form>
         @endauth
 
-        <!-- Tombol Refresh (PWA) -->
-        <button onclick="window.location.reload(true)" class="btn btn-light border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;" title="Refresh Halaman">
-            <i data-lucide="refresh-cw" class="text-secondary" style="width: 18px; height: 18px;"></i>
+        <!-- Refresh -->
+        <button onclick="window.location.reload(true)" class="nav-icon-btn" title="Refresh Halaman">
+            <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>
         </button>
 
-        <!-- Status Gateway Animasi -->
-        @if($isConnected)
-            <div class="status-badge online">
-                <div class="pulse-dot"></div>
-                <span>Connected ({{ strtoupper($gatewayStatus['gateway'] ?? 'wa') }})</span>
-            </div>
-        @else
-            <div class="status-badge offline">
-                <div class="pulse-dot"></div>
-                <span>Disconnected</span>
-            </div>
-        @endif
+        <!-- Status Gateway Badge -->
+        <div class="d-none d-sm-flex">
+            @if($isConnected)
+                <div class="status-badge online">
+                    <div class="pulse-dot"></div>
+                    <span>{{ strtoupper($gatewayStatus['gateway'] ?? 'WA') }} Connected</span>
+                </div>
+            @else
+                <div class="status-badge offline">
+                    <div class="pulse-dot"></div>
+                    <span>Disconnected</span>
+                </div>
+            @endif
+        </div>
 
         @auth
             @php
@@ -84,28 +97,38 @@
                 if (app()->has('current_tenant') && auth()->check()) {
                     try {
                         $activeShift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
-                    } catch (\Exception $e) {
-                        // Ignore if model not available
-                    }
+                    } catch (\Exception $e) {}
                 }
             @endphp
-            
+
             @if($activeShift)
-                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#pengeluaranModal">
-                    <i data-lucide="banknote" style="width: 16px; height: 16px;"></i> Pengeluaran
+                <!-- Pengeluaran -->
+                <button type="button" class="btn-pengeluaran d-none d-md-inline-flex" data-bs-toggle="modal" data-bs-target="#pengeluaranModal">
+                    <i data-lucide="banknote" style="width:15px;height:15px;"></i>
+                    <span>Pengeluaran</span>
                 </button>
-                <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 me-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#tutupShiftModal">
-                    <i data-lucide="lock" style="width: 16px; height: 16px;"></i> Tutup Shift
+                <!-- Tutup Shift CTA -->
+                <button type="button" class="btn-tutup-shift" data-bs-toggle="modal" data-bs-target="#tutupShiftModal">
+                    <i data-lucide="lock" style="width:15px;height:15px;"></i>
+                    <span class="d-none d-sm-inline">Tutup Shift</span>
                 </button>
             @endif
 
-            <div class="vr bg-secondary mx-2 my-1" style="width: 1px; height: 20px; opacity: 0.3;"></div>
-            <div class="d-flex align-items-center gap-2">
-                <i data-lucide="user-circle" class="text-secondary" style="width: 20px; height: 20px;"></i>
-                <small class="text-secondary fw-semibold">{{ auth()->user()->name ?? auth()->user()->email }}</small>
+            <!-- Divider -->
+            <div style="width:1px; height:28px; background:rgba(255,255,255,0.12); margin:0 4px;"></div>
+
+            <!-- User Chip -->
+            <div class="navbar-user-chip">
+                <div class="navbar-user-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? auth()->user()->email, 0, 1)) }}
+                </div>
+                <span class="navbar-user-name d-none d-md-block">{{ auth()->user()->name ?? auth()->user()->email }}</span>
+                <i data-lucide="chevron-down" style="width:14px;height:14px;color:rgba(255,255,255,0.45);"></i>
             </div>
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-secondary px-3 rounded-pill d-flex align-items-center gap-1">
-                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Logout
+
+            <!-- Logout -->
+            <a href="{{ route('logout') }}" class="nav-icon-btn" title="Logout">
+                <i data-lucide="log-out" style="width:16px;height:16px;"></i>
             </a>
         @endauth
     </div>
@@ -165,13 +188,13 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Mohon periksa kembali data yang diisi',
-                            html: '<ul class="text-start mb-0 ps-3" style="color: #6B7280;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
-                            confirmButtonColor: '#D97757',
+                            title: 'Periksa kembali data Anda',
+                            html: '<ul class="text-start mb-0 ps-3" style="color:#64748B;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                            confirmButtonColor: '#4F46E5',
                             confirmButtonText: 'Baik, mengerti',
-                            background: '#FAF7F4',
-                            color: '#3A3A3A',
-                            borderRadius: '16px'
+                            background: '#FFFFFF',
+                            color: '#0F172A',
+                            borderRadius: '20px'
                         });
                     });
                 </script>
@@ -182,9 +205,11 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Oops...',
+                            title: 'Terjadi Kesalahan',
                             text: '{{ session('error') }}',
-                            confirmButtonColor: '#3b82f6'
+                            confirmButtonColor: '#4F46E5',
+                            background: '#FFFFFF',
+                            borderRadius: '20px'
                         });
                     });
                 </script>
@@ -195,9 +220,11 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             icon: 'warning',
-                            title: 'Peringatan',
+                            title: 'Perhatian',
                             text: '{{ session('warning') }}',
-                            confirmButtonColor: '#f59e0b'
+                            confirmButtonColor: '#4F46E5',
+                            background: '#FFFFFF',
+                            borderRadius: '20px'
                         });
                     });
                 </script>
