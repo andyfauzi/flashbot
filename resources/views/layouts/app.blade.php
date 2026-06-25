@@ -152,19 +152,16 @@
     </div>
 </div>
 
-<div class="container-fluid">
-    <div class="row">
-
-        <!-- Sidebar Container (Desktop) -->
-        <div class="col-md-2 px-0 d-none d-md-block sidebar-premium sidebar-sticky">
-            <div class="pt-4 px-0 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
-                
-                @include('layouts.sidebar_menu', ['prefix' => 'Desktop'])
-            </div>
+<div class="d-flex min-vh-100">
+    <!-- Sidebar Container (Desktop) -->
+    <div class="sidebar-premium sidebar-sticky d-none d-md-block flex-shrink-0">
+        <div class="pt-4 px-0 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
+            @include('layouts.sidebar_menu', ['prefix' => 'Desktop'])
         </div>
+    </div>
 
-        <!-- Konten Utama -->
-        <div class="col-md-10 bg-app min-vh-100 py-4 px-4">
+    <!-- Konten Utama -->
+    <div class="flex-grow-1 min-vw-0 bg-app py-4 px-3 px-md-4">
             @if(session('sukses'))
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -267,9 +264,7 @@
                 @endif
 
                 @yield('content')
-            </div>
         </div>
-
     </div>
 </div>
 
