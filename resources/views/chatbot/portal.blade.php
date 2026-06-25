@@ -48,6 +48,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--text-main);
@@ -55,6 +59,11 @@
             display: flex;
             flex-direction: column;
             padding-bottom: 80px; /* Space for mobile cart float bar */
+        }
+
+        /* Offset scroll untuk sticky navbar (tinggi navbar ~58px) */
+        [id] {
+            scroll-margin-top: 68px;
         }
 
         /* Header Styling */
@@ -1227,7 +1236,7 @@
     </header>
 
     <!-- Sticky Navbar -->
-    <nav class="sticky-navbar">
+    <nav class="sticky-navbar" id="mainNav">
         <a href="#beranda" class="nav-link active">Beranda</a>
         @if(isset($identitas->deskripsi_toko) || isset($identitas->galeri_paths))
             <a href="#tentang" class="nav-link">Tentang Kami</a>
@@ -2342,5 +2351,95 @@
     <script>
         lucide.createIcons();
     </script>
+
+    <!-- =============================================
+         SMOOTH SCROLL NAVIGATION
+         ============================================= -->
+    <script>
+        (function () {
+            // Tinggi sticky navbar (untuk offset agar section tidak tertutup)
+            const NAV_OFFSET = 68;
+
+            /**
+             * Smooth scroll ke elemen target dengan offset navbar
+             */
+            function smoothScrollTo(targetId) {
+                const target = document.getElementById(targetId);
+                if (!target) return;
+
+                const targetTop = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+
+                window.scrollTo({
+                    top: targetTop,
+                    behavior: 'smooth'
+                });
+            }
+
+            /**
+             * Update class active di navbar
+             */
+            function setActiveNavLink(href) {
+                document.querySelectorAll('#mainNav .nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === href) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            /**
+             * Intercept semua klik anchor yang mengarah ke #section
+             */
+            document.addEventListener('click', function (e) {
+                // Cari anchor terdekat dari element yang diklik
+                const anchor = e.target.closest('a[href^="#"]');
+                if (!anchor) return;
+
+                const href = anchor.getAttribute('href');
+                if (!href || href === '#') return;
+
+                const targetId = href.slice(1); // hapus '#'
+                const target = document.getElementById(targetId);
+                if (!target) return;
+
+                e.preventDefault();
+                smoothScrollTo(targetId);
+                setActiveNavLink(href);
+
+                // Update URL hash tanpa trigger scroll
+                history.pushState(null, null, href);
+            });
+
+            /**
+             * IntersectionObserver: auto-highlight menu aktif saat user scroll manual
+             */
+            const sectionIds = ['beranda', 'tentang', 'katalog', 'kontak', 'syarat_ketentuan'];
+            const observerOptions = {
+                root: null,
+                // Trigger saat section masuk 30% dari atas viewport
+                rootMargin: `-${NAV_OFFSET}px 0px -60% 0px`,
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setActiveNavLink('#' + entry.target.id);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe semua section yang ada
+            sectionIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+
+            // Juga observe header#beranda
+            const beranda = document.getElementById('beranda');
+            if (beranda) observer.observe(beranda);
+        })();
+    </script>
+
 </body>
 </html>

@@ -15,8 +15,14 @@ use Illuminate\Support\Str;
 
 class GeminiAiService
 {
+    // Sinyal khusus yang dikembalikan ke WhatsAppService untuk trigger fallback manual
+    const FALLBACK_SIGNAL = '__GEMINI_FALLBACK__';
+
     protected string $apiKey;
     protected string $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
+
+    // Cache katalog dalam satu sesi agar tidak dipanggil berulang-ulang
+    protected ?array $katalogCache = null;
 
     public function __construct()
     {
@@ -46,7 +52,7 @@ class GeminiAiService
         $systemInstruction = $this->getSystemInstruction($context);
         $history = ChatbotHistory::where('nomor_wa', $nomorWa)
             ->orderBy('id', 'desc')
-            ->take(15) // ambil 15 pesan terakhir
+            ->take(7) // ambil 7 pesan terakhir untuk hemat token
             ->get()
             ->reverse()
             ->values();
@@ -167,95 +173,141 @@ class GeminiAiService
 
     protected function callGeminiWithToolHandling($nomorWa, $payload)
     {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json'
-        ])->post($this->apiUrl . '?key=' . $this->apiKey, $payload);
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json'
+            ])->timeout(30)->post($this->apiUrl . '?key=' . $this->apiKey, $payload);
 
-        if (!$response->successful()) {
-            Log::error("Gemini API Error: " . $response->body());
-            return "Mohon maaf, sistem AI sedang mengalami gangguan.";
-        }
+            // =============================================
+            // HANDLE ERROR RESPONSE
+            // =============================================
+            if (!$response->successful()) {
+                $statusCode = $response->status();
+                $body = $response->body();
 
-        // Increment Usage Count
-        $identitas = \App\Models\IdentitasToko::first();
-        if ($identitas) {
-            $identitas->increment('gemini_usage_count');
-        }
+                // 429: Kuota Habis (Too Many Requests)
+                if ($statusCode === 429) {
+                    Log::warning("⚠️ Gemini API: Kuota habis (429). Fallback ke Mode Manual. Nomor: {$nomorWa}");
+                    return self::FALLBACK_SIGNAL;
+                }
 
-        $data = $response->json();
-        
-        if (!isset($data['candidates'][0]['content']['parts'][0])) {
-            return "Maaf, saya tidak mengerti.";
-        }
+                // 503: Service Unavailable (server Gemini down)
+                if ($statusCode === 503) {
+                    Log::warning("⚠️ Gemini API: Service tidak tersedia (503). Fallback ke Mode Manual. Nomor: {$nomorWa}");
+                    return self::FALLBACK_SIGNAL;
+                }
 
-        $part = $data['candidates'][0]['content']['parts'][0];
+                // 401/403: API Key tidak valid
+                if (in_array($statusCode, [401, 403])) {
+                    Log::error("❌ Gemini API: API Key tidak valid ({$statusCode}). Nomor: {$nomorWa}");
+                    return self::FALLBACK_SIGNAL;
+                }
 
-        // 5. Cek apakah AI memanggil fungsi (Tool Call)
-        if (isset($part['functionCall'])) {
-            $functionName = $part['functionCall']['name'];
-            $args = $part['functionCall']['args'] ?? [];
-            
-            // Mencegah PHP mengubah JSON object kosong {} menjadi JSON array [] yang ditolak oleh API Gemini
-            if (empty($args) || (is_array($args) && count($args) === 0)) {
-                $data['candidates'][0]['content']['parts'][0]['functionCall']['args'] = new \stdClass();
+                // Error lain yang tidak dikenal
+                Log::error("❌ Gemini API Error [{$statusCode}]: {$body}. Nomor: {$nomorWa}");
+                return self::FALLBACK_SIGNAL;
             }
 
-            Log::info("Gemini memanggil fungsi: {$functionName}", $args);
-
-            $functionResult = [];
-
-            if ($functionName === 'get_katalog_produk') {
-                $functionResult = $this->getKatalogProduk();
-            } elseif ($functionName === 'tambah_ke_keranjang') {
-                $functionResult = $this->tambahKeKeranjang($nomorWa, $args);
-            } elseif ($functionName === 'checkout_pesanan') {
-                $functionResult = $this->checkoutPesanan($nomorWa, $args);
-            } elseif ($functionName === 'batalkan_keranjang') {
-                $functionResult = $this->batalkanKeranjang($nomorWa);
-            } elseif ($functionName === 'batalkan_pesanan') {
-                $functionResult = $this->batalkanPesanan($nomorWa, $args);
-            } elseif ($functionName === 'ubah_pesanan') {
-                $functionResult = $this->ubahPesanan($nomorWa, $args);
-            } elseif ($functionName === 'buat_reservasi') {
-                $functionResult = $this->buatReservasi($nomorWa, $args);
-            } else {
-                $functionResult = ['error' => 'Fungsi tidak ditemukan'];
+            // Increment Usage Count
+            $identitas = \App\Models\IdentitasToko::first();
+            if ($identitas) {
+                $identitas->increment('gemini_usage_count');
             }
 
-            // 6. Kirim kembali hasil fungsi ke AI agar AI bisa membuat jawaban akhir
-            // Append the model's function call to history
-            $payload['contents'][] = $data['candidates'][0]['content'];
-            // Append the function response
-            $payload['contents'][] = [
-                'role' => 'function',
-                'parts' => [
-                    [
-                        'functionResponse' => [
-                            'name' => $functionName,
-                            'response' => empty($functionResult) ? new \stdClass() : $functionResult
+            $data = $response->json();
+
+            // Cek finish_reason SAFETY (konten diblokir)
+            $finishReason = $data['candidates'][0]['finishReason'] ?? null;
+            if ($finishReason === 'SAFETY') {
+                Log::warning("⚠️ Gemini: Konten diblokir karena alasan keamanan. Nomor: {$nomorWa}");
+                return "Maaf Kak, saya tidak bisa membalas pesan tersebut. Silakan coba dengan pertanyaan lain. 🙏";
+            }
+
+            if (!isset($data['candidates'][0]['content']['parts'][0])) {
+                Log::warning("⚠️ Gemini: Response tidak valid, tidak ada parts. Nomor: {$nomorWa}");
+                return "Maaf, saya kurang paham maksudnya. Bisa diulang kembali, Kak?";
+            }
+
+            $part = $data['candidates'][0]['content']['parts'][0];
+
+            // 5. Cek apakah AI memanggil fungsi (Tool Call)
+            if (isset($part['functionCall'])) {
+                $functionName = $part['functionCall']['name'];
+                $args = $part['functionCall']['args'] ?? [];
+
+                // Mencegah PHP mengubah JSON object kosong {} menjadi JSON array [] yang ditolak oleh API Gemini
+                if (empty($args) || (is_array($args) && count($args) === 0)) {
+                    $data['candidates'][0]['content']['parts'][0]['functionCall']['args'] = new \stdClass();
+                }
+
+                Log::info("Gemini memanggil fungsi: {$functionName}", $args);
+
+                $functionResult = [];
+
+                if ($functionName === 'get_katalog_produk') {
+                    // Gunakan cache katalog agar tidak query DB berulang kali dalam satu sesi
+                    if ($this->katalogCache === null) {
+                        $this->katalogCache = $this->getKatalogProduk();
+                    }
+                    $functionResult = $this->katalogCache;
+                } elseif ($functionName === 'tambah_ke_keranjang') {
+                    $functionResult = $this->tambahKeKeranjang($nomorWa, $args);
+                } elseif ($functionName === 'checkout_pesanan') {
+                    $functionResult = $this->checkoutPesanan($nomorWa, $args);
+                } elseif ($functionName === 'batalkan_keranjang') {
+                    $functionResult = $this->batalkanKeranjang($nomorWa);
+                } elseif ($functionName === 'batalkan_pesanan') {
+                    $functionResult = $this->batalkanPesanan($nomorWa, $args);
+                } elseif ($functionName === 'ubah_pesanan') {
+                    $functionResult = $this->ubahPesanan($nomorWa, $args);
+                } elseif ($functionName === 'buat_reservasi') {
+                    $functionResult = $this->buatReservasi($nomorWa, $args);
+                } else {
+                    $functionResult = ['error' => 'Fungsi tidak ditemukan'];
+                }
+
+                // 6. Kirim kembali hasil fungsi ke AI agar AI bisa membuat jawaban akhir
+                $payload['contents'][] = $data['candidates'][0]['content'];
+                $payload['contents'][] = [
+                    'role' => 'function',
+                    'parts' => [
+                        [
+                            'functionResponse' => [
+                                'name' => $functionName,
+                                'response' => empty($functionResult) ? new \stdClass() : $functionResult
+                            ]
                         ]
                     ]
-                ]
-            ];
+                ];
 
-            return $this->callGeminiWithToolHandling($nomorWa, $payload);
+                return $this->callGeminiWithToolHandling($nomorWa, $payload);
+            }
+
+            // 7. Jika berupa teks balasan biasa
+            if (isset($part['text'])) {
+                $responseText = $part['text'];
+
+                // Simpan ke history
+                ChatbotHistory::create([
+                    'nomor_wa' => $nomorWa,
+                    'role' => 'model',
+                    'content' => $responseText
+                ]);
+
+                return $responseText;
+            }
+
+            Log::warning("⚠️ Gemini: Response tidak dikenali. Nomor: {$nomorWa}. Data: " . json_encode($data));
+            return "Maaf, terjadi kesalahan kecil. Silakan ulangi pertanyaanmu ya Kak. 🙏";
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Timeout atau tidak bisa koneksi ke Gemini
+            Log::warning("⚠️ Gemini: Koneksi timeout/gagal. Fallback ke Mode Manual. Error: " . $e->getMessage());
+            return self::FALLBACK_SIGNAL;
+        } catch (\Exception $e) {
+            Log::error("❌ Gemini: Exception tidak terduga. Fallback ke Mode Manual. Error: " . $e->getMessage());
+            return self::FALLBACK_SIGNAL;
         }
-
-        // 7. Jika berupa teks balasan biasa
-        if (isset($part['text'])) {
-            $responseText = $part['text'];
-
-            // Simpan ke history
-            ChatbotHistory::create([
-                'nomor_wa' => $nomorWa,
-                'role' => 'model',
-                'content' => $responseText
-            ]);
-
-            return $responseText;
-        }
-
-        return "Terjadi kesalahan yang tidak terduga.";
     }
 
     // =============================================
@@ -825,64 +877,50 @@ class GeminiAiService
     {
         $now = date('Y-m-d H:i:s');
         $identitas = \App\Models\IdentitasToko::first();
-        $namaToko = $identitas && $identitas->nama_toko ? $identitas->nama_toko : 'Toko Kami';
-        $rekening = $identitas && $identitas->nomor_rekening 
-            ? $identitas->nomor_rekening 
-            : "Hubungi admin untuk informasi pembayaran";
-        
-        $namaBot = $identitas && $identitas->nama_bot ? $identitas->nama_bot : 'Teta Assistant';
-        $karakterBot = $identitas && $identitas->karakter_bot ? $identitas->karakter_bot : 'Customer Service Virtual (AI) ramah';
-        $tagline = $identitas && $identitas->pesan_footer ? $identitas->pesan_footer : "";
-        $taglineText = $tagline ? " Jika memungkinkan, sertakan motto/tagline toko kami secara natural di akhir percakapan: \"{$tagline}\"." : "";
-        
-        $jenisLayanan = $identitas && $identitas->jenis_layanan ? $identitas->jenis_layanan : 'keduanya';
-                $isDineInSupported = in_array($jenisLayanan, ['dine_in', 'keduanya']);
-        $wajibDp = $identitas && $identitas->wajib_dp_reservasi ? true : false;
-        
-        $reservasiText = "";
+        $namaToko = $identitas?->nama_toko ?: 'Toko Kami';
+        $rekening = $identitas?->nomor_rekening ?: 'Hubungi admin untuk info pembayaran';
+        $namaBot = $identitas?->nama_bot ?: 'Teta Assistant';
+        $karakterBot = $identitas?->karakter_bot ?: 'CS Virtual (AI) ramah';
+        $tagline = $identitas?->pesan_footer ?: '';
+        $taglineText = $tagline ? " Sisipkan motto: \"{$tagline}\" di akhir percakapan jika sesuai." : '';
+
+        $jenisLayanan = $identitas?->jenis_layanan ?: 'keduanya';
+        $isDineInSupported = in_array($jenisLayanan, ['dine_in', 'keduanya']);
+        $wajibDp = (bool)($identitas?->wajib_dp_reservasi);
+
+        $reservasiText = '';
         if ($isDineInSupported) {
-            $minJam = isset($identitas) && $identitas->minimal_jam_reservasi ? intval($identitas->minimal_jam_reservasi) : 0;
-            $minJamNote = "";
-            if ($minJam > 0) {
-                $minJamNote = " (PENTING: Waktu reservasi harus berjarak minimal {$minJam} jam dari waktu saat ini. Jika pelanggan meminta waktu yang lebih cepat dari itu, tolak secara sopan dan beritahu batas minimum reservasi adalah {$minJam} jam sebelumnya)";
-            }
-            $reservasiText = "\n12. FITUR RESERVASI MEJA: Karena toko ini melayani Dine-in (Makan di tempat), pelanggan bisa melakukan reservasi meja. Jika pelanggan ingin reservasi, minta: Nama, Tanggal & Jam{$minJamNote}, dan Jumlah Orang (Pax). Jika informasi tersebut sudah lengkap, panggil fungsi `buat_reservasi`.";
-            if ($wajibDp) {
-                $reservasiText .= " Setelah fungsi berhasil dipanggil, WAJIB informasikan kepada pelanggan bahwa mereka harus membayar Uang Muka (DP) sebesar Rp 50.000 ke rekening berikut: \"{$rekening}\" agar meja bisa dikonfirmasi.";
-            } else {
-                $reservasiText .= " Setelah fungsi berhasil dipanggil, informasikan bahwa reservasi sedang diproses dan menunggu konfirmasi admin (ketersediaan meja).";
-            }
+            $minJam = intval($identitas?->minimal_jam_reservasi ?? 0);
+            $minJamNote = $minJam > 0 ? " (min. {$minJam} jam dari sekarang)" : '';
+            $reservasiText = "\n12. RESERVASI: Toko melayani dine-in. Jika pelanggan mau reservasi, minta: Nama, Tanggal+Jam{$minJamNote}, Jumlah Orang, lalu panggil `buat_reservasi`.";
+            $reservasiText .= $wajibDp
+                ? " Setelah berhasil, minta DP Rp 50.000 ke: \"{$rekening}\"."
+                : ' Setelah berhasil, beri tahu bahwa reservasi menunggu konfirmasi admin.';
         }
 
         if ($context === 'admin') {
-            return "Anda adalah '{$namaBot}', Asisten Admin Virtual cerdas untuk staf internal {$namaToko}. Waktu saat ini adalah {$now}.
-Tugas Anda:
-1. Menjawab pertanyaan dari Admin atau Staf Toko (misalnya mengecek stok, harga produk, atau informasi sistem).
-2. Anda BUKAN Customer Service untuk pelanggan di mode ini, melainkan Asisten Staf. Jangan tawarkan menu seolah-olah mereka pembeli.
-3. Anda bisa menggunakan fungsi get_katalog_produk untuk mengecek stok jika staf menanyakan persediaan barang.
-4. Gunakan bahasa yang profesional namun santai ala rekan kerja.
-5. Dilarang mengarang data pesanan atau produk. Selalu berdasarkan data asli.";
+            return "Kamu adalah '{$namaBot}', asisten admin untuk {$namaToko}. Waktu: {$now}.
+Tugas: Jawab pertanyaan staf toko (stok, harga, sistem). Bisa pakai get_katalog_produk untuk cek stok. Bahasa: profesional tapi santai. Jangan mengarang data.";
         }
 
-        $operasionalText = "";
-        if ($identitas && $identitas->jam_buka && $identitas->jam_tutup) {
+        $operasionalText = '';
+        if ($identitas?->jam_buka && $identitas?->jam_tutup) {
             $jamBukaStr = \Carbon\Carbon::parse($identitas->jam_buka)->format('H:i');
             $jamTutupStr = \Carbon\Carbon::parse($identitas->jam_tutup)->format('H:i');
-            $operasionalText = "\n13. JAM OPERASIONAL: Toko beroperasi dari jam {$jamBukaStr} sampai {$jamTutupStr}. Jika pelanggan memesan di luar jam tersebut (cek Waktu saat ini), Anda WAJIB memberi peringatan secara sopan bahwa pesanan mereka masuk di luar jam operasional dan baru akan diproses/disiapkan esok hari pada jam {$jamBukaStr}. Tetap izinkan mereka menyelesaikan pesanan (checkout).";
+            $operasionalText = "\n13. JAM BUKA: {$jamBukaStr}–{$jamTutupStr}. Jika pesan di luar jam ini, peringatkan dengan sopan bahwa akan diproses saat buka jam {$jamBukaStr}, tapi tetap boleh lanjut checkout.";
         }
 
-        return "Anda adalah '{$namaBot}', {$karakterBot} untuk {$namaToko}. Waktu saat ini adalah {$now}.{$taglineText}
-Tugas Anda:
-1. Menyapa dengan hangat dan memanggil pelanggan 'Kak'.
-2. Membantu memberikan informasi menu (gunakan get_katalog_produk). HANYA tawarkan produk yang ada di katalog. Dilarang mengarang menu atau harga sendiri! Jika stok aktif siap kirim (`stok`) kosong tetapi ada stok yang sedang diproses di dapur (`stok_proses_dapur` > 0), beritahukan kepada Kakak/pelanggan bahwa produk tersebut sedang dalam proses pembuatan di dapur dan dapat dipesan untuk dikirim nanti setelah siap dimasak/diproduksi.
-3. Jika pelanggan ingin memesan, masukkan ke keranjang (gunakan tambah_ke_keranjang). Pastikan Anda bertanya detail (varian, jumlah) jika pesanan belum jelas. 
-4. PENTING: Before Anda menanyakan data identitas/alamat untuk pengiriman, Anda WAJIB menyebutkan daftar pesanan yang sudah ada di keranjang mereka dan bertanya \"Apakah pesanannya sudah benar, atau ada tambahan menu lain kak?\". Tunggu jawaban mereka sebelum melanjutkan!
-5. JIKA pelanggan sudah mengkonfirmasi pesanannya selesai, barulah Anda WAJIB BERTANYA SECARA EKSPLISIT 4 HAL INI SEBELUM CHECKOUT: Nama Penerima, Alamat Lengkap (atau ambil di toko / dine in), Tanggal Pengiriman/Pengambilan, dan Metode Pembayaran (QRIS/Transfer/COD).
-6. TENTANG ONGKOS KIRIM: Beritahu pelanggan bahwa jika barang dikirim, nominal ongkos kirim akan dicek dan diinformasikan oleh Admin *setelah* pesanan masuk (melalui chat terpisah). Saat checkout, kosongkan biaya_pengantaran.
-7. Lakukan proses checkout (gunakan checkout_pesanan) JIKA DAN HANYA JIKA data pesanan sudah lengkap.
-8. Jika pelanggan ingin membatalkan keranjang belanjanya (sebelum dicheckout), gunakan fungsi batalkan_keranjang.
-9. Jika pelanggan ingin MEMBATALKAN pesanan yang SUDAH DIBUAT/CHECKOUT, gunakan fungsi batalkan_pesanan. Jika pelanggan ingin MENGUBAH detail pesanan yang SUDAH DIBUAT/CHECKOUT (seperti mengubah alamat, tipe pengiriman dari ambil di toko menjadi diantar, tanggal pengambilan, nama penerima, atau metode pembayaran), gunakan fungsi ubah_pesanan. JANGAN gunakan checkout_pesanan lagi.
-10. Setelah checkout sukses, berikan ringkasan pesanan, nomor order. Jika tipe pengiriman adalah Kurir Toko, beritahu pelanggan untuk menunggu konfirmasi ongkir dari Admin. Jika pesanan berupa Ambil Sendiri dan pembayarannya QRIS atau Transfer, berikan nomor rekening/bank berikut agar pelanggan dapat mentransfer pembayaran: \"{$rekening}\".
-11. INFORMASI REKENING & PEMBAYARAN: Jika pelanggan menanyakan nomor rekening, informasi transfer bank, atau pembayaran menggunakan QRIS kapan saja (baik sebelum memesan, saat memesan, atau setelah selesai memesan), Anda wajib memberikan rincian nomor rekening berikut: \"{$rekening}\". Sampaikan juga bahwa jika mereka ingin membayar menggunakan QRIS, gambar kode QRIS pembayaran akan otomatis terkirim bersamaan dengan pesan tersebut.{$reservasiText}{$operasionalText}";
+        return "Kamu adalah '{$namaBot}', {$karakterBot} untuk {$namaToko}. Waktu: {$now}.{$taglineText}
+ATURAN UTAMA:
+1. Sapa hangat, panggil pelanggan 'Kak'.
+2. Untuk info/pesan menu: gunakan get_katalog_produk. HANYA jual produk yang ada. Jangan mengarang harga/menu. Jika stok=0 tapi stok_proses_dapur>0, beritahu sedang diproses dapur dan bisa dipesan.
+3. Mau pesan? Masukkan ke keranjang (tambah_ke_keranjang). Tanya varian+jumlah jika belum jelas.
+4. SEBELUM tanya alamat: sebutkan dulu isi keranjang dan tanya 'Sudah benar atau ada tambahan, Kak?'. Tunggu konfirmasi.
+5. Setelah konfirmasi: tanya 4 hal—Nama Penerima, Alamat/Ambil Sendiri, Tanggal Kirim, Metode Bayar (QRIS/Transfer/COD).
+6. ONGKIR: jika dikirim, nominal ongkir dikonfirmasi admin setelah pesanan masuk. Saat checkout, biaya_pengantaran=0.
+7. Checkout (checkout_pesanan) HANYA jika semua data lengkap.
+8. Batal keranjang (sebelum checkout) → batalkan_keranjang. Batal/ubah pesanan (sudah checkout) → batalkan_pesanan / ubah_pesanan. JANGAN checkout lagi.
+9. Setelah checkout: beri ringkasan + nomor order. Kurir Toko → tunggu konfirmasi ongkir admin. Ambil Sendiri + QRIS/Transfer → beri rekening: \"{$rekening}\".
+10. Rekening/QRIS ditanya kapan saja: selalu berikan \"{$rekening}\". QRIS → otomatis terkirim gambarnya.{$reservasiText}{$operasionalText}";
     }
 }

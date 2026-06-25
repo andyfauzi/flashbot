@@ -442,16 +442,47 @@ class WhatsAppService
                 if (!\App\Services\TenantManager::hasTenant()) {
                     // Konteks Landlord / Pusat
                     $aiService = app(\App\Services\LandlordAiService::class);
-                } else {
-                    // Konteks Tenant (Toko)
-                    $aiService = app(\App\Services\GeminiAiService::class);
+                    $reply = $aiService->handleMessage($nomor, $pesan);
+                    $this->kirimPesan($nomor, $reply, null, null, $deviceId);
+                    return;
                 }
-                
+
+                // Konteks Tenant (Toko)
+                $aiService = app(\App\Services\GeminiAiService::class);
                 $reply = $aiService->handleMessage($nomor, $pesan);
-                $this->kirimPesan($nomor, $reply, null, null, $deviceId);
+
+                // =============================================
+                // DETEKSI FALLBACK SIGNAL
+                // Jika Gemini mengembalikan FALLBACK_SIGNAL (kuota habis, down, dsb),
+                // lanjutkan ke Mode Manual di bawah (jangan return di sini)
+                // =============================================
+                if ($reply === \App\Services\GeminiAiService::FALLBACK_SIGNAL) {
+                    Log::warning("🔀 Gemini fallback aktif untuk {$nomor}. Beralih ke Mode Manual.");
+                    // Kirim pesan pemberitahuan ke pelanggan
+                    $this->kirimPesan(
+                        $nomor,
+                        "Mohon maaf Kak, asisten AI kami sedang sibuk. 🙏\n\nSilakan gunakan menu manual berikut:\n• Ketik *katalog* untuk melihat menu\n• Ketik *order* untuk mulai pesan\n• Ketik *status order* untuk cek pesanan\n• Ketik *menu* untuk daftar lengkap",
+                        null,
+                        null,
+                        $deviceId
+                    );
+                    return; // Cukup kirim notifikasi fallback, tidak perlu lanjut ke manual flow
+                }
+
+                // Balasan normal dari AI
+                if (!empty($reply)) {
+                    $this->kirimPesan($nomor, $reply, null, null, $deviceId);
+                }
             } catch (\Exception $e) {
-                Log::error("Gemini AI Error: " . $e->getMessage());
-                $this->kirimPesan($nomor, "Sistem AI sedang offline. Pesan error: " . $e->getMessage(), null, null, $deviceId);
+                Log::error("Gemini AI Exception: " . $e->getMessage());
+                // Jangan tampilkan error teknis ke pelanggan
+                $this->kirimPesan(
+                    $nomor,
+                    "Mohon maaf Kak, sistem kami sedang gangguan. Silakan coba lagi dalam beberapa saat. 🙏",
+                    null,
+                    null,
+                    $deviceId
+                );
             }
             return;
         }
