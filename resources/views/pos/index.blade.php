@@ -129,8 +129,10 @@
                         <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
                             @if($kat->foto)
                                 <img src="{{ asset('storage/' . $kat->foto) }}" alt="{{ $kat->nama }}" class="mb-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;">
+                            @elseif($kat->icon)
+                                <i class="fa-solid {{ $kat->icon }} fs-2 text-primary mb-2"></i>
                             @else
-                                <i class="fa-solid fa-folder-open fs-2 text-warning mb-2"></i>
+                                <i class="fa-solid fa-box fs-2 text-primary mb-2"></i>
                             @endif
                             <h6 class="fw-bold mb-0">{{ $kat->nama }}</h6>
                         </div>

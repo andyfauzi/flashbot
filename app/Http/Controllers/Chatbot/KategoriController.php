@@ -25,6 +25,7 @@ class KategoriController extends Controller
             'nama' => 'required|string|max:255|unique:kategoris',
             'deskripsi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'icon' => 'nullable|string|max:50',
             'aktif' => 'boolean'
         ]);
 
@@ -37,6 +38,7 @@ class KategoriController extends Controller
             'nama' => $request->nama,
             'deskripsi' => $request->deskripsi,
             'foto' => $fotoPath,
+            'icon' => $request->icon,
             'aktif' => $request->has('aktif') ? true : false,
         ]);
 
@@ -54,12 +56,14 @@ class KategoriController extends Controller
             'nama' => 'required|string|max:255|unique:kategoris,nama,' . $kategori->id,
             'deskripsi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'icon' => 'nullable|string|max:50',
             'aktif' => 'boolean'
         ]);
 
         $data = [
             'nama' => $request->nama,
             'deskripsi' => $request->deskripsi,
+            'icon' => $request->icon,
             'aktif' => $request->has('aktif') ? true : false,
         ];
 

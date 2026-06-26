@@ -10,7 +10,7 @@ class Kategori extends Model
 {
     use HasFactory, BelongsToTenant;
 
-    protected $fillable = ['nama', 'deskripsi', 'aktif', 'foto'];
+    protected $fillable = ['nama', 'deskripsi', 'aktif', 'foto', 'icon'];
 
     public function produks()
     {
