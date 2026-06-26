@@ -49,11 +49,11 @@
                 <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height:30px; width:30px; object-fit:cover; border-radius:8px; border:1.5px solid rgba(255,255,255,0.15);">
             @else
                 <div class="brand-logo-wrap">
-                    <i class="fa-solid fa-bolt" style="color:#fff; font-size:14px;"></i>
+                    <i class="fa-solid fa-bolt" style="color:var(--brand); font-size:16px;"></i>
                 </div>
             @endif
-            <span class="brand-name d-none d-sm-block">
-                {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}
+            <span class="brand-name d-none d-sm-block fs-5 ms-1">
+                {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'BALAI BACA' }}
             </span>
         </a>
     </div>
@@ -65,29 +65,25 @@
         @auth
         <form action="{{ route('dashboard.ui_mode.toggle') }}" method="POST" class="m-0">
             @csrf
-            <button type="submit" class="nav-icon-btn" title="Ubah Tampilan">
-                <i data-lucide="{{ auth()->user()->ui_mode === 'grid' ? 'list' : 'layout-grid' }}" style="width:16px;height:16px;"></i>
+            <button type="submit" class="nav-icon-btn d-flex align-items-center justify-content-center" title="Ubah Tampilan" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); width:36px; height:36px; border-radius:8px;">
+                <i data-lucide="{{ auth()->user()->ui_mode === 'grid' ? 'list' : 'layout-grid' }}" style="width:18px;height:18px;color:rgba(255,255,255,0.8);"></i>
             </button>
         </form>
         @endauth
 
         <!-- Refresh -->
-        <button onclick="window.location.reload(true)" class="nav-icon-btn" title="Refresh Halaman">
-            <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>
+        <button onclick="window.location.reload(true)" class="nav-icon-btn d-flex align-items-center justify-content-center" title="Refresh Halaman" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); width:36px; height:36px; border-radius:8px;">
+            <i data-lucide="refresh-cw" style="width:16px;height:16px;color:rgba(255,255,255,0.8);"></i>
         </button>
 
         <!-- Status Gateway Badge -->
-        <div class="d-none d-sm-flex">
+        <div class="d-none d-sm-flex align-items-center mx-1" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 6px 14px;">
             @if($isConnected)
-                <div class="status-badge online">
-                    <div class="pulse-dot"></div>
-                    <span>{{ strtoupper($gatewayStatus['gateway'] ?? 'WA') }} Connected</span>
-                </div>
+                <div class="pulse-dot" style="background-color: #10B981;"></div>
+                <span style="color: #A7F3D0; font-size: 13px; font-weight: 600; margin-left: 8px;">Connected (BAILEYS)</span>
             @else
-                <div class="status-badge offline">
-                    <div class="pulse-dot"></div>
-                    <span>Disconnected</span>
-                </div>
+                <div class="pulse-dot" style="background-color: #EF4444;"></div>
+                <span style="color: #FCA5A5; font-size: 13px; font-weight: 600; margin-left: 8px;">Disconnected</span>
             @endif
         </div>
 
@@ -103,13 +99,13 @@
 
             @if($activeShift)
                 <!-- Pengeluaran -->
-                <button type="button" class="btn-pengeluaran d-none d-md-inline-flex" data-bs-toggle="modal" data-bs-target="#pengeluaranModal">
-                    <i data-lucide="banknote" style="width:15px;height:15px;"></i>
+                <button type="button" class="btn btn-sm d-none d-md-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#pengeluaranModal" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); padding: 7px 14px; border-radius: 8px; font-weight: 500;">
+                    <i data-lucide="banknote" style="width:16px;height:16px;"></i>
                     <span>Pengeluaran</span>
                 </button>
                 <!-- Tutup Shift CTA -->
-                <button type="button" class="btn-tutup-shift" data-bs-toggle="modal" data-bs-target="#tutupShiftModal">
-                    <i data-lucide="lock" style="width:15px;height:15px;"></i>
+                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#tutupShiftModal" style="background:#EF4444; border:none; color:white; padding: 7px 14px; border-radius: 8px; font-weight: 600;">
+                    <i data-lucide="lock" style="width:16px;height:16px;"></i>
                     <span class="d-none d-sm-inline">Tutup Shift</span>
                 </button>
             @endif
@@ -164,7 +160,7 @@
 <div class="d-flex min-vh-100">
     <!-- Sidebar Container (Desktop) -->
     <div class="sidebar-premium sidebar-sticky d-none d-md-block flex-shrink-0">
-        <div class="pt-4 px-0 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
+        <div class="pt-4 px-0 d-flex flex-column h-100 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
             @include('layouts.sidebar_menu', ['prefix' => 'Desktop'])
         </div>
     </div>

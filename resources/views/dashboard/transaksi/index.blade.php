@@ -5,14 +5,14 @@
 @section('content')
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
-        <h1 class="h3 mb-0 text-gray-800">Riwayat Transaksi</h1>
-        <p class="text-muted mb-0">Kelola dan pantau semua transaksi kasir.</p>
+        <h1 class="h3 mb-0" style="color: var(--text-primary); font-weight: 700; letter-spacing: -0.02em;">Riwayat Transaksi</h1>
+        <p class="text-muted mb-0" style="font-size: 14px;">Kelola dan pantau semua transaksi kasir.</p>
     </div>
     <div style="min-width: 300px;">
         <form action="{{ route('dashboard.transaksi.index') }}" method="GET">
-            <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden; border: 1px solid var(--border-card);">
-                <input type="text" name="search" class="form-control border-0" placeholder="Cari No. Order / Pelanggan..." value="{{ request('search') }}">
-                <button class="btn btn-primary px-4 border-0" type="submit"><i class="fa-solid fa-search"></i></button>
+            <div class="input-group shadow-sm bg-white" style="border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light);">
+                <input type="text" name="search" class="form-control border-0 bg-transparent py-2 px-3 shadow-none" placeholder="Cari No. Order / Pelanggan..." value="{{ request('search') }}" style="font-size: 13px;">
+                <button class="btn px-4 border-0 text-white" style="background: var(--brand);" type="submit"><i class="fa-solid fa-search"></i></button>
             </div>
         </form>
     </div>
@@ -22,15 +22,25 @@
 @if(isset($statistik))
 <div class="row g-4 mb-4">
     <div class="col-md-6">
-        <div class="card-premium stat-card p-4">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="text-secondary small fw-semibold mb-1">Omzet Hari Ini</div>
-                    <div class="fs-4 fw-extrabold text-primary tracking-tight mb-2">Rp {{ number_format($statistik['omzet_hari_ini'], 0, ',', '.') }}</div>
-                    <span class="badge border border-secondary text-secondary rounded-pill">{{ $statistik['pesanan_hari_ini'] }} Pesanan Hari Ini</span>
+        <div class="card-premium stat-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); border-radius: 16px;">
+            <!-- Wavy background SVG -->
+            <svg class="position-absolute bottom-0 end-0" style="width:100%; height:auto; opacity:0.15; pointer-events:none; transform: scale(1.1); transform-origin: bottom right;" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#ffffff" fill-opacity="1" d="M0,224L60,202.7C120,181,240,139,360,133.3C480,128,600,160,720,186.7C840,213,960,235,1080,213.3C1200,192,1320,128,1380,96L1440,64L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+            </svg>
+            <div class="position-relative z-1">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="fa-solid fa-chart-line text-white" style="font-size: 18px;"></i>
+                    </div>
+                    <div class="text-white opacity-75 small fw-medium">Omzet Hari Ini</div>
+                    <div class="ms-auto text-white opacity-75 fw-medium">Rp</div>
                 </div>
-                <div>
-                    <i class="fa-solid fa-rupiah-sign fs-4 text-muted"></i>
+                <div class="text-white fw-bold mb-4" style="font-size: 2.2rem; letter-spacing: -1px;">
+                    Rp {{ number_format($statistik['omzet_hari_ini'], 0, ',', '.') }}
+                </div>
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="rounded-circle" style="width: 6px; height: 6px; background-color: #34D399;"></div>
+                    <span class="text-white fw-medium" style="font-size: 11px;">{{ $statistik['pesanan_hari_ini'] }} Pesanan Hari Ini</span>
                 </div>
             </div>
         </div>
@@ -115,26 +125,28 @@
                         <td class="fw-bold text-success">Rp {{ number_format($trx->total_biaya, 0, ',', '.') }}</td>
                         <td>
                             @if($trx->status === 'completed' || $trx->status === 'paid')
-                                <span class="badge bg-success rounded-pill px-3 py-2">Selesai</span>
+                                <span class="badge rounded-pill px-3 py-1.5" style="color: #059669; background: #ECFDF5; border: 1px solid #10B981;"><i class="fa-solid fa-circle-check me-1"></i>Selesai</span>
                             @elseif($trx->status === 'batal')
-                                <span class="badge bg-danger rounded-pill px-3 py-2">Batal (Void)</span>
+                                <span class="badge rounded-pill px-3 py-1.5" style="color: #DC2626; background: #FEE2E2; border: 1px solid #EF4444;"><i class="fa-solid fa-circle-xmark me-1"></i>Batal (Void)</span>
                                 <div class="text-danger mt-1" style="font-size: 10px; max-width: 150px; white-space: normal;">
                                     {!! nl2br(e($trx->catatan)) !!}
                                 </div>
+                            @elseif($trx->status === 'pending_payment')
+                                <span class="badge rounded-pill px-3 py-1.5" style="color: #D97706; background: #FFFBEB; border: 1px solid #F59E0B;"><i class="fa-solid fa-clock me-1"></i>Pending_payment</span>
                             @else
-                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">{{ ucfirst($trx->status) }}</span>
+                                <span class="badge rounded-pill px-3 py-1.5" style="color: #D97706; background: #FFFBEB; border: 1px solid #F59E0B;"><i class="fa-solid fa-clock me-1"></i>{{ ucfirst($trx->status) }}</span>
                             @endif
                         </td>
                         <td class="text-end pe-4">
                             @if($trx->status !== 'batal')
-                                <button type="button" class="btn btn-sm btn-light text-primary me-1" onclick="cetakStruk({{ $trx->id }})" title="Cetak Ulang">
-                                    <i class="fa-solid fa-print"></i>
+                                <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center me-1 rounded-circle" style="width: 32px; height: 32px; border: 1px solid #C7D2FE; color: var(--brand); background: transparent; transition: all 0.2s;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='transparent'" onclick="cetakStruk({{ $trx->id }})" title="Cetak Ulang">
+                                    <i class="fa-solid fa-print" style="font-size: 13px;"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-light text-warning me-1" onclick="editTransaksi({{ $trx->id }}, '{{ $trx->nomor_order }}')" title="Edit / Batal Sebagian">
-                                    <i class="fa-solid fa-pen-to-square"></i>
+                                <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center me-1 rounded-circle" style="width: 32px; height: 32px; border: 1px solid #FDE68A; color: #D97706; background: transparent; transition: all 0.2s;" onmouseover="this.style.background='#FEF3C7'" onmouseout="this.style.background='transparent'" onclick="editTransaksi({{ $trx->id }}, '{{ $trx->nomor_order }}')" title="Edit / Batal Sebagian">
+                                    <i class="fa-solid fa-pen-to-square" style="font-size: 13px;"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-light text-danger" onclick="batalTransaksi({{ $trx->id }}, '{{ $trx->nomor_order }}')" title="Batal Total (Void)">
-                                    <i class="fa-solid fa-ban"></i>
+                                <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; border: 1px solid #FECACA; color: #DC2626; background: transparent; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='transparent'" onclick="batalTransaksi({{ $trx->id }}, '{{ $trx->nomor_order }}')" title="Batal Total (Void)">
+                                    <i class="fa-solid fa-ban" style="font-size: 13px;"></i>
                                 </button>
                             @else
                                 <span class="text-muted small"><i class="fa-solid fa-lock"></i> Terkunci</span>

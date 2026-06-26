@@ -369,6 +369,21 @@
         </div>
     </div>
     @endif
+
+    <!-- Bantuan Widget -->
+    <div class="mt-auto px-3 pb-4 pt-3">
+        <div class="p-3 rounded-4" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(79, 70, 229, 0.05) 100%); border: 1px solid rgba(79, 70, 229, 0.3);">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i data-lucide="headphones" style="color: #A5B4FC; width: 18px; height: 18px;"></i>
+                <span style="font-weight: 600; color: #fff; font-size: 13px;">Butuh bantuan?</span>
+            </div>
+            <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 12px;">Pusat Bantuan & Dokumentasi</p>
+            <a href="{{ route('dashboard.help') }}" class="btn btn-sm w-100 d-flex justify-content-between align-items-center" style="background: var(--brand); color: #fff; border-radius: 8px; font-weight: 500; font-size: 12px; padding: 8px 12px;">
+                Pusat Bantuan
+                <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
+        </div>
+    </div>
 </div>
 
 <style>
