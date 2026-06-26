@@ -117,19 +117,28 @@
             <!-- Divider -->
             <div style="width:1px; height:28px; background:rgba(255,255,255,0.12); margin:0 4px;"></div>
 
-            <!-- User Chip -->
-            <div class="navbar-user-chip">
-                <div class="navbar-user-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? auth()->user()->email, 0, 1)) }}
+            <!-- User Dropdown -->
+            <div class="dropdown">
+                <div class="navbar-user-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                    <div class="navbar-user-avatar">
+                        {{ strtoupper(substr(auth()->user()->name ?? auth()->user()->email, 0, 1)) }}
+                    </div>
+                    <span class="navbar-user-name d-none d-md-block">{{ auth()->user()->name ?? auth()->user()->email }}</span>
+                    <i data-lucide="chevron-down" style="width:14px;height:14px;color:rgba(255,255,255,0.45);"></i>
                 </div>
-                <span class="navbar-user-name d-none d-md-block">{{ auth()->user()->name ?? auth()->user()->email }}</span>
-                <i data-lucide="chevron-down" style="width:14px;height:14px;color:rgba(255,255,255,0.45);"></i>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 200px; border-radius: 12px; margin-top: 8px;">
+                    <li class="px-3 py-2 border-bottom mb-1">
+                        <div class="fw-bold text-dark">{{ auth()->user()->name ?? 'User' }}</div>
+                        <div class="text-muted small" style="font-size: 11px;">{{ auth()->user()->email }}</div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger fw-medium" href="{{ route('logout') }}">
+                            <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                            Keluar (Logout)
+                        </a>
+                    </li>
+                </ul>
             </div>
-
-            <!-- Logout -->
-            <a href="{{ route('logout') }}" class="nav-icon-btn" title="Logout">
-                <i data-lucide="log-out" style="width:16px;height:16px;"></i>
-            </a>
         @endauth
     </div>
 </nav>

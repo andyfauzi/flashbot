@@ -1070,6 +1070,7 @@ hr {
    ============================================================ */
 .offcanvas.sidebar-premium {
     background: linear-gradient(180deg, var(--sidebar-from) 0%, var(--sidebar-to) 100%) !important;
+    position: fixed !important;
 }
 
 .offcanvas.sidebar-premium .offcanvas-header {
