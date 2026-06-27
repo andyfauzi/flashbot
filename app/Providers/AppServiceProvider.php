@@ -27,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
+
         if (app()->isProduction()) {
             $requiredSecrets = [
                 'chatbot.webhook_secret',

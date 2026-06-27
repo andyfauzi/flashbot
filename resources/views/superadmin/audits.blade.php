@@ -62,7 +62,7 @@
         </div>
         @if($audits->hasPages())
         <div class="card-footer bg-white border-0 pt-4 pb-4 px-4 d-flex justify-content-end">
-            {{ $audits->links('pagination::bootstrap-5') }}
+            {{ $audits->links() }}
         </div>
         @endif
     </div>

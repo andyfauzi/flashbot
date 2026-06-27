@@ -163,7 +163,7 @@
         </div>
     </div>
     <div class="card-footer bg-white border-0 py-3">
-        {{ $transaksis->links('pagination::bootstrap-4') }}
+        {{ $transaksis->links() }}
     </div>
 </div>
 
