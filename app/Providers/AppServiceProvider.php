@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        \Illuminate\Pagination\Paginator::useBootstrapFive();
+        \Illuminate\Pagination\Paginator::useBootstrap();
 
         if (app()->isProduction()) {
             $requiredSecrets = [
