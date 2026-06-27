@@ -48,16 +48,12 @@
             <i data-lucide="menu" style="width:18px;height:18px;"></i>
         </button>
 
-        <a class="navbar-brand m-0" href="{{ route('chatbot.dashboard') }}">
-            @if(isset($identitasToko) && $identitasToko->logo_path)
-                <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height:30px; width:30px; object-fit:cover; border-radius:8px; border:1.5px solid rgba(255,255,255,0.15);">
-            @else
-                <div class="brand-logo-wrap">
-                    <i class="fa-solid fa-bolt" style="color:var(--brand); font-size:16px;"></i>
-                </div>
-            @endif
+        <a class="navbar-brand m-0" href="{{ route('superadmin.index') }}">
+            <div class="brand-logo-wrap">
+                <i class="fa-solid fa-crown" style="color:var(--brand); font-size:16px;"></i>
+            </div>
             <span class="brand-name d-none d-sm-block fs-5 ms-1">
-                {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'BALAI BACA' }}
+                SUPER ADMIN
             </span>
         </a>
     </div>
@@ -80,46 +76,14 @@
             <i data-lucide="refresh-cw" style="width:16px;height:16px;color:rgba(255,255,255,0.8);"></i>
         </button>
 
-        <!-- Status Gateway Badge -->
-        <!-- Status Gateway Badge -->
-        <div class="d-none d-sm-flex align-items-center mx-1" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 6px 14px;">
-            @if($isConnected ?? false)
-                <div class="pulse-dot" style="background-color: #10B981;"></div>
-                <span style="color: #A7F3D0; font-size: 13px; font-weight: 600; margin-left: 8px;">Connected (BAILEYS)</span>
-            @else
-                <div class="pulse-dot" style="background-color: #EF4444;"></div>
-                <span style="color: #FCA5A5; font-size: 13px; font-weight: 600; margin-left: 8px;">Disconnected</span>
-            @endif
-        </div>
-        </div>
+        <!-- Status Gateway Badge Removed for Super Admin -->
+        <!-- Shift Buttons Removed for Super Admin -->
 
-        @auth
-            @php
-                $activeShift = null;
-                if (app()->has('current_tenant') && auth()->check()) {
-                    try {
-                        $activeShift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
-                    } catch (\Exception $e) {}
-                }
-            @endphp
-
-            @if($activeShift)
-                <!-- Pengeluaran -->
-                <button type="button" class="btn btn-sm d-none d-md-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#pengeluaranModal" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); padding: 7px 14px; border-radius: 8px; font-weight: 500;">
-                    <i data-lucide="banknote" style="width:16px;height:16px;"></i>
-                    <span>Pengeluaran</span>
-                </button>
-                <!-- Tutup Shift CTA -->
-                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#tutupShiftModal" style="background:#EF4444; border:none; color:white; padding: 7px 14px; border-radius: 8px; font-weight: 600;">
-                    <i data-lucide="lock" style="width:16px;height:16px;"></i>
-                    <span class="d-none d-sm-inline">Tutup Shift</span>
-                </button>
-            @endif
-
-            <!-- Divider -->
+        <!-- Divider -->
             <div style="width:1px; height:28px; background:rgba(255,255,255,0.12); margin:0 4px;"></div>
 
             <!-- User Dropdown -->
+            @auth
             <div class="dropdown">
                 <div class="navbar-user-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
                     <div class="navbar-user-avatar">
@@ -149,17 +113,13 @@
 <div class="offcanvas offcanvas-start sidebar-premium" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
     <div class="offcanvas-header border-bottom px-4">
         <h5 class="offcanvas-title fw-bold d-flex align-items-center gap-2" id="sidebarOffcanvasLabel" style="font-family: var(--font-heading); color: var(--text-primary);">
-            @if(isset($identitasToko) && $identitasToko->logo_path)
-                <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height: 24px; object-fit: contain;" class="me-1" loading="lazy">
-            @else
-                <i class="fa-solid fa-store text-primary"></i>
-            @endif
-            {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'TENANTA.ID' }}
+            <i class="fa-solid fa-crown text-primary"></i>
+            SUPER ADMIN
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body flex-column pt-2 px-0 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
-        @include('layouts.sidebar_menu', ['prefix' => 'Mobile'])
+        @include('layouts.superadmin_sidebar_menu', ['prefix' => 'Mobile'])
     </div>
 </div>
 
@@ -167,7 +127,7 @@
     <!-- Sidebar Container (Desktop) -->
     <div class="sidebar-premium sidebar-sticky d-none d-md-block flex-shrink-0" id="desktopSidebarContainer">
         <div class="pt-4 px-0 d-flex flex-column h-100 {{ (auth()->user() && auth()->user()->ui_mode === 'grid') ? 'grid-mode-menu' : '' }}">
-            @include('layouts.sidebar_menu', ['prefix' => 'Desktop'])
+            @include('layouts.superadmin_sidebar_menu', ['prefix' => 'Desktop'])
         </div>
     </div>
 
@@ -310,189 +270,7 @@
   }
 </script>
 
-@auth
-@if(isset($activeShift) && $activeShift)
-<!-- Modal Pengeluaran Kasir -->
-<div class="modal fade" id="pengeluaranModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('dashboard.shift.pengeluaran') }}" method="POST" class="modal-content" onsubmit="return preventDoubleSubmit(this);">
-            @csrf
-            <div class="modal-header">
-                <h5 class="modal-title"><i data-lucide="arrow-right-left" class="text-warning me-2"></i>Catat Pengeluaran Kasir</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Nominal (Rp)</label>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="nominal" class="form-control" placeholder="Contoh: 15000" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Keterangan / Keperluan</label>
-                    <input type="text" name="keterangan" class="form-control" placeholder="Beli es batu dadakan" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-warning w-100 fw-bold">Simpan Pengeluaran</button>
-            </div>
-        </form>
-    </div>
-</div>
 
-<!-- Modal Tutup Shift -->
-<div class="modal fade" id="tutupShiftModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('dashboard.shift.tutup') }}" method="POST" class="modal-content" onsubmit="return preventDoubleSubmit(this);">
-            @csrf
-            <div class="modal-header">
-                <h5 class="modal-title"><i data-lucide="lock" class="text-danger me-2"></i>Tutup Shift Kasir</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <ul class="mb-0">
-                        <li>Modal Awal: <strong>Rp {{ number_format($activeShift->modal_awal, 0, ',', '.') }}</strong></li>
-                        <li>Penjualan Tunai: <strong>Rp {{ number_format($activeShift->total_penjualan_tunai, 0, ',', '.') }}</strong></li>
-                        <li>Pengeluaran: <strong>Rp {{ number_format($activeShift->pengeluaran_kasir, 0, ',', '.') }}</strong></li>
-                    </ul>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-danger">Total Uang Fisik yang Ada di Laci Sekarang (Rp)</label>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="uang_fisik" class="form-control form-control-lg border-danger" placeholder="Hitung uang tunai Anda..." required>
-                    <small class="text-muted">Masukkan jumlah asli sesuai fisik uang, sistem akan mencocokkannya secara otomatis.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-danger w-100 fw-bold">Kunci Laci & Tutup Shift</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
-@endauth
-
-<!-- Bottom Navigation (Mobile Only) -->
-<nav class="bottom-nav d-md-none fixed-bottom bg-white border-top py-2 d-flex justify-content-around shadow-sm" style="z-index: 1040;">
-    <a href="{{ route('chatbot.dashboard') }}" class="text-center text-decoration-none {{ request()->routeIs('chatbot.dashboard') ? 'text-primary' : 'text-secondary' }}">
-        <i data-lucide="home" class="d-block mx-auto mb-1" style="width: 20px; height: 20px;"></i>
-        <span style="font-size: 0.7rem; font-weight: 500;">Home</span>
-    </a>
-    <a href="{{ route('pos.index') }}" class="text-center text-decoration-none {{ request()->routeIs('pos.*') ? 'text-primary' : 'text-secondary' }}">
-        <i data-lucide="banknote" class="d-block mx-auto mb-1" style="width: 20px; height: 20px;"></i>
-        <span style="font-size: 0.7rem; font-weight: 500;">Kasir</span>
-    </a>
-    <!-- FAB (Floating Action Button) -->
-    <a href="{{ route('dashboard.preorder.index') }}" class="text-center text-decoration-none">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-lg mx-auto" style="width: 50px; height: 50px; margin-top: -25px; border: 4px solid #FFFCFA;">
-            <i data-lucide="calendar-check" style="width: 24px; height: 24px;"></i>
-        </div>
-        <span class="text-secondary" style="font-size: 0.7rem; font-weight: 500;">Pesanan</span>
-    </a>
-    <a href="{{ route('chatbot.grup') }}" class="text-center text-decoration-none {{ request()->routeIs('chatbot.grup*') ? 'text-primary' : 'text-secondary' }}">
-        <i data-lucide="users" class="d-block mx-auto mb-1" style="width: 20px; height: 20px;"></i>
-        <span style="font-size: 0.7rem; font-weight: 500;">Grup</span>
-    </a>
-    <a href="#" class="text-center text-decoration-none text-secondary">
-        <i data-lucide="settings" class="d-block mx-auto mb-1" style="width: 20px; height: 20px;"></i>
-        <span style="font-size: 0.7rem; font-weight: 500;">Setelan</span>
-    </a>
-</nav>
-
-<!-- Padding helper agar konten tidak tertutup bottom nav -->
-<div class="d-md-none" style="height: 70px;"></div>
-<!-- Idle Detection Modal -->
-@auth
-<div class="modal fade" id="idleModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-body text-center p-5">
-                <i data-lucide="clock" class="text-warning mb-3" style="width: 64px; height: 64px;"></i>
-                <h4 class="fw-bold mb-3">Sesi Akan Berakhir</h4>
-                <p class="text-secondary mb-4">Sesi Anda akan berakhir dalam <span id="idleCountdown" class="fw-bold text-danger">120</span> detik karena tidak ada aktivitas.</p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <button type="button" class="btn btn-outline-secondary px-4 rounded-3" onclick="window.location.href='{{ route('logout') }}'">Logout</button>
-                    <button type="button" class="btn btn-primary px-4 rounded-3" onclick="extendSession()">Tetap Login</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    let idleTime = 0;
-    let countdownTime = 120;
-    let idleInterval;
-    let countdownInterval;
-    
-    // 18 minutes = 1080 seconds
-    const maxIdleTime = 1080;
-
-    function resetTimer() {
-        idleTime = 0;
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-            const modal = bootstrap.Modal.getInstance(document.getElementById('idleModal'));
-            if (modal) modal.hide();
-        }
-    }
-
-    function timerIncrement() {
-        idleTime++;
-        if (idleTime > maxIdleTime && !countdownInterval) {
-            // Show modal and start countdown
-            countdownTime = 120;
-            document.getElementById('idleCountdown').innerText = countdownTime;
-            const idleModal = new bootstrap.Modal(document.getElementById('idleModal'));
-            idleModal.show();
-
-            countdownInterval = setInterval(() => {
-                countdownTime--;
-                document.getElementById('idleCountdown').innerText = countdownTime;
-                if (countdownTime <= 0) {
-                    window.location.href = "{{ route('login') }}";
-                }
-            }, 1000);
-        }
-    }
-
-    function extendSession() {
-        fetch('/api/heartbeat', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        }).then(response => {
-            if (response.ok) {
-                resetTimer();
-            } else {
-                window.location.href = "{{ route('login') }}";
-            }
-        }).catch(() => {
-            window.location.href = "{{ route('login') }}";
-        });
-    }
-
-    // Bind events
-    document.addEventListener('mousemove', resetTimer);
-    document.addEventListener('keypress', resetTimer);
-    document.addEventListener('scroll', resetTimer);
-    document.addEventListener('click', resetTimer);
-
-    // Increment timer every second
-    idleInterval = setInterval(timerIncrement, 1000);
-
-    // Double Submit Protection untuk UX Kasir
-    function preventDoubleSubmit(form) {
-        const btn = form.querySelector('button[type="submit"]');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...';
-        }
-        return true;
-    }
-</script>
-@endauth
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>

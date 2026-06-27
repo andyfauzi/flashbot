@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.superadmin')
 
 @section('title', 'Super Admin')
 
@@ -205,10 +205,10 @@
     </script>
 @endif
 
-<div class="row">
+<div class="row g-3 mb-4">
     <!-- Form Tambah Tenant Card -->
-    <div class="col-lg-4 mb-4 mb-lg-0">
-        <div class="custom-card">
+    <div class="col-lg-6">
+        <div class="custom-card h-100 mb-0">
             <h5 class="fw-bold mb-4"><i class="fa-solid fa-circle-plus text-primary me-2"></i>Daftarkan Tenant Baru</h5>
             <form action="{{ route('superadmin.store') }}" method="POST">
                 @csrf
@@ -253,9 +253,11 @@
                 <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-circle-nodes me-2"></i>Buat & Inisialisasi Database</button>
             </form>
         </div>
+    </div>
 
-        <!-- Card Global Package Toggles -->
-        <div class="custom-card mt-4">
+    <!-- Card Global Package Toggles -->
+    <div class="col-lg-6">
+        <div class="custom-card h-100 mb-0">
             <h5 class="fw-bold mb-4"><i class="fa-solid fa-tags text-success me-2"></i>Ketersediaan Paket</h5>
             <form action="{{ route('superadmin.settings.update') }}" method="POST">
                 @csrf
@@ -279,9 +281,11 @@
             </form>
         </div>
     </div>
+</div>
 
+<div class="row">
     <!-- List Card -->
-    <div class="col-lg-8">
+    <div class="col-12">
         <div class="custom-card">
             <h5 class="fw-bold mb-4"><i class="fa-solid fa-database text-primary me-2"></i>Daftar Tenant Platform</h5>
             @if($tenants->isEmpty())

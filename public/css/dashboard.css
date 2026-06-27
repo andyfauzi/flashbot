@@ -326,6 +326,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     position: sticky !important;
     top: var(--navbar-h) !important;
     height: calc(100vh - var(--navbar-h)) !important;
+    min-height: calc(100vh - var(--navbar-h)) !important;
     overflow-y: auto !important;
     align-self: flex-start !important;
 }

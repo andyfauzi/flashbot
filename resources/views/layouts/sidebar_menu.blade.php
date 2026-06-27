@@ -303,18 +303,7 @@
     @endif
     @endif
 
-    <!-- ============================================== -->
-    <!-- 🆘 PUSAT BANTUAN -->
-    <!-- ============================================== -->
-    @if(auth()->user() && !auth()->user()->is_super_admin)
-    <div class="accordion-item bg-transparent border-0 mb-1">
-        <h2 class="accordion-header" id="headingBantuan{{ $prefix }}">
-            <a href="{{ route('dashboard.help') }}" class="accordion-button bg-transparent shadow-none px-3 py-2 fw-bold collapsed text-decoration-none" style="display: block;">
-                <i data-lucide="help-circle" class="me-2 text-primary"></i> Pusat Bantuan
-            </a>
-        </h2>
-    </div>
-    @endif
+
 
     <!-- ============================================== -->
     <!-- 👑 SUPER ADMIN (Landlord) -->
