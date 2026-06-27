@@ -87,9 +87,18 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($v->resep->count() > 0)
-                                        <ul class="list-unstyled mb-0 small">
-                                            @foreach($v->resep as $r)
+                                    @php
+                                        $resepBahan = $v->resep->filter(fn($r) => optional($r->bahanBaku)->kategori !== 'packaging');
+                                        $resepPackaging = $v->resep->filter(fn($r) => optional($r->bahanBaku)->kategori === 'packaging');
+                                        
+                                        $hppBahan = $resepBahan->sum(fn($r) => $r->qty_dipakai * optional($r->bahanBaku)->harga_per_unit);
+                                        $hppPackaging = $resepPackaging->sum(fn($r) => $r->qty_dipakai * optional($r->bahanBaku)->harga_per_unit);
+                                    @endphp
+
+                                    @if($resepBahan->count() > 0)
+                                        <div class="fw-bold text-primary small mb-1"><i class="fa-solid fa-leaf me-1"></i> Bahan Baku</div>
+                                        <ul class="list-unstyled mb-2 small">
+                                            @foreach($resepBahan as $r)
                                             <li class="mb-1 d-flex justify-content-between align-items-center">
                                                 <span>{{ $r->qty_dipakai }} {{ $r->bahanBaku->satuan ?? '?' }} {{ $r->bahanBaku->nama_bahan ?? 'Bahan Dihapus' }}</span>
                                                 <form action="{{ route('dashboard.hpp.resep.destroy', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus bahan ini dari resep?');">
@@ -100,7 +109,25 @@
                                             </li>
                                             @endforeach
                                         </ul>
-                                    @else
+                                    @endif
+
+                                    @if($resepPackaging->count() > 0)
+                                        <div class="fw-bold text-warning small mb-1 mt-2"><i class="fa-solid fa-box-open me-1"></i> Packaging</div>
+                                        <ul class="list-unstyled mb-0 small">
+                                            @foreach($resepPackaging as $r)
+                                            <li class="mb-1 d-flex justify-content-between align-items-center">
+                                                <span>{{ $r->qty_dipakai }} {{ $r->bahanBaku->satuan ?? '?' }} {{ $r->bahanBaku->nama_bahan ?? 'Bahan Dihapus' }}</span>
+                                                <form action="{{ route('dashboard.hpp.resep.destroy', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus bahan ini dari resep?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0"><i class="fa-solid fa-times"></i></button>
+                                                </form>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if($v->resep->count() == 0)
                                         <span class="text-muted small fst-italic">Belum ada resep.</span>
                                     @endif
                                 </td>
@@ -115,8 +142,12 @@
                                 </td>
                                 <td>
                                     <div class="mb-1">
-                                        <span class="text-muted small">HPP Bahan:</span>
-                                        <strong class="float-end">Rp{{ number_format($v->hpp, 0, ',', '.') }}</strong>
+                                        <span class="text-muted small">HPP Bahan Baku:</span>
+                                        <strong class="float-end">Rp{{ number_format($hppBahan, 0, ',', '.') }}</strong>
+                                    </div>
+                                    <div class="mb-1">
+                                        <span class="text-muted small">HPP Packaging:</span>
+                                        <strong class="float-end">Rp{{ number_format($hppPackaging, 0, ',', '.') }}</strong>
                                     </div>
                                     <div class="mb-1">
                                         <span class="text-muted small">+ Overhead:</span>

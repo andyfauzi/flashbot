@@ -28,6 +28,7 @@
                         <tr>
                             <th class="ps-4">No</th>
                             <th>Nama Bahan</th>
+                            <th>Kategori</th>
                             <th class="text-end text-primary">Stok Aktual</th>
                             <th>Satuan Beli</th>
                             <th class="text-end">Harga Beli</th>
@@ -41,6 +42,13 @@
                         <tr>
                             <td class="ps-4">{{ $index + 1 }}</td>
                             <td class="fw-bold">{{ $b->nama_bahan }}</td>
+                            <td>
+                                @if($b->kategori == 'packaging')
+                                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-box-open me-1"></i> Packaging</span>
+                                @else
+                                    <span class="badge bg-primary text-white"><i class="fa-solid fa-leaf me-1"></i> Bahan Baku</span>
+                                @endif
+                            </td>
                             <td class="text-end fw-bold text-primary">{{ number_format($b->stok, 2, ',', '.') }} {{ $b->satuan }}</td>
                             <td>{{ $b->satuan }}</td>
                             <td class="text-end">Rp {{ number_format($b->harga_beli, 0, ',', '.') }}</td>
@@ -56,7 +64,7 @@
                                 <button class="btn btn-sm btn-outline-warning me-1" title="Lapor Bahan Rusak/Susut" onclick="rusakBahan({{ $b->id }}, '{{ $b->nama_bahan }}', '{{ $b->satuan }}', {{ $b->stok }})">
                                     <i class="fa-solid fa-heart-crack"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-primary me-1" title="Edit Master" onclick="editBahan({{ $b->id }}, '{{ $b->nama_bahan }}', '{{ $b->satuan }}', {{ $b->harga_beli }}, {{ $b->qty_beli }})">
+                                <button class="btn btn-sm btn-outline-primary me-1" title="Edit Master" onclick="editBahan({{ $b->id }}, '{{ $b->nama_bahan }}', '{{ $b->kategori }}', '{{ $b->satuan }}', {{ $b->harga_beli }}, {{ $b->qty_beli }})">
                                     <i class="fa-solid fa-edit"></i>
                                 </button>
                                 <form action="{{ route('dashboard.hpp.bahan.destroy', $b->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus bahan baku ini?');">
@@ -97,8 +105,15 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Nama Bahan</label>
-                        <input type="text" name="nama_bahan" id="nama_bahan" class="form-control" placeholder="Contoh: Tepung Terigu Segitiga Biru" required>
+                        <label class="form-label fw-bold">Nama Bahan / Item</label>
+                        <input type="text" name="nama_bahan" id="nama_bahan" class="form-control" placeholder="Contoh: Tepung Terigu / Paper Cup" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Kategori</label>
+                        <select name="kategori" id="kategori" class="form-select" required>
+                            <option value="bahan_baku">Bahan Baku (Bahan Makanan/Minuman)</option>
+                            <option value="packaging">Packaging (Gelas, Sedotan, Plastik)</option>
+                        </select>
                     </div>
                     <div class="row">
                         @php
@@ -267,12 +282,13 @@
 <script>
     let modalBahanBakuInitialized = false;
 
-    function editBahan(id, nama, satuan, harga_beli, qty_beli) {
+    function editBahan(id, nama, kategori, satuan, harga_beli, qty_beli) {
         document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-edit text-primary me-2"></i> Edit Bahan Baku';
         document.getElementById('formBahanBaku').action = '/dashboard/hpp/bahan/' + id;
         document.getElementById('formMethod').value = 'PUT';
         
         document.getElementById('nama_bahan').value = nama;
+        document.getElementById('kategori').value = kategori;
         document.getElementById('satuan').value = satuan;
         document.getElementById('harga_beli').value = harga_beli;
         

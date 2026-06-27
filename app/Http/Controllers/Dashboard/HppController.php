@@ -29,6 +29,7 @@ class HppController extends Controller
     {
         $request->validate([
             'nama_bahan' => 'required|string|max:255',
+            'kategori' => 'required|in:bahan_baku,packaging',
             'satuan' => 'required|string|max:50',
             'harga_beli' => 'required|numeric|min:0',
             'qty_beli' => 'required|numeric|min:0.01',
@@ -41,6 +42,7 @@ class HppController extends Controller
 
             $bahan = BahanBaku::create([
                 'nama_bahan' => $request->nama_bahan,
+                'kategori' => $request->kategori,
                 'satuan' => $request->satuan,
                 'harga_beli' => $request->harga_beli,
                 'qty_beli' => $request->qty_beli,
@@ -81,6 +83,7 @@ class HppController extends Controller
     {
         $request->validate([
             'nama_bahan' => 'required|string|max:255',
+            'kategori' => 'required|in:bahan_baku,packaging',
             'satuan' => 'required|string|max:50',
             'harga_beli' => 'required|numeric|min:0',
             'qty_beli' => 'required|numeric|min:0.01',
@@ -90,6 +93,7 @@ class HppController extends Controller
 
         $bahan->update([
             'nama_bahan' => $request->nama_bahan,
+            'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'harga_beli' => $request->harga_beli,
             'qty_beli' => $request->qty_beli,
