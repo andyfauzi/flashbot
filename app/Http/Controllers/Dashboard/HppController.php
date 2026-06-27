@@ -21,7 +21,8 @@ class HppController extends Controller
     public function indexBahanBaku()
     {
         $bahan = BahanBaku::orderBy('nama_bahan')->get();
-        return view('dashboard.hpp.bahan_baku', compact('bahan'));
+        $konversis = \App\Models\SatuanKonversi::orderBy('satuan_awal')->get();
+        return view('dashboard.hpp.bahan_baku', compact('bahan', 'konversis'));
     }
 
     public function storeBahanBaku(Request $request)

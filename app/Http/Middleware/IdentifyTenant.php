@@ -38,8 +38,6 @@ class IdentifyTenant
         $parts  = explode('.', $host);
         $tenant = null;
 
-        // Deteksi subdomain: tokobudi.localhost, ninsky.flashbot.id, dll.
-        // Filter: abaikan "www", "localhost" langsung, dan alamat IP
         if (
             count($parts) > 1
             && $parts[0] !== 'www'
@@ -49,36 +47,48 @@ class IdentifyTenant
             $subdomain = $parts[0];
 
             try {
-                $tenant = Tenant::where('subdomain', $subdomain)->first();
-                Log::info('[DEBUG] IdentifyTenant found tenant:', ['subdomain' => $subdomain, 'found' => $tenant !== null, 'is_active' => $tenant ? $tenant->is_active : null]);
+                // Gunakan koneksi landlord eksplisit untuk mencari tenant
+                $tenant = \Illuminate\Support\Facades\DB::connection('landlord')
+                    ->table('tenants')
+                    ->where('subdomain', $subdomain)
+                    ->first();
 
                 if (!$tenant) {
                     Log::channel('tenant_security')->warning('[IdentifyTenant] Subdomain tidak dikenali.', [
                         'subdomain' => $subdomain,
                         'host'      => $host,
                         'ip'        => $request->ip(),
-                        'url'       => $request->fullUrl(),
                     ]);
                     
-                    // Only abort if they are trying to access a tenant-specific route
-                } elseif (!$tenant->is_active) {
-                    Log::channel('tenant_security')->warning('[IdentifyTenant] Tenant tidak aktif diakses.', [
+                    abort(404, 'Toko tidak ditemukan.');
+                } 
+                
+                // Cek status tenant / subscription
+                if (!$tenant->is_active) {
+                    Log::channel('tenant_security')->warning('[IdentifyTenant] Tenant tidak aktif / suspended diakses.', [
                         'subdomain' => $subdomain,
                         'host'      => $host,
                     ]);
                     
-                    // We still bind the tenant context so that subsequent middleware (like EnsurePortalTenant)
-                    // or controllers can handle the inactive state properly and show a custom 403 page.
+                    abort(403, 'Akses ditolak. Masa berlangganan telah berakhir atau akun sedang ditangguhkan.');
                 }
+            } catch (\Illuminate\Http\Exceptions\HttpResponseException $e) {
+                throw $e; // Re-throw HTTP aborts
             } catch (\Exception $e) {
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                    throw $e;
+                }
                 Log::error('[IdentifyTenant] Database landlord bermasalah: ' . $e->getMessage());
                 abort(503, 'Sistem sedang dalam pemeliharaan. Silakan coba beberapa saat lagi.');
             }
         }
 
         if ($tenant) {
-            // Aktifkan konteks tenant — koneksi scoped per-request via IoC
-            TenantManager::switchTo($tenant);
+            // Kita perlu mengambil dari model Eloquent untuk konsistensi dengan method di TenantManager
+            $tenantModel = Tenant::find($tenant->id);
+            
+            // Aktifkan konteks tenant
+            TenantManager::switchToTenant($tenantModel);
             
             try {
                 if (\Illuminate\Support\Facades\Schema::hasTable('identitas_tokos')) {
@@ -90,7 +100,6 @@ class IdentifyTenant
                 \Illuminate\Support\Facades\View::share('identitasToko', null);
             }
         } else {
-            // Tidak ada tenant → gunakan landlord context
             TenantManager::switchToLandlord();
         }
 

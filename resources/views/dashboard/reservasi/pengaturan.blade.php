@@ -46,7 +46,7 @@
                     <div class="mb-4">
                         <label for="minimal_jam_reservasi" class="form-label fw-semibold">Batas Minimum Reservasi (H- Jam)</label>
                         <div class="input-group">
-                            <input type="number" class="form-control @error('minimal_jam_reservasi') is-invalid @enderror" id="minimal_jam_reservasi" name="minimal_jam_reservasi" value="{{ old('minimal_jam_reservasi', $identitas->minimal_jam_reservasi ?? 2) }}" min="0" max="72" step="1">
+                            <input type="number" class="form-control @error('minimal_jam_reservasi') is-invalid @enderror" id="minimal_jam_reservasi" name="minimal_jam_reservasi" value="{{ old('minimal_jam_reservasi', $identitas->minimal_jam_reservasi ?? 2) }}" min="0" max="720" step="1">
                             <span class="input-group-text bg-light">Jam Sebelumnya</span>
                         </div>
                         <div class="form-text">Contoh: Jika diisi '2', maka pelanggan hanya bisa memesan meja untuk jam yang minimal berjarak 2 jam dari waktu saat ini. Isi '0' jika membolehkan reservasi mendadak.</div>

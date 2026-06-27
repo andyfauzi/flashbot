@@ -51,6 +51,10 @@ class PackageMenuSeeder extends Seeder
             ['menu_key' => 'tagihan_paket', 'menu_label' => 'Tagihan dan Paket', 'category' => 'Pengaturan Sistem', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
             ['menu_key' => 'admin_whatsapp', 'menu_label' => 'Admin WhatsApp', 'category' => 'Pengaturan Sistem', 'gratis' => false, 'starter' => false, 'pro' => false, 'business' => true],
             ['menu_key' => 'manajemen_kurir', 'menu_label' => 'Manajemen Kurir', 'category' => 'Pengaturan Sistem', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
+            ['menu_key' => 'pengaturan_payment_gateway', 'menu_label' => 'Pengaturan Payment Gateway', 'category' => 'Pengaturan Sistem', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
+
+            // Transaksi & Pembayaran
+            ['menu_key' => 'payment_gateway', 'menu_label' => 'Payment Gateway (Midtrans/Xendit)', 'category' => 'Transaksi & Pembayaran', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
         ];
 
         foreach ($menus as $menu) {

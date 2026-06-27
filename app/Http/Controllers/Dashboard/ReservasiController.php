@@ -115,7 +115,7 @@ class ReservasiController extends Controller
         $validated = $request->validate([
             'wajib_dp_reservasi' => 'nullable|boolean',
             'nominal_dp_reservasi' => 'nullable|numeric|min:0',
-            'minimal_jam_reservasi' => 'nullable|integer|min:0|max:24',
+            'minimal_jam_reservasi' => 'nullable|integer|min:0|max:720',
             'hold_duration_hours' => 'nullable|integer|min:1|max:72',
             'max_pax_per_reservation' => 'nullable|integer|min:1|max:500',
         ]);

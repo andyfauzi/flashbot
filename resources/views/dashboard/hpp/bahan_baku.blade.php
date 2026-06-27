@@ -101,18 +101,36 @@
                         <input type="text" name="nama_bahan" id="nama_bahan" class="form-control" placeholder="Contoh: Tepung Terigu Segitiga Biru" required>
                     </div>
                     <div class="row">
+                        @php
+                            $uniqueAwal = $konversis->pluck('satuan_awal')->unique();
+                            $uniqueAkhir = $konversis->pluck('satuan_akhir')->unique();
+                            $allUnits = $uniqueAwal->merge($uniqueAkhir)->unique();
+                        @endphp
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Kuantitas per Beli</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" id="qty_beli_input" class="form-control" placeholder="Contoh: 1000" required>
+                                <select id="qty_beli_unit" class="form-select" style="max-width: 140px;">
+                                    @foreach($allUnits as $unit)
+                                        <option value="{{ $unit }}">{{ $unit }}</option>
+                                    @endforeach
+                                    <option value="custom">Custom (Dos/Pack)</option>
+                                </select>
+                            </div>
+                            <div id="qty_beli_custom_group" class="input-group mt-2 d-none">
+                                <span class="input-group-text small bg-light">Isi per Karton/Dos:</span>
+                                <input type="number" step="0.01" id="qty_beli_custom_multiplier" class="form-control" value="1" min="1">
+                            </div>
+                            <input type="hidden" name="qty_beli" id="qty_beli">
+                            <small class="text-success mt-1 d-block fw-bold" id="qty_beli_helper"></small>
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Satuan Terkecil</label>
                             <select name="satuan" id="satuan" class="form-select" required>
-                                <option value="gram">Gram (g)</option>
-                                <option value="ml">Mililiter (ml)</option>
-                                <option value="pcs">Pieces (pcs)</option>
+                                @foreach($allUnits as $unit)
+                                    <option value="{{ $unit }}">{{ $unit }}</option>
+                                @endforeach
                             </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Kuantitas per Beli</label>
-                            <input type="number" step="0.01" name="qty_beli" id="qty_beli" class="form-control" placeholder="Contoh: 1000" required>
-                            <small class="text-muted d-block mt-1">Dalam satuan terkecil</small>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -247,6 +265,8 @@
 
 @section('scripts')
 <script>
+    let modalBahanBakuInitialized = false;
+
     function editBahan(id, nama, satuan, harga_beli, qty_beli) {
         document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-edit text-primary me-2"></i> Edit Bahan Baku';
         document.getElementById('formBahanBaku').action = '/dashboard/hpp/bahan/' + id;
@@ -255,14 +275,20 @@
         document.getElementById('nama_bahan').value = nama;
         document.getElementById('satuan').value = satuan;
         document.getElementById('harga_beli').value = harga_beli;
-        document.getElementById('qty_beli').value = qty_beli;
+        
+        // Handle unit calculator inputs
+        // For editing, we set the input unit to the base unit itself (e.g., Gram -> gram), so multiplier is 1
+        const unitSelect = document.getElementById('qty_beli_unit');
+        unitSelect.value = satuan; // since our static select has 'gram', 'ml', 'pcs', 'butir', etc.
+        document.getElementById('qty_beli_input').value = qty_beli;
+        updateModalBahanBakuCalculator();
 
         new bootstrap.Modal(document.getElementById('modalBahanBaku')).show();
     }
 
     function getConversionOptions(baseSatuan) {
         if (baseSatuan === 'gram') return `<option value="1">Gram (g)</option><option value="1000">Kilogram (Kg)</option><option value="custom">Custom (Dos/Sak)</option>`;
-        if (baseSatuan === 'ml') return `<option value="1">Mililiter (ml)</option><option value="1000">Liter (L)</option><option value="custom">Custom (Karton)</option>`;
+        if (baseSatuan === 'ml') return `<option value="1">Mililiter (ml)</option><option value="1000">Liter (L)</option><option value="19000">Galon</option><option value="custom">Custom (Karton)</option>`;
         return `<option value="1">${baseSatuan.charAt(0).toUpperCase() + baseSatuan.slice(1)}</option><option value="custom">Karton/Dos/Pack</option>`;
     }
 
@@ -274,9 +300,17 @@
         const customGroup = document.getElementById(customGroupId);
         const customInput = document.getElementById(customInputId);
 
+        input.dataset.baseSatuan = baseSatuan;
         select.innerHTML = getConversionOptions(baseSatuan);
         
+        if (input.dataset.initialized) {
+            input.dispatchEvent(new Event('input'));
+            return;
+        }
+        input.dataset.initialized = 'true';
+
         function calculate() {
+            const currentBaseSatuan = input.dataset.baseSatuan;
             const val = parseFloat(input.value) || 0;
             let multiplier = 1;
             
@@ -292,7 +326,7 @@
             real.value = total;
             
             if (val > 0) {
-                helper.innerHTML = `<i class="fa-solid fa-arrow-right-arrow-left me-1"></i> Disimpan sebagai: ${total} ${baseSatuan}`;
+                helper.innerHTML = `<i class="fa-solid fa-check me-1"></i> Disimpan sebagai: ${total} ${currentBaseSatuan}`;
             } else {
                 helper.innerHTML = '';
             }
@@ -337,6 +371,77 @@
         document.getElementById('formBahanBaku').action = '{{ route("dashboard.hpp.bahan.store") }}';
         document.getElementById('formMethod').value = 'POST';
         document.getElementById('formBahanBaku').reset();
+        document.getElementById('satuan').dispatchEvent(new Event('change'));
+        document.getElementById('qty_beli_input').dispatchEvent(new Event('input'));
+    });
+
+    const dbKonversis = @json($konversis);
+    const unitMapping = {
+        'custom': { base: 'custom', multiplier: 'custom' }
+    };
+
+    // Build fallback for 1:1 conversions (e.g., Gram -> Gram, Pcs -> Pcs)
+    const uniqueAwal = [...new Set(dbKonversis.map(k => k.satuan_awal))];
+    const uniqueAkhir = [...new Set(dbKonversis.map(k => k.satuan_akhir))];
+    const allUniqueUnits = [...new Set([...uniqueAwal, ...uniqueAkhir])];
+    
+    allUniqueUnits.forEach(unit => {
+        unitMapping[unit] = { base: unit, multiplier: 1 };
+    });
+
+    // Overwrite with actual conversions from database
+    dbKonversis.forEach(k => {
+        unitMapping[k.satuan_awal] = { base: k.satuan_akhir, multiplier: parseFloat(k.nilai_konversi) };
+    });
+
+    function updateModalBahanBakuCalculator() {
+        const input = document.getElementById('qty_beli_input');
+        const unit = document.getElementById('qty_beli_unit');
+        const real = document.getElementById('qty_beli');
+        const helper = document.getElementById('qty_beli_helper');
+        const customGroup = document.getElementById('qty_beli_custom_group');
+        const customMultiplier = document.getElementById('qty_beli_custom_multiplier');
+        const satuanSelect = document.getElementById('satuan');
+
+        const val = parseFloat(input.value) || 0;
+        const mapping = unitMapping[unit.value];
+        let multiplier = 1;
+        let baseSatuanText = '';
+
+        if (mapping.base === 'custom') {
+            customGroup.classList.remove('d-none');
+            multiplier = parseFloat(customMultiplier.value) || 1;
+            satuanSelect.disabled = false; // Let user choose base unit
+            baseSatuanText = satuanSelect.options[satuanSelect.selectedIndex].text;
+        } else {
+            customGroup.classList.add('d-none');
+            multiplier = mapping.multiplier;
+            satuanSelect.value = mapping.base; // Auto-select base unit
+            satuanSelect.disabled = true; // Lock the base unit
+            baseSatuanText = satuanSelect.options[satuanSelect.selectedIndex].text;
+        }
+
+        const total = val * multiplier;
+        real.value = total;
+
+        if (val > 0) {
+            helper.innerHTML = `<i class="fa-solid fa-check me-1"></i> Disimpan sebagai: ${total} ${baseSatuanText}`;
+        } else {
+            helper.innerHTML = '';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Init modal bahan baku
+        document.getElementById('qty_beli_input').addEventListener('input', updateModalBahanBakuCalculator);
+        document.getElementById('qty_beli_unit').addEventListener('change', updateModalBahanBakuCalculator);
+        document.getElementById('qty_beli_custom_multiplier').addEventListener('input', updateModalBahanBakuCalculator);
+        document.getElementById('satuan').addEventListener('change', updateModalBahanBakuCalculator); // In case they change it when custom
+        
+        // Remove disabled attribute from satuan before submitting form
+        document.getElementById('formBahanBaku').addEventListener('submit', function() {
+            document.getElementById('satuan').disabled = false;
+        });
     });
 </script>
 @endsection

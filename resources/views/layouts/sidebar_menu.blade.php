@@ -154,6 +154,10 @@
                     <i data-lucide="factory"></i><span>Produksi Dapur</span>
                     @if(!$hMenu) <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.6rem;">{{ $reqPlan }}</span> @endif
                 </a>
+                
+                <a href="{{ route('dashboard.hpp.satuan.index') }}" class="{{ request()->routeIs('dashboard.hpp.satuan.*') ? 'active' : '' }}">
+                    <i data-lucide="scale"></i><span>Pengaturan Satuan</span>
+                </a>
             </div>
         </div>
     </div>

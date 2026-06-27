@@ -29,105 +29,80 @@ class TenantManager
     /**
      * Aktifkan konteks database untuk tenant yang diberikan.
      *
-     * Membuat konfigurasi koneksi bernama unik ("tenant_{id}") yang merupakan
-     * klon dari koneksi 'landlord' dengan database name yang diganti ke database
-     * milik tenant tersebut. Koneksi ini disimpan di IoC container sehingga
-     * scoped per-request dan tidak mempengaruhi request lain.
-     *
-     * @param  Tenant $tenant  Tenant yang akan diaktifkan konteksnya.
+     * @param  Tenant $tenant
      * @return void
      */
-    public static function switchTo(Tenant $tenant): void
+    public static function switchToTenant(Tenant $tenant): void
     {
-        // Nama koneksi unik per tenant: "tenant_5", "tenant_12", dll.
-        // Menggunakan ID (bukan subdomain) agar immutable.
         $connectionName = 'tenant_' . $tenant->id;
 
-        // Hanya konfigurasi koneksi jika belum ada (idempotent),
-        // atau jika databasenya berbeda (tenant berganti di tengah request).
         $existing = config("database.connections.{$connectionName}.database");
         if ($existing !== $tenant->database_name) {
             config([
                 "database.connections.{$connectionName}" => array_merge(
-                    // Klon semua parameter dari koneksi landlord (host, port, user, pass, charset, dll)
                     config('database.connections.landlord'),
                     [
-                        // Override hanya nama databasenya
                         'database' => $tenant->database_name,
                         'prefix'   => '',
                     ]
                 ),
             ]);
 
-            // Purge koneksi lama jika ada (agar tidak pakai PDO handle lama)
             DB::purge($connectionName);
         }
 
-        // Simpan di IoC container — SCOPED PER REQUEST, tidak global.
-        // Laravel membuat container baru untuk setiap request HTTP,
-        // jadi nilai ini tidak bocor ke request concurrent lain.
+        // Simpan ke IoC container
         app()->instance('current_tenant', $tenant);
         app()->instance('current_tenant_connection', $connectionName);
 
-        // Catat setiap tenant switch ke dedicated security log
+        // Set koneksi default ke tenant agar CLI/Queue otomatis pakai ini
+        DB::setDefaultConnection($connectionName);
+
+        // Update Redis prefix untuk isolasi cache/session/queue
+        $redisPrefix = 'tenanta_' . $tenant->id . '_';
+        config(['database.redis.options.prefix' => $redisPrefix]);
+
         Log::channel('tenant_security')->info('[TenantManager] Tenant context aktif.', [
-            'tenant_id'      => $tenant->id,
-            'tenant_name'    => $tenant->name,
-            'subdomain'      => $tenant->subdomain,
-            'database'       => $tenant->database_name,
-            'connection'     => $connectionName,
+            'tenant_id' => $tenant->id,
+            'connection' => $connectionName,
         ]);
     }
 
     /**
-     * Aktifkan konteks landlord (database utama platform).
-     *
-     * Dipanggil untuk route yang tidak memiliki subdomain tenant,
-     * seperti landing page, OAuth callback, atau super-admin panel.
-     *
-     * @return void
+     * Alias untuk kompatibilitas ke belakang
      */
-    public static function switchToLandlord(): void
+    public static function switchTo(Tenant $tenant): void
     {
-        // Hapus tenant context dari container
-        app()->forgetInstance('current_tenant');
-        app()->forgetInstance('current_tenant_connection');
-
-        // Pastikan default connection kembali ke landlord
-        // (ini aman karena tidak ada tenant lain yang bergantung padanya)
-        DB::setDefaultConnection('landlord');
+        self::switchToTenant($tenant);
     }
 
     /**
-     * Ambil nama koneksi tenant yang sedang aktif untuk request ini.
+     * Memutuskan koneksi tenant dan mengembalikan ke landlord.
+     * Membersihkan cache koneksi dan Redis prefix.
      *
-     * Dipanggil oleh trait BelongsToTenant di setiap model.
-     *
-     * @return string  Nama koneksi, misal "tenant_5".
-     *
-     * @throws \RuntimeException Jika tidak ada tenant context aktif.
-     *                           SENGAJA fail-loud: lebih baik exception daripada
-     *                           menulis data ke database yang salah secara silent.
+     * @return void
      */
-    public static function getTenantConnection(): string
+    public static function disconnectTenant(): void
     {
-        if (!app()->bound('current_tenant_connection')) {
-            $caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2] ?? [];
-
-            Log::channel('tenant_security')->error('[TenantManager] Model diakses tanpa tenant context!', [
-                'caller_class'  => $caller['class'] ?? 'unknown',
-                'caller_method' => $caller['function'] ?? 'unknown',
-                'caller_file'   => $caller['file'] ?? 'unknown',
-                'caller_line'   => $caller['line'] ?? 0,
-            ]);
-
-            throw new \RuntimeException(
-                'Tenant context belum diinisialisasi. Model tenant tidak boleh diakses ' .
-                'tanpa melewati middleware IdentifyTenant atau memanggil TenantManager::switchTo() terlebih dahulu.'
-            );
+        if (app()->bound('current_tenant_connection')) {
+            $connectionName = app('current_tenant_connection');
+            DB::purge($connectionName);
+            
+            // Hapus config koneksi on-the-fly
+            $connections = config('database.connections');
+            unset($connections[$connectionName]);
+            config(['database.connections' => $connections]);
         }
 
-        return app('current_tenant_connection');
+        app()->forgetInstance('current_tenant');
+        app()->forgetInstance('current_tenant_connection');
+
+        // Kembalikan default connection ke landlord
+        DB::setDefaultConnection('landlord');
+
+        // Kembalikan Redis prefix ke default bawaan config
+        $defaultPrefix = env('REDIS_PREFIX', \Illuminate\Support\Str::slug(env('APP_NAME', 'laravel'), '_').'_database_');
+        config(['database.redis.options.prefix' => $defaultPrefix]);
     }
 
     /**
@@ -135,9 +110,42 @@ class TenantManager
      *
      * @return Tenant|null
      */
-    public static function current(): ?Tenant
+    public static function getTenant(): ?Tenant
     {
         return app()->bound('current_tenant') ? app('current_tenant') : null;
+    }
+
+    // Mempertahankan alias lama agar kode lain tidak error
+    public static function current(): ?Tenant
+    {
+        return self::getTenant();
+    }
+
+    public static function switchToLandlord(): void
+    {
+        self::disconnectTenant();
+    }
+
+    public static function forgetTenant(): void
+    {
+        self::disconnectTenant();
+    }
+
+    /**
+     * Ambil nama koneksi tenant yang sedang aktif untuk request ini.
+     *
+     * @return string
+     */
+    public static function getTenantConnection(): string
+    {
+        if (!app()->bound('current_tenant_connection')) {
+            throw new \RuntimeException(
+                'Tenant context belum diinisialisasi. Model tenant tidak boleh diakses ' .
+                'tanpa melewati middleware IdentifyTenant atau memanggil TenantManager::switchToTenant() terlebih dahulu.'
+            );
+        }
+
+        return app('current_tenant_connection');
     }
 
     /**
@@ -148,41 +156,5 @@ class TenantManager
     public static function hasTenant(): bool
     {
         return app()->bound('current_tenant_connection');
-    }
-
-    /**
-     * Bersihkan tenant context dan tutup koneksi setelah request selesai.
-     *
-     * Dipanggil dari terminate() di IdentifyTenant middleware untuk
-     * memastikan koneksi database dikembalikan ke pool setelah setiap request.
-     *
-     * @return void
-     */
-    public static function forgetTenant(): void
-    {
-        if (app()->bound('current_tenant_connection')) {
-            $connectionName = app('current_tenant_connection');
-            $tenant         = app()->bound('current_tenant') ? app('current_tenant') : null;
-
-            // Tutup dan hapus koneksi dari pool Eloquent
-            DB::purge($connectionName);
-
-            // Hapus konfigurasi koneksi dari config runtime untuk bersih-bersih memori
-            // (opsional, tapi baik untuk lingkungan long-running seperti Octane)
-            $connections = config('database.connections');
-            unset($connections[$connectionName]);
-            config(['database.connections' => $connections]);
-
-            // Hapus dari IoC container
-            app()->forgetInstance('current_tenant');
-            app()->forgetInstance('current_tenant_connection');
-
-            if ($tenant) {
-                Log::channel('tenant_security')->debug('[TenantManager] Tenant context dibersihkan.', [
-                    'tenant_id'  => $tenant->id,
-                    'connection' => $connectionName,
-                ]);
-            }
-        }
     }
 }

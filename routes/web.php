@@ -271,6 +271,12 @@ Route::middleware(['auth', 'active.subscription', 'permission:akses_hpp'])->pref
     Route::delete('/kalkulator/resep/{resep}', [\App\Http\Controllers\Dashboard\HppController::class, 'hapusResep'])->name('dashboard.hpp.resep.destroy');
     Route::put('/kalkulator/{varian}/konfigurasi', [\App\Http\Controllers\Dashboard\HppController::class, 'updateKonfigurasiHarga'])->name('dashboard.hpp.konfigurasi');
     Route::put('/kalkulator/{varian}/rekomendasi', [\App\Http\Controllers\Dashboard\HppController::class, 'terapkanHargaRekomendasi'])->name('dashboard.hpp.rekomendasi');
+
+    // Pengaturan Satuan Konversi
+    Route::get('/satuan', [\App\Http\Controllers\Dashboard\SatuanKonversiController::class, 'index'])->name('dashboard.hpp.satuan.index');
+    Route::post('/satuan', [\App\Http\Controllers\Dashboard\SatuanKonversiController::class, 'store'])->name('dashboard.hpp.satuan.store');
+    Route::put('/satuan/{id}', [\App\Http\Controllers\Dashboard\SatuanKonversiController::class, 'update'])->name('dashboard.hpp.satuan.update');
+    Route::delete('/satuan/{id}', [\App\Http\Controllers\Dashboard\SatuanKonversiController::class, 'destroy'])->name('dashboard.hpp.satuan.destroy');
 });
 
 // =============================================
