@@ -81,7 +81,6 @@
         </button>
 
         <!-- Status Gateway Badge -->
-        <!-- Status Gateway Badge -->
         <div class="d-none d-sm-flex align-items-center mx-1" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 6px 14px;">
             @if($isConnected ?? false)
                 <div class="pulse-dot" style="background-color: #10B981;"></div>
@@ -90,7 +89,6 @@
                 <div class="pulse-dot" style="background-color: #EF4444;"></div>
                 <span style="color: #FCA5A5; font-size: 13px; font-weight: 600; margin-left: 8px;">Disconnected</span>
             @endif
-        </div>
         </div>
 
         @auth
