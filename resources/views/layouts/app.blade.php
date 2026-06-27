@@ -38,23 +38,31 @@
      ====================================================== -->
 <nav class="navbar-premium px-3 px-md-4 d-flex justify-content-between align-items-center" style="height:68px; position:sticky; top:0; z-index:1030;">
 
-    <!-- LEFT: Hamburger (mobile) + Brand -->
     <div class="d-flex align-items-center gap-2">
         <button class="nav-icon-btn d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.09); color:rgba(255,255,255,0.7);">
             <i data-lucide="menu" style="width:18px;height:18px;"></i>
         </button>
 
         <a class="navbar-brand m-0" href="{{ route('chatbot.dashboard') }}">
-            @if(isset($identitasToko) && $identitasToko->logo_path)
-                <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height:30px; width:30px; object-fit:cover; border-radius:8px; border:1.5px solid rgba(255,255,255,0.15);">
-            @else
+            @if(auth()->user() && auth()->user()->is_super_admin)
                 <div class="brand-logo-wrap">
-                    <i class="fa-solid fa-bolt" style="color:var(--brand); font-size:16px;"></i>
+                    <i class="fa-solid fa-crown" style="color:var(--brand); font-size:16px;"></i>
                 </div>
+                <span class="brand-name d-none d-sm-block fs-5 ms-1">
+                    SUPER ADMIN
+                </span>
+            @else
+                @if(isset($identitasToko) && $identitasToko->logo_path)
+                    <img src="{{ asset('storage/' . $identitasToko->logo_path) }}" alt="Logo" style="height:30px; width:30px; object-fit:cover; border-radius:8px; border:1.5px solid rgba(255,255,255,0.15);">
+                @else
+                    <div class="brand-logo-wrap">
+                        <i class="fa-solid fa-bolt" style="color:var(--brand); font-size:16px;"></i>
+                    </div>
+                @endif
+                <span class="brand-name d-none d-sm-block fs-5 ms-1">
+                    {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'BALAI BACA' }}
+                </span>
             @endif
-            <span class="brand-name d-none d-sm-block fs-5 ms-1">
-                {{ isset($identitasToko) ? strtoupper($identitasToko->nama_toko) : 'BALAI BACA' }}
-            </span>
         </a>
     </div>
 
@@ -77,8 +85,9 @@
         </button>
 
         <!-- Status Gateway Badge -->
+        @if(auth()->user() && !auth()->user()->is_super_admin)
         <div class="d-none d-sm-flex align-items-center mx-1" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 6px 14px;">
-            @if($isConnected)
+            @if($isConnected ?? false)
                 <div class="pulse-dot" style="background-color: #10B981;"></div>
                 <span style="color: #A7F3D0; font-size: 13px; font-weight: 600; margin-left: 8px;">Connected (BAILEYS)</span>
             @else
@@ -86,6 +95,7 @@
                 <span style="color: #FCA5A5; font-size: 13px; font-weight: 600; margin-left: 8px;">Disconnected</span>
             @endif
         </div>
+        @endif
 
         @auth
             @php

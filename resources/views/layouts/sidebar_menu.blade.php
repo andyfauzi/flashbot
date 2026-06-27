@@ -371,6 +371,7 @@
     @endif
 
     <!-- Bantuan Widget -->
+    @if(auth()->user() && !auth()->user()->is_super_admin)
     <div class="mt-auto px-3 pb-4 pt-3">
         <div class="p-3 rounded-4" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(79, 70, 229, 0.05) 100%); border: 1px solid rgba(79, 70, 229, 0.3);">
             <div class="d-flex align-items-center gap-2 mb-2">
@@ -384,6 +385,7 @@
             </a>
         </div>
     </div>
+    @endif
 </div>
 
 <style>
