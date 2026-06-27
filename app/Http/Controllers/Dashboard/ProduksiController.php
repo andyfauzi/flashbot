@@ -27,7 +27,7 @@ class ProduksiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'produk_varian_id' => 'required|exists:produk_varians,id',
+            'produk_varian_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',
             'qty_produksi' => 'required|integer|min:1',
         ]);
 
@@ -113,7 +113,7 @@ class ProduksiController extends Controller
     public function validasiSelesai(Request $request)
     {
         $request->validate([
-            'produk_varian_id' => 'required|exists:produk_varians,id',
+            'produk_varian_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',
             'qty_validasi' => 'required|integer|min:1',
             'tindakan' => 'required|in:selesai,waste'
         ]);

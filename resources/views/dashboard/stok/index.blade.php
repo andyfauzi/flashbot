@@ -58,11 +58,10 @@
                                                 <span class="badge bg-light text-dark border">{{ $varian->nama_varian }}</span>
                                             </td>
                                             <td class="text-center">
-                                                @if($varian->stok_proses_dapur > 0)
-                                                    <span class="badge bg-info text-dark fw-bold">{{ $varian->stok_proses_dapur }} pcs</span>
-                                                @else
-                                                    <span class="text-muted small">-</span>
-                                                @endif
+                                                <div class="input-group input-group-sm mx-auto" style="max-width: 140px;">
+                                                    <input type="number" name="stok_dapur[{{ $varian->id }}]" class="form-control text-center text-info fw-bold" value="{{ $varian->stok_proses_dapur }}" min="0" required>
+                                                    <span class="input-group-text bg-light border-end-0">pcs</span>
+                                                </div>
                                             </td>
                                             <td class="px-4 text-center">
                                                 <div class="input-group input-group-sm mx-auto" style="max-width: 160px;">

@@ -22,6 +22,8 @@ class StokController extends Controller
         $request->validate([
             'stok' => 'required|array',
             'stok.*' => 'required|integer|min:0',
+            'stok_dapur' => 'nullable|array',
+            'stok_dapur.*' => 'nullable|integer|min:0',
         ]);
 
         try {
@@ -41,9 +43,13 @@ class StokController extends Controller
             // 2. Lock Variants and update
             foreach ($varianIds as $varianId) {
                 $jumlahStok = $request->stok[$varianId];
+                $jumlahStokDapur = $request->stok_dapur[$varianId] ?? null;
                 $varian = ProdukVarian::lockForUpdate()->find($varianId);
                 if ($varian) {
                     $varian->stok = $jumlahStok;
+                    if ($jumlahStokDapur !== null) {
+                        $varian->stok_proses_dapur = $jumlahStokDapur;
+                    }
                     $varian->save();
                 }
             }

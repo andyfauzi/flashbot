@@ -266,7 +266,7 @@ class HppController extends Controller
     public function simpanResep(Request $request, ProdukVarian $varian)
     {
         $request->validate([
-            'bahan_baku_id' => 'required|exists:bahan_bakus,id',
+            'bahan_baku_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.bahan_bakus,id',
             'qty_dipakai' => 'required|numeric|min:0.01'
         ]);
 

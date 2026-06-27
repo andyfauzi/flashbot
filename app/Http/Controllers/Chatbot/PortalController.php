@@ -293,7 +293,7 @@ class PortalController extends Controller
             'nomor_telepon'  => 'required|string|max:50',
             'tanggal_waktu'  => 'required|date',
             'jumlah_orang'   => 'required|integer|min:1',
-            'meja_id'        => 'nullable|exists:mejas,id',
+            'meja_id'        => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.mejas,id',
             'catatan'        => 'nullable|string'
         ]);
 

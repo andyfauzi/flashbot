@@ -24,7 +24,7 @@ class ReservasiController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'meja_id' => 'required|exists:mejas,id',
+            'meja_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.mejas,id',
             'nama_pelanggan' => 'required|string|max:255',
             'nomor_telepon' => 'required|string|max:50',
             'tanggal_waktu' => 'required|date',

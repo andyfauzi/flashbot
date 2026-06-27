@@ -87,7 +87,7 @@ class PreOrderController extends Controller
             'tipe_pengiriman' => 'required|in:ambil_sendiri,kurir_toko',
             'alamat_penerima' => 'nullable|string',
             'biaya_pengantaran' => 'nullable|numeric|min:0',
-            'kurir_id' => 'nullable|exists:kurirs,id',
+            'kurir_id' => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.kurirs,id',
             'nomor_hp' => 'nullable|string|max:20'
         ]);
 

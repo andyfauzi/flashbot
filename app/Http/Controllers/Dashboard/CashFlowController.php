@@ -42,7 +42,7 @@ class CashFlowController extends Controller
             'kategori' => 'required|string|max:255',
             'nominal' => 'required|numeric|min:0',
             'keterangan' => 'nullable|string',
-            'bahan_baku_id' => 'nullable|exists:bahan_bakus,id',
+            'bahan_baku_id' => 'nullable|exists:'.\App\Services\TenantManager::getTenantConnection().'.bahan_bakus,id',
             'qty_beli' => 'nullable|numeric|min:0.01',
         ]);
 
