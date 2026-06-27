@@ -10,7 +10,7 @@
         
         <p>Halo {{ $tenantRequest->owner_name }},</p>
         
-        <p>Terima kasih telah mendaftarkan toko <strong>{{ $tenantRequest->store_name }}</strong> di Flashbot. Kami telah menerima permohonan Anda dan saat ini sedang dalam proses peninjauan oleh tim kami.</p>
+        <p>Terima kasih telah mendaftarkan toko <strong>{{ $tenantRequest->store_name }}</strong> di Tenanta. Kami telah menerima permohonan Anda dan saat ini sedang dalam proses peninjauan oleh tim kami.</p>
         
         <p>Proses peninjauan ini biasanya memakan waktu maksimal 1x24 jam kerja. Kami akan mengirimkan email pemberitahuan selanjutnya setelah permohonan Anda disetujui atau jika ada informasi tambahan yang kami perlukan.</p>
         
@@ -24,7 +24,7 @@
         <p>Jika Anda memiliki pertanyaan, jangan ragu untuk membalas email ini.</p>
         
         <p>Salam hangat,<br>
-        Tim Flashbot</p>
+        Tim Tenanta</p>
     </div>
 </body>
 </html>

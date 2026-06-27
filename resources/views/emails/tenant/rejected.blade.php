@@ -10,7 +10,7 @@
         
         <p>Halo {{ $tenantRequest->owner_name }},</p>
         
-        <p>Terima kasih atas ketertarikan Anda untuk mendaftarkan toko <strong>{{ $tenantRequest->store_name }}</strong> di Flashbot.</p>
+        <p>Terima kasih atas ketertarikan Anda untuk mendaftarkan toko <strong>{{ $tenantRequest->store_name }}</strong> di Tenanta.</p>
         
         <p>Setelah meninjau permohonan Anda, dengan berat hati kami sampaikan bahwa saat ini kami <strong>belum dapat menyetujui</strong> pendaftaran toko Anda. Hal ini bisa terjadi karena berbagai alasan, seperti ketidaksesuaian data atau hal lainnya terkait kebijakan layanan kami.</p>
         
@@ -18,7 +18,7 @@
         
         <p>Terima kasih atas pengertian Anda.<br>
         Salam,<br>
-        Tim Flashbot</p>
+        Tim Tenanta</p>
     </div>
 </body>
 </html>

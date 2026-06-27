@@ -10,7 +10,7 @@
         
         <p>Halo,</p>
         
-        <p>Kabar baik! Pendaftaran toko <strong>{{ $storeName }}</strong> di Flashbot telah kami setujui dan database toko Anda sudah siap digunakan.</p>
+        <p>Kabar baik! Pendaftaran toko <strong>{{ $storeName }}</strong> di Tenanta telah kami setujui dan database toko Anda sudah siap digunakan.</p>
         
         <p>Berikut adalah informasi akses masuk (login) untuk dashboard toko Anda:</p>
         
@@ -26,7 +26,7 @@
         
         <p>Semoga sukses dengan bisnis Anda!<br>
         Salam hangat,<br>
-        Tim Flashbot</p>
+        Tim Tenanta</p>
     </div>
 </body>
 </html>
