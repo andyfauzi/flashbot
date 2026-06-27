@@ -34,14 +34,16 @@ class IdentifyTenant
      */
     public function handle(Request $request, Closure $next)
     {
-        $host   = $request->getHost();
+        $host   = explode(':', $request->getHost())[0];
         $parts  = explode('.', $host);
         $tenant = null;
 
+        $centralDomains = ['tenanta.id', 'localhost', '127.0.0.1'];
+
         if (
             count($parts) > 1
+            && !in_array($host, $centralDomains)
             && $parts[0] !== 'www'
-            && $parts[0] !== 'localhost'
             && !filter_var($host, FILTER_VALIDATE_IP)
         ) {
             $subdomain = $parts[0];
