@@ -296,6 +296,8 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
         Route::get('/cash-flow', [\App\Http\Controllers\Dashboard\CashFlowController::class, 'index'])->name('dashboard.cash_flow.index');
         Route::post('/cash-flow', [\App\Http\Controllers\Dashboard\CashFlowController::class, 'store'])->name('dashboard.cash_flow.store');
         Route::delete('/cash-flow/{cashFlow}', [\App\Http\Controllers\Dashboard\CashFlowController::class, 'destroy'])->name('dashboard.cash_flow.destroy');
+        
+        Route::get('/kalkulator-bisnis', [\App\Http\Controllers\Dashboard\KalkulatorBisnisController::class, 'index'])->name('dashboard.kalkulator_bisnis.index');
 
         // Riwayat Transaksi
         Route::get('/transaksi', [\App\Http\Controllers\Dashboard\TransaksiController::class, 'index'])->name('dashboard.transaksi.index');

@@ -17,7 +17,34 @@ class PosController extends Controller
     {
         $tenantId = app('current_tenant')->id;
         $produks = \Illuminate\Support\Facades\Cache::tags(["tenant_{$tenantId}_produk"])->remember("pos_produks_{$tenantId}", 3600, function () {
-            return Produk::with(['varians', 'kategori', 'addons'])->where('aktif', true)->orderBy('nama')->get();
+            $prods = Produk::with(['varians', 'kategori', 'addons', 'bundleItems.varian.produk'])->where('aktif', true)->orderBy('nama')->get();
+            
+            foreach ($prods as $p) {
+                if ($p->is_bundle && $p->bundleItems) {
+                    $minStock = 999999;
+                    foreach ($p->bundleItems as $bItem) {
+                        $v = $bItem->varian;
+                        if ($v) {
+                            $vProd = $v->produk;
+                            if ($vProd && $vProd->is_made_to_order) {
+                                $cStock = 9999;
+                            } else {
+                                $cStock = floor($v->stok / max(1, $bItem->qty));
+                            }
+                            if ($cStock < $minStock) {
+                                $minStock = $cStock;
+                            }
+                        }
+                    }
+                    if ($minStock === 999999) $minStock = 0;
+                    
+                    if ($p->varians->count() > 0) {
+                        $p->varians[0]->stok = $minStock;
+                    }
+                }
+            }
+            
+            return $prods;
         });
         $kategoris = \App\Models\Kategori::orderBy('nama')->get();
         $activeShift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();

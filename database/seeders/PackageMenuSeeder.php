@@ -29,6 +29,7 @@ class PackageMenuSeeder extends Seeder
             ['menu_key' => 'kategori_produk', 'menu_label' => 'Kategori Produk', 'category' => 'Produk & Inventori', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
             ['menu_key' => 'produk_varian', 'menu_label' => 'Produk & Varian', 'category' => 'Produk & Inventori', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
             ['menu_key' => 'pengelolaan_stok', 'menu_label' => 'Pengelolaan Stok', 'category' => 'Produk & Inventori', 'gratis' => true, 'starter' => true, 'pro' => true, 'business' => true],
+            ['menu_key' => 'paket_bundling', 'menu_label' => 'Fitur Paket Bundling', 'category' => 'Produk & Inventori', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
 
             // Produksi & HPP
             ['menu_key' => 'master_bahan_baku', 'menu_label' => 'Master Bahan Baku', 'category' => 'Produksi & HPP', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
@@ -37,6 +38,7 @@ class PackageMenuSeeder extends Seeder
 
             // Keuangan & Laporan
             ['menu_key' => 'buku_kas_laporan', 'menu_label' => 'Buku Kas dan Laporan', 'category' => 'Keuangan & Laporan', 'gratis' => false, 'starter' => false, 'pro' => true, 'business' => true],
+            ['menu_key' => 'kalkulator_bisnis', 'menu_label' => 'Kalkulator Bisnis & BEP', 'category' => 'Keuangan & Laporan', 'gratis' => false, 'starter' => false, 'pro' => false, 'business' => true],
 
             // Chatbot & WhatsApp
             ['menu_key' => 'dashboard_chatbot', 'menu_label' => 'Dashboard Chatbot', 'category' => 'Chatbot & WhatsApp', 'gratis' => false, 'starter' => false, 'pro' => false, 'business' => true],

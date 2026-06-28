@@ -189,7 +189,37 @@ class CheckoutService
                 // Implementasi Smart Deduction (Hibrida)
                 $isMadeToOrder = $itemData['produk']->is_made_to_order;
 
-                if ($isMadeToOrder) {
+                if ($itemData['produk']->is_bundle && $itemData['produk']->bundleItems) {
+                    // JIKA BUNDLE: Looping isi bundle, lalu potong stok per komponen
+                    foreach ($itemData['produk']->bundleItems as $bItem) {
+                        $komponenVarian = $bItem->varian;
+                        $komponenProduk = $komponenVarian ? $komponenVarian->produk : null;
+                        $qtyKomponen = $bItem->qty * $itemData['qty'];
+
+                        if ($komponenProduk && $komponenVarian) {
+                            if ($komponenProduk->is_made_to_order) {
+                                $yield = max(1, $komponenVarian->resep_yield ?? 1);
+                                $resep = \App\Models\ResepVarian::where('produk_varian_id', $komponenVarian->id)->get();
+                                foreach ($resep as $r) {
+                                    $qtyDibutuhkan = ($r->qty_dipakai / $yield) * $qtyKomponen;
+                                    $bahanBaku = BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                    if ($bahanBaku) {
+                                        $bahanBaku->decrement('stok', $qtyDibutuhkan);
+                                        StokBahanHistory::create([
+                                            'bahan_baku_id' => $bahanBaku->id,
+                                            'user_id' => $userId,
+                                            'tipe' => 'produksi',
+                                            'qty' => $qtyDibutuhkan,
+                                            'keterangan' => 'Terjual di POS (Bundle ' . $itemData['produk']->nama . ') Struk #' . $pesanan->nomor_order . ' - ' . $komponenVarian->nama_varian
+                                        ]);
+                                    }
+                                }
+                            } else {
+                                $komponenVarian->decrement('stok', $qtyKomponen);
+                            }
+                        }
+                    }
+                } elseif ($isMadeToOrder) {
                     // JIKA MADE-TO-ORDER: HANYA potong bahan baku
                     if ($itemData['varian']) {
                         $yield = max(1, $itemData['varian']->resep_yield ?? 1);

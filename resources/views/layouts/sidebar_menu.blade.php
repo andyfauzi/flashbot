@@ -167,7 +167,7 @@
     <!-- 💰 KEUANGAN & LAPORAN -->
     <!-- ============================================== -->
     @can('akses_kas')
-    @php $keuanganActive = request()->routeIs('dashboard.cash_flow.*'); @endphp
+    @php $keuanganActive = request()->routeIs('dashboard.cash_flow.*', 'dashboard.kalkulator_bisnis.*'); @endphp
     <div class="accordion-item bg-transparent border-0 mb-1">
         <h2 class="accordion-header" id="headingKeuangan{{ $prefix }}">
             <button class="accordion-button bg-transparent shadow-none px-3 py-2 fw-bold {{ $keuanganActive ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKeuangan{{ $prefix }}" aria-expanded="{{ $keuanganActive ? 'true' : 'false' }}" aria-controls="collapseKeuangan{{ $prefix }}">
@@ -179,6 +179,12 @@
                 @php $hMenu = \App\Helpers\TenantPlanHelper::hasMenu('buku_kas_laporan'); $reqPlan = \App\Helpers\TenantPlanHelper::getMinimumPlan('buku_kas_laporan'); @endphp
                 <a href="{{ $hMenu ? route('dashboard.cash_flow.index') : '#' }}" class="{{ request()->routeIs('dashboard.cash_flow.*') ? 'active' : '' }} {{ !$hMenu ? 'opacity-50' : '' }}" {!! !$hMenu ? 'onclick="event.preventDefault(); Swal.fire(\'Fitur Terkunci\', \'Silakan upgrade ke paket '.$reqPlan.' untuk mengakses Buku Kas & Laporan.\', \'info\');"' : '' !!}>
                     <i data-lucide="receipt"></i><span>Buku Kas & Laporan</span>
+                    @if(!$hMenu) <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.6rem;">{{ $reqPlan }}</span> @endif
+                </a>
+                
+                @php $hMenu = \App\Helpers\TenantPlanHelper::hasMenu('kalkulator_bisnis'); $reqPlan = \App\Helpers\TenantPlanHelper::getMinimumPlan('kalkulator_bisnis'); @endphp
+                <a href="{{ $hMenu ? route('dashboard.kalkulator_bisnis.index') : '#' }}" class="{{ request()->routeIs('dashboard.kalkulator_bisnis.*') ? 'active' : '' }} {{ !$hMenu ? 'opacity-50' : '' }}" {!! !$hMenu ? 'onclick="event.preventDefault(); Swal.fire(\'Fitur Terkunci\', \'Silakan upgrade ke paket '.$reqPlan.' untuk mengakses Kalkulator Bisnis & BEP.\', \'info\');"' : '' !!}>
+                    <i data-lucide="calculator"></i><span>Kalkulator Bisnis / BEP</span>
                     @if(!$hMenu) <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.6rem;">{{ $reqPlan }}</span> @endif
                 </a>
             </div>

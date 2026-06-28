@@ -28,7 +28,11 @@ class ProdukController extends Controller
         $nextId = $lastProduk ? $lastProduk->id + 1 : 1;
         $autoKode = 'PRD-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
         
-        return view('chatbot.produk.form', compact('kategoris', 'autoKode'));
+        $allVarians = ProdukVarian::with('produk')->whereHas('produk', function($q) {
+            $q->where('is_bundle', false);
+        })->get();
+        
+        return view('chatbot.produk.form', compact('kategoris', 'autoKode', 'allVarians'));
     }
 
     public function store(Request $request)
@@ -48,6 +52,10 @@ class ProdukController extends Controller
             'addons' => 'nullable|array',
             'addons.*.nama_addon' => 'required|string|max:100',
             'addons.*.harga' => 'required|numeric|min:0',
+            'is_bundle' => 'nullable',
+            'bundle_items' => 'nullable|array',
+            'bundle_items.*.varian_id' => 'required_with:bundle_items|integer',
+            'bundle_items.*.qty' => 'required_with:bundle_items|integer|min:1',
         ]);
 
         try {
@@ -75,6 +83,7 @@ class ProdukController extends Controller
                 'aktif' => $request->has('aktif'),
                 'is_made_to_order' => $request->has('is_made_to_order'),
                 'is_favorite' => $request->has('is_favorite'),
+                'is_bundle' => $request->has('is_bundle'),
                 'promo_min_qty' => $request->promo_min_qty,
                 'promo_harga' => $request->promo_harga
             ]);
@@ -102,6 +111,15 @@ class ProdukController extends Controller
                 }
             }
 
+            if ($request->has('is_bundle') && $request->has('bundle_items')) {
+                foreach ($request->bundle_items as $bItem) {
+                    $produk->bundleItems()->create([
+                        'produk_varian_id' => $bItem['varian_id'],
+                        'qty' => $bItem['qty'],
+                    ]);
+                }
+            }
+
             DB::commit();
             return redirect()->route('chatbot.produk.index')->with('sukses', 'Produk berhasil ditambahkan!');
         } catch (\Exception $e) {
@@ -112,9 +130,14 @@ class ProdukController extends Controller
 
     public function edit(Produk $produk)
     {
-        $produk->load(['varians', 'addons']);
+        $produk->load(['varians', 'addons', 'bundleItems.varian.produk']);
         $kategoris = \App\Models\Kategori::where('aktif', true)->orderBy('nama')->get();
-        return view('chatbot.produk.form', compact('produk', 'kategoris'));
+        // Load all produk_varians for the bundle selection dropdown
+        $allVarians = ProdukVarian::with('produk')->whereHas('produk', function($q) {
+            $q->where('is_bundle', false);
+        })->get();
+        
+        return view('chatbot.produk.form', compact('produk', 'kategoris', 'allVarians'));
     }
 
     public function update(Request $request, Produk $produk)
@@ -136,6 +159,10 @@ class ProdukController extends Controller
             'addons' => 'nullable|array',
             'addons.*.nama_addon' => 'required|string|max:100',
             'addons.*.harga' => 'required|numeric|min:0',
+            'is_bundle' => 'nullable',
+            'bundle_items' => 'nullable|array',
+            'bundle_items.*.varian_id' => 'required_with:bundle_items|integer',
+            'bundle_items.*.qty' => 'required_with:bundle_items|integer|min:1',
         ]);
 
         try {
@@ -192,19 +219,19 @@ class ProdukController extends Controller
                 $rv->delete();
             }
 
-            // Sync Addons
+            // Update Addons
             $addonIdsKept = [];
             if ($request->has('addons')) {
                 foreach ($request->addons as $addonData) {
-                    if (isset($addonData['id']) && $addonData['id']) {
-                        $existingAddon = \App\Models\ProdukAddon::find($addonData['id']);
-                        if ($existingAddon) {
-                            $existingAddon->update([
+                    if (isset($addonData['id'])) {
+                        $addon = $produk->addons()->find($addonData['id']);
+                        if ($addon) {
+                            $addon->update([
                                 'nama_addon' => $addonData['nama_addon'],
                                 'harga' => $addonData['harga'],
                                 'butuh_teks' => isset($addonData['butuh_teks']) ? true : false
                             ]);
-                            $addonIdsKept[] = $existingAddon->id;
+                            $addonIdsKept[] = $addon->id;
                         }
                     } else {
                         $newAddon = $produk->addons()->create([
@@ -216,8 +243,36 @@ class ProdukController extends Controller
                     }
                 }
             }
-            // Delete addons that were removed
             $produk->addons()->whereNotIn('id', $addonIdsKept)->delete();
+
+            // Update Bundle Items
+            if ($request->has('is_bundle')) {
+                $bundleIdsKept = [];
+                if ($request->has('bundle_items')) {
+                    foreach ($request->bundle_items as $bItem) {
+                        if (isset($bItem['id'])) {
+                            $bundle = $produk->bundleItems()->find($bItem['id']);
+                            if ($bundle) {
+                                $bundle->update([
+                                    'produk_varian_id' => $bItem['varian_id'],
+                                    'qty' => $bItem['qty'],
+                                ]);
+                                $bundleIdsKept[] = $bundle->id;
+                            }
+                        } else {
+                            $newBundle = $produk->bundleItems()->create([
+                                'produk_varian_id' => $bItem['varian_id'],
+                                'qty' => $bItem['qty'],
+                            ]);
+                            $bundleIdsKept[] = $newBundle->id;
+                        }
+                    }
+                }
+                $produk->bundleItems()->whereNotIn('id', $bundleIdsKept)->delete();
+            } else {
+                // If not bundle anymore, delete all
+                $produk->bundleItems()->delete();
+            }
 
             $fotoPath = $produk->foto;
             if ($request->hasFile('foto')) {
@@ -239,6 +294,7 @@ class ProdukController extends Controller
                 'aktif' => $request->has('aktif'),
                 'is_made_to_order' => $request->has('is_made_to_order'),
                 'is_favorite' => $request->has('is_favorite'),
+                'is_bundle' => $request->has('is_bundle'),
                 'promo_min_qty' => $request->promo_min_qty,
                 'promo_harga' => $request->promo_harga
             ]);

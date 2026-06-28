@@ -42,7 +42,8 @@ class Produk extends Model
         'aktif',
         'promo_min_qty',
         'promo_harga',
-        'is_favorite'
+        'is_favorite',
+        'is_bundle'
     ];
 
     protected $casts = [
@@ -53,12 +54,18 @@ class Produk extends Model
         'is_made_to_order' => 'boolean',
         'promo_min_qty' => 'integer',
         'promo_harga' => 'float',
-        'is_favorite' => 'boolean'
+        'is_favorite' => 'boolean',
+        'is_bundle' => 'boolean'
     ];
 
     public function varians()
     {
         return $this->hasMany(ProdukVarian::class, 'produk_id');
+    }
+
+    public function bundleItems()
+    {
+        return $this->hasMany(BundleItem::class, 'produk_id');
     }
 
     public function addons()

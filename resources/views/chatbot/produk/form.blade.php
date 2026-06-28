@@ -50,7 +50,7 @@
                   <div class="row">
                       <div class="col-md-4 mb-3">
                           <label class="form-label fw-bold">Harga Pokok (Rp)</label>
-                          <input type="number" name="harga" class="form-control form-control-premium" value="{{ old('harga', isset($produk) ? (int)$produk->harga : '') }}" required placeholder="Contoh: 50000" min="0">
+                          <input type="number" name="harga" id="inputHargaPokok" class="form-control form-control-premium" value="{{ old('harga', isset($produk) ? (int)$produk->harga : '') }}" required placeholder="Contoh: 50000" min="0">
                       </div>
                       <div class="col-md-3 mb-3">
                           <label class="form-label fw-bold">Tipe Produksi</label>
@@ -75,6 +75,112 @@
                                   {{ old('aktif', $produk->aktif ?? true) ? 'checked' : '' }}>
                               <label class="form-check-label ms-2">Tampilkan untuk pelanggan</label>
                           </div>
+                      </div>
+                      <div class="col-md-12 mb-3">
+                          <div class="card bg-light border-0">
+                              <div class="card-body py-2">
+                                  <div class="form-check form-switch mt-2">
+                                      <input class="form-check-input" type="checkbox" name="is_bundle" id="isBundleToggle" value="1" style="transform: scale(1.3); margin-left: -2em;" 
+                                          {{ old('is_bundle', $produk->is_bundle ?? false) ? 'checked' : '' }}>
+                                      <label class="form-check-label ms-2 fw-bold text-primary" for="isBundleToggle">Jadikan sebagai Menu Paket (Bundling)</label>
+                                  </div>
+                                  <small class="text-muted d-block mt-1">Menu Paket memungkinkan Anda menggabungkan beberapa produk/varian menjadi satu harga paket khusus.</small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="card bg-info border-0 mb-4" id="bundleItemsSection" style="display: none; --bs-bg-opacity: .1;">
+                      <div class="card-body">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                              <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-boxes-stacked me-2"></i>Isi Paket Bundling</h5>
+                              <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="tambahBundleItem()">
+                                  <i class="fa-solid fa-plus"></i> Tambah Isi Paket
+                              </button>
+                          </div>
+                          <div class="table-responsive">
+                              <table class="table table-bordered align-middle bg-white" id="tableBundle">
+                                  <thead class="bg-light">
+                                      <tr>
+                                          <th>Pilih Produk / Varian</th>
+                                          <th style="width: 150px;">Qty (Jumlah)</th>
+                                          <th style="width: 80px;" class="text-center">Aksi</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @php
+                                          $bundleItems = old('bundle_items', isset($produk) && $produk->bundleItems ? $produk->bundleItems->toArray() : []);
+                                      @endphp
+                                      
+                                      @forelse($bundleItems as $idx => $bItem)
+                                      <tr class="bundle-row">
+                                          <td>
+                                              <input type="hidden" name="bundle_items[{{ $idx }}][id]" value="{{ $bItem['id'] ?? '' }}">
+                                              <select name="bundle_items[{{ $idx }}][varian_id]" class="form-select" required>
+                                                  <option value="">-- Pilih Varian Produk --</option>
+                                                  @if(isset($allVarians))
+                                                      @foreach($allVarians as $av)
+                                                          <option value="{{ $av->id }}" 
+                                                              data-harga="{{ $av->harga > 0 ? $av->harga : ($av->produk->harga ?? 0) }}" 
+                                                              data-hpp="{{ $av->hpp ?? 0 }}"
+                                                              {{ (isset($bItem['produk_varian_id']) && $bItem['produk_varian_id'] == $av->id) || (isset($bItem['varian_id']) && $bItem['varian_id'] == $av->id) ? 'selected' : '' }}>
+                                                              {{ $av->produk->nama }} - {{ $av->nama_varian }}
+                                                          </option>
+                                                      @endforeach
+                                                  @endif
+                                              </select>
+                                          </td>
+                                          <td>
+                                              <input type="number" name="bundle_items[{{ $idx }}][qty]" class="form-control text-center bundle-qty" value="{{ $bItem['qty'] ?? 1 }}" required min="1">
+                                          </td>
+                                          <td class="text-center">
+                                              <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapusBundleItem(this)">
+                                                  <i class="fa-solid fa-times"></i>
+                                              </button>
+                                          </td>
+                                      </tr>
+                                      @empty
+                                      <tr id="emptyBundleRow">
+                                          <td colspan="3" class="text-center text-muted py-3">Belum ada isi paket. Klik Tambah Isi Paket.</td>
+                                      </tr>
+                                      @endforelse
+                                  </tbody>
+                              </table>
+                          </div>
+                          
+                          <!-- KALKULATOR PROFIT BUNDLING -->
+                          <div class="card border-0 mt-3 shadow-sm" style="background-color: #f8f9fa;">
+                              <div class="card-body">
+                                  <h6 class="fw-bold text-success mb-3"><i class="fa-solid fa-calculator me-2"></i>Kalkulator Profit Bundling</h6>
+                                  <div class="row text-center">
+                                      <div class="col-md-3 mb-2">
+                                          <div class="small text-muted">Total Harga Jual Normal</div>
+                                          <div class="fw-bold fs-5" id="calcHargaNormal">Rp 0</div>
+                                      </div>
+                                      <div class="col-md-3 mb-2">
+                                          <div class="small text-muted">Total HPP / Modal</div>
+                                          <div class="fw-bold fs-5 text-danger" id="calcTotalHpp">Rp 0</div>
+                                      </div>
+                                      <div class="col-md-3 mb-2">
+                                          <div class="small text-muted">Harga Paket Bundling</div>
+                                          <div class="fw-bold fs-5 text-primary" id="calcHargaPaket">Rp 0</div>
+                                      </div>
+                                      <div class="col-md-3 mb-2">
+                                          <div class="small text-muted">Estimasi Keuntungan</div>
+                                          <div class="fw-bold fs-5 text-success" id="calcProfit">Rp 0</div>
+                                      </div>
+                                  </div>
+                                  <hr class="my-2">
+                                  <div class="d-flex justify-content-between align-items-center">
+                                      <small class="text-muted" id="calcDiskonText">Diskon yang diberikan ke pembeli: Rp 0 (0%)</small>
+                                      <div>
+                                          <span class="badge bg-info rounded-pill me-2" id="calcDiskonBadge">Diskon: 0%</span>
+                                          <span class="badge bg-success rounded-pill" id="calcMarginBadge">Margin: 0%</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <!-- END KALKULATOR -->
                       </div>
                   </div>
 
@@ -101,7 +207,7 @@
                     <small class="text-muted">Penjelasan mengenai ukuran atau tipe varian. Teks ini akan dikirim oleh bot sebelum pelanggan memilih varian.</small>
                 </div>
 
-                <div class="card bg-light border-0 mb-4">
+                <div class="card bg-light border-0 mb-4" id="promoPaketSection">
                     <div class="card-body">
                         <h6 class="fw-bold"><i class="fa-solid fa-tags text-warning me-2"></i>Harga Grosir / Promo Paket (Opsional)</h6>
                         <p class="text-muted small mb-3">Isi bagian ini jika produk memiliki sistem paket promo. Contoh: Harga normal Rp 4.000, "Beli 3 seharga Rp 10.000".</p>
@@ -118,6 +224,8 @@
                     </div>
                 </div>
 
+                <!-- Bundle items section moved to top -->
+
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -127,13 +235,13 @@
                     </button>
                 </div>
                 
-                <div class="alert alert-info py-2" style="font-size: 13px;">
+                <div class="alert alert-info py-2" style="font-size: 13px;" id="varianAlertText">
                     <i class="fa-solid fa-circle-info me-2"></i>
                     Masukkan Varian/Ukuran di sini (contoh: "Ukuran S", "Kotak Besar", "Kecil + Kartu Ucapan").
-                    Jika produk ini tidak memiliki varian (All Size), cukup buat 1 variis dengan nama "Regular" atau "All Size".
+                    Jika produk ini tidak memiliki varian (All Size) atau ini adalah Menu Paket, cukup biarkan 1 varian dengan nama "Regular" (Otomatis hidden dari pembeli).
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive" id="varianTableSection">
                     <table class="table table-bordered align-middle" id="tableVarian">
                         <thead class="bg-light">
                             <tr>
@@ -174,6 +282,7 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
 
                 <hr class="my-4">
 
@@ -248,6 +357,175 @@
 @section('scripts')
 <script>
     let varianIndex = {{ count($varians) }};
+    @php
+        $bundleItemsCount = isset($bundleItems) ? count($bundleItems) : (isset($produk) && $produk->bundleItems ? $produk->bundleItems->count() : 0);
+    @endphp
+    let bundleIndex = {{ $bundleItemsCount }};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const bundleToggle = document.getElementById('isBundleToggle');
+        const inputHargaPokok = document.getElementById('inputHargaPokok');
+        
+        function toggleBundleSections() {
+            const isBundle = bundleToggle.checked;
+            const promoSection = document.getElementById('promoPaketSection');
+            const bundleSection = document.getElementById('bundleItemsSection');
+            const varianAlert = document.getElementById('varianAlertText');
+            
+            if (isBundle) {
+                promoSection.style.display = 'none';
+                bundleSection.style.display = 'block';
+                varianAlert.innerHTML = '<i class="fa-solid fa-circle-info me-2"></i> Menu Paket Bundling: Varian di bawah ini (biasanya "Regular") hanya sebagai data referensi. Isi paketnya ditentukan di bagian atas.';
+                
+                // Set first varian to Regular if none exists
+                const firstVarian = document.querySelector('input[name="varians[0][nama]"]');
+                if (firstVarian && firstVarian.value === '') {
+                    firstVarian.value = 'Regular';
+                }
+                hitungProfitBundling(); // Hitung awal
+            } else {
+                promoSection.style.display = 'block';
+                bundleSection.style.display = 'none';
+                varianAlert.innerHTML = '<i class="fa-solid fa-circle-info me-2"></i> Masukkan Varian/Ukuran di sini (contoh: "Ukuran S", "Kotak Besar", "Kecil + Kartu Ucapan"). Jika produk ini tidak memiliki varian (All Size), cukup buat 1 varian dengan nama "Regular" atau "All Size".';
+            }
+        }
+
+        if(bundleToggle) {
+            bundleToggle.addEventListener('change', toggleBundleSections);
+            toggleBundleSections(); // Init on load
+        }
+        
+        if (inputHargaPokok) {
+            inputHargaPokok.addEventListener('input', hitungProfitBundling);
+        }
+        
+        // Delegasi event untuk perubahan select dan qty
+        document.getElementById('tableBundle').addEventListener('change', function(e) {
+            if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
+                hitungProfitBundling();
+            }
+        });
+        document.getElementById('tableBundle').addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT') {
+                hitungProfitBundling();
+            }
+        });
+    });
+    
+    function hitungProfitBundling() {
+        let totalHargaNormal = 0;
+        let totalHpp = 0;
+        
+        const rows = document.querySelectorAll('#tableBundle tbody .bundle-row');
+        rows.forEach(row => {
+            const select = row.querySelector('select');
+            const qtyInput = row.querySelector('.bundle-qty');
+            if (select && select.value !== '' && qtyInput) {
+                const option = select.options[select.selectedIndex];
+                const harga = parseFloat(option.getAttribute('data-harga')) || 0;
+                const hpp = parseFloat(option.getAttribute('data-hpp')) || 0;
+                const qty = parseInt(qtyInput.value) || 1;
+                
+                totalHargaNormal += (harga * qty);
+                totalHpp += (hpp * qty);
+            }
+        });
+        
+        const hargaPaket = parseFloat(document.getElementById('inputHargaPokok').value) || 0;
+        const profit = hargaPaket - totalHpp;
+        
+        const diskon = totalHargaNormal - hargaPaket;
+        const persentaseDiskon = totalHargaNormal > 0 ? Math.abs(diskon / totalHargaNormal * 100).toFixed(1) : 0;
+        
+        let margin = 0;
+        if (hargaPaket > 0) margin = (profit / hargaPaket * 100).toFixed(1);
+        else if (totalHpp > 0) margin = (profit / totalHpp * 100).toFixed(1);
+        
+        const formatRp = (angka) => 'Rp ' + Math.abs(angka).toLocaleString('id-ID');
+        
+        document.getElementById('calcHargaNormal').innerText = formatRp(totalHargaNormal);
+        document.getElementById('calcTotalHpp').innerText = formatRp(totalHpp);
+        document.getElementById('calcHargaPaket').innerText = formatRp(hargaPaket);
+        document.getElementById('calcProfit').innerText = (profit < 0 ? '-' : '') + formatRp(profit);
+        
+        let diskonText = '';
+        if (diskon > 0) {
+            diskonText = `<span class="text-success fw-bold"><i class="fa-solid fa-tag me-1"></i> Diskon untuk pembeli: ${formatRp(diskon)} (${persentaseDiskon}%)</span>`;
+        } else if (diskon < 0) {
+            diskonText = `<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> Harga paket lebih MAHAL ${formatRp(diskon)} dari beli satuan!</span>`;
+        } else {
+            diskonText = `<span class="text-muted"><i class="fa-solid fa-equals me-1"></i> Harga paket SAMA dengan harga beli satuan.</span>`;
+        }
+        
+        document.getElementById('calcDiskonText').innerHTML = diskonText;
+        
+        let badgeDiskon = document.getElementById('calcDiskonBadge');
+        if (diskon > 0) {
+            badgeDiskon.innerText = `Diskon: ${persentaseDiskon}%`;
+            badgeDiskon.className = 'badge bg-info rounded-pill me-2';
+        } else if (diskon < 0) {
+            badgeDiskon.innerText = `Markup: ${persentaseDiskon}%`;
+            badgeDiskon.className = 'badge bg-danger rounded-pill me-2';
+        } else {
+            badgeDiskon.innerText = `Diskon: 0%`;
+            badgeDiskon.className = 'badge bg-secondary rounded-pill me-2';
+        }
+
+        document.getElementById('calcMarginBadge').innerText = `Margin: ${margin}%`;
+        
+        if (profit < 0) {
+            document.getElementById('calcProfit').className = 'fw-bold fs-5 text-danger';
+            document.getElementById('calcMarginBadge').className = 'badge bg-danger rounded-pill';
+        } else {
+            document.getElementById('calcProfit').className = 'fw-bold fs-5 text-success';
+            document.getElementById('calcMarginBadge').className = 'badge bg-success rounded-pill';
+        }
+    }
+
+    function tambahBundleItem() {
+        const emptyRow = document.getElementById('emptyBundleRow');
+        if (emptyRow) emptyRow.remove();
+
+        const tbody = document.querySelector('#tableBundle tbody');
+        const tr = document.createElement('tr');
+        tr.className = 'bundle-row';
+        tr.innerHTML = `
+            <td>
+                <input type="hidden" name="bundle_items[${bundleIndex}][id]" value="">
+                <select name="bundle_items[${bundleIndex}][varian_id]" class="form-select" required>
+                    <option value="">-- Pilih Varian Produk --</option>
+                    @if(isset($allVarians))
+                        @foreach($allVarians as $av)
+                            <option value="{{ $av->id }}"
+                                data-harga="{{ $av->harga > 0 ? $av->harga : ($av->produk->harga ?? 0) }}" 
+                                data-hpp="{{ $av->hpp ?? 0 }}">
+                                {{ $av->produk->nama }} - {{ $av->nama_varian }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </td>
+            <td>
+                <input type="number" name="bundle_items[${bundleIndex}][qty]" class="form-control text-center bundle-qty" value="1" required min="1">
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapusBundleItem(this)">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        bundleIndex++;
+    }
+
+    function hapusBundleItem(btn) {
+        btn.closest('tr').remove();
+        const tbody = document.querySelector('#tableBundle tbody');
+        if (tbody.querySelectorAll('.bundle-row').length === 0) {
+            tbody.innerHTML = '<tr id="emptyBundleRow"><td colspan="3" class="text-center text-muted py-3">Belum ada isi paket. Klik Tambah Isi Paket.</td></tr>';
+        }
+        hitungProfitBundling();
+    }
 
     function tambahVarian() {
         const tbody = document.querySelector('#tableVarian tbody');
