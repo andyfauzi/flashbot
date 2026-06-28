@@ -46,7 +46,7 @@ class ShiftController extends Controller
         try {
             $shift->waktu_tutup = now();
             
-            $uangSeharusnya = $shift->modal_awal + $shift->total_penjualan_tunai - $shift->pengeluaran_kasir;
+            $uangSeharusnya = $shift->modal_awal + $shift->total_penjualan_tunai + $shift->penambahan_kasir - $shift->pengeluaran_kasir;
             $shift->selisih_uang = $request->uang_fisik - $uangSeharusnya;
             $shift->status = 'selesai';
             $shift->save();
@@ -90,6 +90,43 @@ class ShiftController extends Controller
 
             DB::commit();
             return back()->with('sukses', 'Pengeluaran berhasil dicatat!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function penambahanKasir(Request $request)
+    {
+        $request->validate([
+            'nominal' => 'required|numeric|min:1',
+            'keterangan' => 'required|string|max:255',
+        ]);
+
+        $shift = Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+        if (!$shift) {
+            return back()->with('error', 'Anda harus membuka shift terlebih dahulu.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $shift->penambahan_kasir += $request->nominal;
+            $shift->save();
+
+            if (config('flashbot.features.finance')) {
+                \App\Models\CashFlow::create([
+                    'user_id' => auth()->id(),
+                    'shift_id' => $shift->id,
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'in',
+                    'kategori' => 'Penambahan Kasir',
+                    'nominal' => $request->nominal,
+                    'keterangan' => $request->keterangan,
+                ]);
+            }
+
+            DB::commit();
+            return back()->with('sukses', 'Penambahan uang kasir berhasil dicatat!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

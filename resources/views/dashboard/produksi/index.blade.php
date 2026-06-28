@@ -24,6 +24,17 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <!-- Form Produksi -->
         <div class="col-md-5">
@@ -41,7 +52,7 @@
                                 <option value="">-- Pilih Produk Jadi --</option>
                                 @foreach($produks as $produk)
                                     @foreach($produk->varians as $varian)
-                                        <option value="{{ $varian->id }}" data-resep="{{ json_encode($varian->resep->map(function($r) { return ['nama' => $r->bahanBaku->nama_bahan, 'qty' => $r->qty_dipakai, 'satuan' => $r->bahanBaku->satuan]; })) }}">
+                                        <option value="{{ $varian->id }}" data-yield="{{ max(1, $varian->resep_yield ?? 1) }}" data-resep="{{ json_encode($varian->resep->map(function($r) { return ['nama' => $r->bahanBaku->nama_bahan, 'qty' => $r->qty_dipakai, 'satuan' => $r->bahanBaku->satuan, 'stok' => $r->bahanBaku->stok]; })) }}">
                                             {{ $produk->nama }} {{ $varian->nama_varian !== 'All Size' ? ' - ' . $varian->nama_varian : '' }}
                                         </option>
                                     @endforeach
@@ -78,13 +89,13 @@
         </div>
     </div>
 
-    <!-- Baris Baru untuk Produk Sedang Diproses (Dapur) & Validasi Gudang -->
+    <!-- Baris Baru untuk Produk Sedang Diproses (Dapur) & Validasi Dapur -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="card card-premium">
                 <div class="card-header bg-white pb-0 border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold"><i class="fa-solid fa-hourglass-half me-2 text-info"></i> Produk Sedang Diproses di Dapur</h5>
-                    <span class="badge bg-info text-dark fw-bold">Menunggu Validasi Gudang</span>
+                    <span class="badge bg-info text-dark fw-bold">Menunggu Validasi Dapur</span>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <div class="table-responsive">
@@ -113,11 +124,23 @@
                                                     {{ $varian->stok_proses_dapur }} pcs
                                                 </td>
                                                 <td class="text-center">
-                                                    <button type="button" class="btn btn-sm btn-success fw-bold px-3 btn-validasi" 
+                                                    <button type="button" class="btn btn-sm btn-success fw-bold px-3 btn-validasi mb-1" 
                                                         data-id="{{ $varian->id }}"
                                                         data-nama="{{ $produk->nama }}{{ $varian->nama_varian !== 'All Size' ? ' - ' . $varian->nama_varian : '' }}"
                                                         data-max="{{ $varian->stok_proses_dapur }}">
-                                                        <i class="fa-solid fa-square-check me-1"></i> Validasi Gudang
+                                                        <i class="fa-solid fa-square-check me-1"></i> Validasi Dapur
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-warning fw-bold px-3 btn-edit-produksi mb-1 text-dark" 
+                                                        data-id="{{ $varian->id }}"
+                                                        data-nama="{{ $produk->nama }}{{ $varian->nama_varian !== 'All Size' ? ' - ' . $varian->nama_varian : '' }}"
+                                                        data-qty="{{ $varian->stok_proses_dapur }}">
+                                                        <i class="fa-solid fa-edit me-1"></i> Edit
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger fw-bold px-3 btn-batal-produksi mb-1" 
+                                                        data-id="{{ $varian->id }}"
+                                                        data-nama="{{ $produk->nama }}{{ $varian->nama_varian !== 'All Size' ? ' - ' . $varian->nama_varian : '' }}"
+                                                        data-max="{{ $varian->stok_proses_dapur }}">
+                                                        <i class="fa-solid fa-ban me-1"></i> Batal
                                                     </button>
                                                 </td>
                                             </tr>
@@ -141,7 +164,7 @@
     </div>
 </div>
 
-<!-- Modal Validasi Gudang -->
+<!-- Modal Validasi Dapur -->
 <div class="modal fade" id="modalValidasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -198,86 +221,220 @@
     </div>
 </div>
 
-@push('scripts')
+<!-- Modal Edit Produksi -->
+<div class="modal fade" id="modalEditProduksi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ route('dashboard.produksi.update') }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="produk_varian_id" id="editVarianId">
+                <div class="modal-header bg-warning-subtle border-bottom-0">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-edit me-2"></i> Edit Jumlah Produksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">Produk / Varian</label>
+                        <div class="p-2 bg-light rounded fw-bold text-dark" id="editNamaProduk">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Jumlah Produksi Baru (Pcs)</label>
+                        <input type="number" name="qty_baru" id="editQtyInput" class="form-control form-control-lg text-center fw-bold" min="1" required>
+                        <small class="text-muted mt-2 d-block">Sistem akan menyesuaikan stok bahan baku yang dipotong secara otomatis berdasarkan selisih angka lama dengan yang baru.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-warning fw-bold px-4 text-dark">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Batal Produksi -->
+<div class="modal fade" id="modalBatalProduksi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ route('dashboard.produksi.batal') }}" method="POST">
+                @csrf
+                <input type="hidden" name="produk_varian_id" id="batalVarianId">
+                <div class="modal-header bg-danger-subtle border-bottom-0">
+                    <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Batal Produksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">Produk / Varian</label>
+                        <div class="p-2 bg-light rounded fw-bold text-dark" id="batalNamaProduk">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Jumlah Dibatalkan (Pcs)</label>
+                        <div class="input-group">
+                            <input type="number" name="qty_batal" id="batalQtyInput" class="form-control form-control-lg text-center fw-bold" min="1" required>
+                            <span class="input-group-text bg-light fw-bold" id="batalMaxLabel">/ Max 0 pcs</span>
+                        </div>
+                        <small class="text-danger mt-2 d-block fw-bold"><i class="fa-solid fa-arrow-rotate-left me-1"></i> Bahan baku akan dikembalikan ke gudang!</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-danger fw-bold px-4">Batalkan Produksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const produkSelect = document.getElementById('produkSelect');
-        const qtyInput = document.getElementById('qtyInput');
-        const previewResep = document.getElementById('previewResep');
+        try {
+            const produkSelect = document.getElementById('produkSelect');
+            const qtyInput = document.getElementById('qtyInput');
+            const previewResep = document.getElementById('previewResep');
 
-        function updatePreview() {
-            const selectedOption = produkSelect.options[produkSelect.selectedIndex];
-            if (!selectedOption.value) {
-                previewResep.innerHTML = `
-                    <div class="text-center p-5 text-muted bg-light rounded-3">
-                        <i class="fa-solid fa-receipt fa-3x mb-3 text-secondary"></i>
-                        <p class="mb-0">Pilih produk di sebelah kiri untuk melihat rincian bahan baku yang akan dipotong otomatis.</p>
-                    </div>`;
-                return;
-            }
+            function updatePreview() {
+                const selectedOption = produkSelect.options[produkSelect.selectedIndex];
+                if (!selectedOption.value) {
+                    previewResep.innerHTML = `
+                        <div class="text-center p-5 text-muted bg-light rounded-3">
+                            <i class="fa-solid fa-receipt fa-3x mb-3 text-secondary"></i>
+                            <p class="mb-0">Pilih produk di sebelah kiri untuk melihat rincian bahan baku yang akan dipotong otomatis.</p>
+                        </div>`;
+                    return;
+                }
 
-            const resepData = JSON.parse(selectedOption.getAttribute('data-resep') || '[]');
-            const qty = parseInt(qtyInput.value) || 1;
+                const resepData = JSON.parse(selectedOption.getAttribute('data-resep') || '[]');
+                const yieldVal = parseFloat(selectedOption.getAttribute('data-yield')) || 1;
+                const qty = parseInt(qtyInput.value) || 1;
 
-            if (resepData.length === 0) {
-                previewResep.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fa-solid fa-info-circle me-2"></i> Produk ini tidak memiliki resep HPP. Sistem hanya akan menambahkan stok produk jadi tanpa memotong bahan baku.
-                    </div>`;
-                return;
-            }
+                if (resepData.length === 0) {
+                    previewResep.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-info-circle me-2"></i> Produk ini tidak memiliki resep HPP. Sistem hanya akan menambahkan stok produk jadi tanpa memotong bahan baku.
+                        </div>`;
+                    return;
+                }
 
-            let html = `
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle border">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Bahan Baku</th>
-                                <th>Kebutuhan per Pcs</th>
-                                <th>Total Dipotong (x${qty})</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            resepData.forEach(item => {
-                const total = item.qty * qty;
-                html += `
-                    <tr>
-                        <td class="fw-bold text-dark">${item.nama}</td>
-                        <td class="text-muted">${item.qty} ${item.satuan}</td>
-                        <td class="text-danger fw-bold"><i class="fa-solid fa-arrow-trend-down me-1"></i> -${total} ${item.satuan}</td>
-                    </tr>
+                let html = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Bahan Baku</th>
+                                    <th>Kebutuhan per Pcs</th>
+                                    <th>Total Dipotong (x${qty})</th>
+                                    <th>Stok Gudang</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 `;
+
+                resepData.forEach(item => {
+                    const total = (item.qty / yieldVal) * qty;
+                    const formattedTotal = total % 1 === 0 ? total : total.toFixed(3);
+                    const formattedStok = item.stok % 1 === 0 ? item.stok : parseFloat(item.stok).toFixed(3);
+                    const isEnough = item.stok >= total;
+                    const stockBadge = isEnough 
+                        ? `<span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size:0.7em;">Cukup</span>` 
+                        : `<span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size:0.7em;">Kurang</span>`;
+
+                    html += `
+                        <tr>
+                            <td class="fw-bold text-dark">${item.nama}</td>
+                            <td class="text-muted">${item.qty} ${item.satuan} / ${yieldVal} Pcs</td>
+                            <td class="text-danger fw-bold"><i class="fa-solid fa-arrow-trend-down me-1"></i> -${formattedTotal} ${item.satuan}</td>
+                            <td class="${isEnough ? 'text-success' : 'text-danger'} fw-bold">
+                                ${formattedStok} ${item.satuan} ${stockBadge}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table></div>`;
+                previewResep.innerHTML = html;
+            }
+
+            if (produkSelect) {
+                produkSelect.addEventListener('change', updatePreview);
+            }
+            if (qtyInput) {
+                qtyInput.addEventListener('input', updatePreview);
+            }
+
+            // Handling modal trigger
+            const btnValidasis = document.querySelectorAll('.btn-validasi');
+            let modalValidasi;
+            if (document.getElementById('modalValidasi')) {
+                modalValidasi = new bootstrap.Modal(document.getElementById('modalValidasi'));
+            }
+            
+            btnValidasis.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+                    const max = parseInt(this.getAttribute('data-max')) || 0;
+
+                    document.getElementById('valVarianId').value = id;
+                    document.getElementById('valNamaProduk').textContent = nama;
+                    document.getElementById('valQtyInput').value = max;
+                    document.getElementById('valQtyInput').max = max;
+                    document.getElementById('valMaxLabel').textContent = `/ Max ${max} pcs`;
+
+                    if(modalValidasi) modalValidasi.show();
+                });
             });
 
-            html += `</tbody></table></div>`;
-            previewResep.innerHTML = html;
+            // Handling Edit Produksi
+            const btnEdits = document.querySelectorAll('.btn-edit-produksi');
+            let modalEdit;
+            if (document.getElementById('modalEditProduksi')) {
+                modalEdit = new bootstrap.Modal(document.getElementById('modalEditProduksi'));
+            }
+            
+            btnEdits.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+                    const qty = parseInt(this.getAttribute('data-qty')) || 0;
+
+                    document.getElementById('editVarianId').value = id;
+                    document.getElementById('editNamaProduk').textContent = nama;
+                    document.getElementById('editQtyInput').value = qty;
+
+                    if(modalEdit) modalEdit.show();
+                });
+            });
+
+            // Handling Batal Produksi
+            const btnBatals = document.querySelectorAll('.btn-batal-produksi');
+            let modalBatal;
+            if (document.getElementById('modalBatalProduksi')) {
+                modalBatal = new bootstrap.Modal(document.getElementById('modalBatalProduksi'));
+            }
+            
+            btnBatals.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+                    const max = parseInt(this.getAttribute('data-max')) || 0;
+
+                    document.getElementById('batalVarianId').value = id;
+                    document.getElementById('batalNamaProduk').textContent = nama;
+                    document.getElementById('batalQtyInput').value = max;
+                    document.getElementById('batalQtyInput').max = max;
+                    document.getElementById('batalMaxLabel').textContent = `/ Max ${max} pcs`;
+
+                    if(modalBatal) modalBatal.show();
+                });
+            });
+        } catch (error) {
+            alert("Terjadi kesalahan pada sistem: " + error.message);
+            console.error(error);
         }
-
-        produkSelect.addEventListener('change', updatePreview);
-        qtyInput.addEventListener('input', updatePreview);
-
-        // Handling modal trigger
-        const btnValidasis = document.querySelectorAll('.btn-validasi');
-        const modalValidasi = new bootstrap.Modal(document.getElementById('modalValidasi'));
-        
-        btnValidasis.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama');
-                const max = parseInt(this.getAttribute('data-max')) || 0;
-
-                document.getElementById('valVarianId').value = id;
-                document.getElementById('valNamaProduk').textContent = nama;
-                document.getElementById('valQtyInput').value = max;
-                document.getElementById('valQtyInput').max = max;
-                document.getElementById('valMaxLabel').textContent = `/ Max ${max} pcs`;
-
-                modalValidasi.show();
-            });
-        });
     });
 </script>
-@endpush
+@endsection
 @endsection

@@ -349,6 +349,21 @@
     </div>
 </div>
 
+<!-- Modal Produk per Kategori -->
+<div class="modal fade" id="categoryProductsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 shadow-sm z-index-1">
+                <h5 class="modal-title fw-bold" id="categoryProductsModalTitle">Kategori</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light" style="min-height: 50vh;">
+                <div class="row g-3" id="modalProductContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -416,73 +431,75 @@
             window.history.replaceState({}, document.title, "{{ route('pos.index') }}");
         @endif
 
-        // Event listener untuk klik produk di keranjang (Card Produk)
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.addEventListener('click', function() {
-                if (this.classList.contains('disabled')) return;
+        // Event listener delegasi untuk klik produk (Card Produk)
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.product-card');
+            if (!card) return;
+            // Abaikan klik jika ini adalah card kategori di layar depan (yang tidak punya data-id)
+            if (!card.hasAttribute('data-id')) return;
+            if (card.classList.contains('disabled')) return;
+            
+            const id = card.getAttribute('data-id');
+            const nama = card.getAttribute('data-nama');
+            const varianId = card.getAttribute('data-varian-id');
+            const varianNama = card.getAttribute('data-varian-nama');
+            const varianHarga = parseInt(card.getAttribute('data-varian-harga'));
+            const addonsJson = card.getAttribute('data-addons') || '[]';
+            const promoMin = parseInt(card.getAttribute('data-promo-min')) || null;
+            const promoHarga = parseFloat(card.getAttribute('data-promo-harga')) || null;
+            const stokTersedia = parseInt(card.getAttribute('data-stok'));
+            const isMadeToOrder = card.getAttribute('data-is-made-to-order') === '1';
+
+            if (stokTersedia <= 0 && !isMadeToOrder) {
+                Swal.fire('Stok Habis', 'Produk ini sedang kosong.', 'warning');
+                return;
+            }
+
+            let addons = [];
+            try {
+                addons = JSON.parse(addonsJson);
+            } catch (err) {
+                console.error("Gagal mem-parsing JSON", err);
+            }
+
+            if (addons.length > 0) {
+                // Tampilkan modal opsi addons
+                document.getElementById('modalOpsiTitle').innerText = (varianNama && varianNama !== 'All Size') ? `${nama} (${varianNama})` : nama;
+                let html = '<form id="formOpsiProduk">';
                 
-                const id = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama');
-                const varianId = this.getAttribute('data-varian-id');
-                const varianNama = this.getAttribute('data-varian-nama');
-                const varianHarga = parseInt(this.getAttribute('data-varian-harga'));
-                const addonsJson = this.getAttribute('data-addons') || '[]';
-                const promoMin = parseInt(this.getAttribute('data-promo-min')) || null;
-                const promoHarga = parseFloat(this.getAttribute('data-promo-harga')) || null;
-                const stokTersedia = parseInt(this.getAttribute('data-stok'));
-                const isMadeToOrder = this.getAttribute('data-is-made-to-order') === '1';
-
-                if (stokTersedia <= 0 && !isMadeToOrder) {
-                    Swal.fire('Stok Habis', 'Produk ini sedang kosong.', 'warning');
-                    return;
-                }
-
-                let addons = [];
-                try {
-                    addons = JSON.parse(addonsJson);
-                } catch (e) {
-                    console.error("Gagal mem-parsing JSON", e);
-                }
-
-                if (addons.length > 0) {
-                    // Tampilkan modal opsi addons
-                    document.getElementById('modalOpsiTitle').innerText = (varianNama && varianNama !== 'All Size') ? `${nama} (${varianNama})` : nama;
-                    let html = '<form id="formOpsiProduk">';
-                    
-                    html += '<h6 class="fw-bold mb-2">Menu Tambahan (Opsional):</h6><div class="list-group mb-3">';
-                    addons.forEach((a) => {
-                        const hargaAddon = parseInt(a.harga);
-                        html += `
-                            <label class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <input class="form-check-input me-2 addon-checkbox" type="checkbox" name="addonSelect[]" value='${JSON.stringify({id: a.id, nama: a.nama_addon, harga: hargaAddon})}'>
-                                    ${a.nama_addon}
-                                </div>
-                                <span class="badge bg-success">+ Rp ${formatRupiah(hargaAddon)}</span>
-                            </label>
-                        `;
+                html += '<h6 class="fw-bold mb-2">Menu Tambahan (Opsional):</h6><div class="list-group mb-3">';
+                addons.forEach((a) => {
+                    const hargaAddon = parseInt(a.harga);
+                    html += `
+                        <label class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <input class="form-check-input me-2 addon-checkbox" type="checkbox" name="addonSelect[]" value='${JSON.stringify({id: a.id, nama: a.nama_addon, harga: hargaAddon})}'>
+                                ${a.nama_addon}
+                            </div>
+                            <span class="badge bg-success">+ Rp ${formatRupiah(hargaAddon)}</span>
+                        </label>
+                    `;
+                });
+                html += '</div></form>';
+                document.getElementById('opsiFormContainer').innerHTML = html;
+                
+                // Setup submit button
+                const btnSubmit = document.getElementById('btnSubmitOpsi');
+                btnSubmit.onclick = function() {
+                    let selectedAddons = [];
+                    const checkboxes = document.querySelectorAll('.addon-checkbox:checked');
+                    checkboxes.forEach(cb => {
+                        selectedAddons.push(JSON.parse(cb.value));
                     });
-                    html += '</div></form>';
-                    document.getElementById('opsiFormContainer').innerHTML = html;
-                    
-                    // Setup submit button
-                    const btnSubmit = document.getElementById('btnSubmitOpsi');
-                    btnSubmit.onclick = function() {
-                        let selectedAddons = [];
-                        const checkboxes = document.querySelectorAll('.addon-checkbox:checked');
-                        checkboxes.forEach(cb => {
-                            selectedAddons.push(JSON.parse(cb.value));
-                        });
 
-                        addToCart(id, nama, varianHarga, stokTersedia, varianId, varianNama, selectedAddons, promoMin, promoHarga, isMadeToOrder);
-                    };
+                    addToCart(id, nama, varianHarga, stokTersedia, varianId, varianNama, selectedAddons, promoMin, promoHarga, isMadeToOrder);
+                };
 
-                    new bootstrap.Modal(document.getElementById('modalOpsi')).show();
-                } else {
-                    // Langsung tambah ke cart jika tidak ada addons
-                    addToCart(id, nama, varianHarga, stokTersedia, varianId, varianNama, [], promoMin, promoHarga, isMadeToOrder);
-                }
-            });
+                new bootstrap.Modal(document.getElementById('modalOpsi')).show();
+            } else {
+                // Langsung tambah ke cart jika tidak ada addons
+                addToCart(id, nama, varianHarga, stokTersedia, varianId, varianNama, [], promoMin, promoHarga, isMadeToOrder);
+            }
         });
     });
 
@@ -534,24 +551,31 @@
         // Kosongkan search box saat masuk kategori
         document.getElementById('posSearch').value = '';
         
-        document.getElementById('categoryContainer').classList.add('d-none');
-        document.getElementById('productContainer').classList.remove('d-none');
-        document.getElementById('mainTitle').innerHTML = '<i class="fa-solid fa-cash-register me-2"></i>' + kategoriNama;
-        document.getElementById('btnBackToCategory').classList.remove('d-none');
-        document.getElementById('viewToggleGroup').classList.remove('d-none');
+        // Pastikan container kategori tetap terlihat di background
+        document.getElementById('categoryContainer').classList.remove('d-none');
+        document.getElementById('productContainer').classList.add('d-none');
+        document.getElementById('mainTitle').innerHTML = '<i class="fa-solid fa-tags me-2"></i>Pilih Kategori';
+        document.getElementById('btnBackToCategory').classList.add('d-none');
+        document.getElementById('viewToggleGroup').classList.add('d-none');
 
-        const products = document.querySelectorAll('.product-wrapper');
+        // Siapkan Modal
+        document.getElementById('categoryProductsModalTitle').innerHTML = '<i class="fa-solid fa-layer-group me-2 text-primary"></i> ' + kategoriNama;
+        const modalContainer = document.getElementById('modalProductContainer');
+        modalContainer.innerHTML = '';
+        
+        // Clone produk yang relevan
+        const products = document.querySelectorAll('#productContainer .product-wrapper');
         products.forEach(p => {
-            if (kategoriId === 'all') {
-                p.style.display = 'block';
-            } else {
-                if (p.getAttribute('data-kategori') === kategoriId.toString()) {
-                    p.style.display = 'block';
-                } else {
-                    p.style.display = 'none';
-                }
+            if (kategoriId === 'all' || p.getAttribute('data-kategori') === kategoriId.toString()) {
+                const clone = p.cloneNode(true);
+                clone.style.display = 'block';
+                modalContainer.appendChild(clone);
             }
         });
+        
+        // Tampilkan Modal
+        const modal = new bootstrap.Modal(document.getElementById('categoryProductsModal'));
+        modal.show();
     }
 
     function searchProducts(keyword) {

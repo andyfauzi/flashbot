@@ -102,6 +102,11 @@
             @endphp
 
             @if($activeShift)
+                <!-- Penambahan -->
+                <button type="button" class="btn btn-sm d-none d-md-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#penambahanModal" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); padding: 7px 14px; border-radius: 8px; font-weight: 500;">
+                    <i data-lucide="wallet" style="width:16px;height:16px;"></i>
+                    <span>Tambah Kas</span>
+                </button>
                 <!-- Pengeluaran -->
                 <button type="button" class="btn btn-sm d-none d-md-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#pengeluaranModal" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); padding: 7px 14px; border-radius: 8px; font-weight: 500;">
                     <i data-lucide="banknote" style="width:16px;height:16px;"></i>
@@ -310,6 +315,32 @@
 
 @auth
 @if(isset($activeShift) && $activeShift)
+<!-- Modal Penambahan Kasir -->
+<div class="modal fade" id="penambahanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('dashboard.shift.penambahan') }}" method="POST" class="modal-content" onsubmit="return preventDoubleSubmit(this);">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title"><i data-lucide="wallet" class="text-success me-2"></i>Tambah Uang Kasir (Cash In)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nominal (Rp)</label>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="nominal" class="form-control" placeholder="Contoh: 50000" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Keterangan / Keperluan</label>
+                    <input type="text" name="keterangan" class="form-control" placeholder="Uang receh tambahan dari Owner" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success w-100 fw-bold">Tambah Uang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal Pengeluaran Kasir -->
 <div class="modal fade" id="pengeluaranModal" tabindex="-1">
     <div class="modal-dialog">
@@ -350,6 +381,7 @@
                     <ul class="mb-0">
                         <li>Modal Awal: <strong>Rp {{ number_format($activeShift->modal_awal, 0, ',', '.') }}</strong></li>
                         <li>Penjualan Tunai: <strong>Rp {{ number_format($activeShift->total_penjualan_tunai, 0, ',', '.') }}</strong></li>
+                        <li>Penambahan Kas: <strong>Rp {{ number_format($activeShift->penambahan_kasir, 0, ',', '.') }}</strong></li>
                         <li>Pengeluaran: <strong>Rp {{ number_format($activeShift->pengeluaran_kasir, 0, ',', '.') }}</strong></li>
                     </ul>
                 </div>

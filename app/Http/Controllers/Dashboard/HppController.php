@@ -18,9 +18,15 @@ class HppController extends Controller
     // ==========================================
     // BAHAN BAKU
     // ==========================================
-    public function indexBahanBaku()
+    public function indexBahanBaku(Request $request)
     {
-        $bahan = BahanBaku::orderBy('nama_bahan')->get();
+        $query = BahanBaku::orderBy('nama_bahan');
+        
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama_bahan', 'like', '%' . $request->search . '%');
+        }
+        
+        $bahan = $query->paginate(10);
         $konversis = \App\Models\SatuanKonversi::orderBy('satuan_awal')->get();
         return view('dashboard.hpp.bahan_baku', compact('bahan', 'konversis'));
     }

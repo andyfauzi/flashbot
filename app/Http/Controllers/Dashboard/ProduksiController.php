@@ -27,7 +27,7 @@ class ProduksiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'produk_varian_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',
+            'produk_varian_id' => 'required|exists:produk_varians,id',
             'qty_produksi' => 'required|integer|min:1',
         ]);
 
@@ -69,8 +69,10 @@ class ProduksiController extends Controller
             // 3. Cek ketersediaan bahan baku dulu dan lock (Urutkan berdasarkan bahan_baku_id untuk mencegah deadlock)
             $lockedBahanBakus = [];
             $resepSorted = $varian->resep->sortBy('bahan_baku_id');
+            $yield = max(1, $varian->resep_yield ?? 1);
+            
             foreach ($resepSorted as $resep) {
-                $qtyDibutuhkan = $resep->qty_dipakai * $request->qty_produksi;
+                $qtyDibutuhkan = ($resep->qty_dipakai / $yield) * $request->qty_produksi;
                 $bahanBaku = BahanBaku::lockForUpdate()->find($resep->bahan_baku_id);
                 
                 if (!$bahanBaku || $bahanBaku->stok < $qtyDibutuhkan) {
@@ -81,7 +83,7 @@ class ProduksiController extends Controller
 
             // Potong bahan baku dan catat riwayat
             foreach ($resepSorted as $resep) {
-                $qtyDibutuhkan = $resep->qty_dipakai * $request->qty_produksi;
+                $qtyDibutuhkan = ($resep->qty_dipakai / $yield) * $request->qty_produksi;
                 $bahanBaku = $lockedBahanBakus[$resep->bahan_baku_id];
                 
                 $bahanBaku->decrement('stok', $qtyDibutuhkan);
@@ -113,7 +115,7 @@ class ProduksiController extends Controller
     public function validasiSelesai(Request $request)
     {
         $request->validate([
-            'produk_varian_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.produk_varians,id',
+            'produk_varian_id' => 'required|exists:produk_varians,id',
             'qty_validasi' => 'required|integer|min:1',
             'tindakan' => 'required|in:selesai,waste'
         ]);
@@ -155,6 +157,152 @@ class ProduksiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal memvalidasi: ' . $e->getMessage());
+        }
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'produk_varian_id' => 'required|exists:produk_varians,id',
+            'qty_baru' => 'required|integer|min:1',
+        ]);
+
+        $varian = ProdukVarian::findOrFail($request->produk_varian_id);
+        $qtyLama = $varian->stok_proses_dapur;
+        $qtyBaru = $request->qty_baru;
+        $selisih = $qtyBaru - $qtyLama;
+
+        if ($selisih === 0) {
+            return back()->with('sukses', 'Tidak ada perubahan pada jumlah produksi.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $lockedProduk = Produk::lockForUpdate()->find($varian->produk_id);
+            $lockedVarian = ProdukVarian::lockForUpdate()->find($varian->id);
+
+            // Hitung bahan baku (potong jika positif, kembalikan jika negatif)
+            $lockedBahanBakus = [];
+            $resepSorted = $varian->resep->sortBy('bahan_baku_id');
+            $yield = max(1, $varian->resep_yield ?? 1);
+            
+            // Verifikasi stok bahan baku jika ada penambahan
+            if ($selisih > 0) {
+                foreach ($resepSorted as $resep) {
+                    $qtyDibutuhkan = ($resep->qty_dipakai / $yield) * $selisih;
+                    $bahanBaku = BahanBaku::lockForUpdate()->find($resep->bahan_baku_id);
+                    
+                    if (!$bahanBaku || $bahanBaku->stok < $qtyDibutuhkan) {
+                        throw new \Exception("Stok {$resep->bahanBaku->nama_bahan} tidak mencukupi untuk tambahan produksi! Butuh {$qtyDibutuhkan}, tersedia " . ($bahanBaku ? $bahanBaku->stok : 0) . ".");
+                    }
+                    $lockedBahanBakus[$resep->bahan_baku_id] = $bahanBaku;
+                }
+            } else {
+                // Lock bahan baku untuk refund
+                foreach ($resepSorted as $resep) {
+                    $bahanBaku = BahanBaku::lockForUpdate()->find($resep->bahan_baku_id);
+                    $lockedBahanBakus[$resep->bahan_baku_id] = $bahanBaku;
+                }
+            }
+
+            // Eksekusi potong/kembalikan bahan baku
+            foreach ($resepSorted as $resep) {
+                $qtySelisihBahan = ($resep->qty_dipakai / $yield) * abs($selisih);
+                $bahanBaku = $lockedBahanBakus[$resep->bahan_baku_id];
+                
+                if ($selisih > 0) {
+                    $bahanBaku->decrement('stok', $qtySelisihBahan);
+                    $tipeHistory = 'produksi';
+                    $ketHistory = 'Tambahan Produksi Massal Dapur (Edit): ' . $selisih . ' ' . $varian->nama_varian;
+                } else {
+                    $bahanBaku->increment('stok', $qtySelisihBahan);
+                    $tipeHistory = 'tambah';
+                    $ketHistory = 'Refund Pembatalan Produksi Massal Dapur (Edit): ' . abs($selisih) . ' ' . $varian->nama_varian;
+                }
+
+                StokBahanHistory::create([
+                    'bahan_baku_id' => $bahanBaku->id,
+                    'user_id' => auth()->id(),
+                    'tipe' => $tipeHistory,
+                    'qty' => $qtySelisihBahan,
+                    'keterangan' => $ketHistory
+                ]);
+            }
+
+            // Update stok proses dapur
+            if ($selisih > 0) {
+                $lockedVarian->increment('stok_proses_dapur', $selisih);
+            } else {
+                $lockedVarian->decrement('stok_proses_dapur', abs($selisih));
+            }
+
+            $lockedProduk->stok_proses_dapur = $lockedProduk->varians()->sum('stok_proses_dapur');
+            $lockedProduk->save();
+
+            DB::commit();
+            return back()->with('sukses', 'Jumlah produksi berhasil diupdate menjadi ' . $qtyBaru . ' pcs.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal mengupdate produksi: ' . $e->getMessage());
+        }
+    }
+
+    public function batal(Request $request)
+    {
+        $request->validate([
+            'produk_varian_id' => 'required|exists:produk_varians,id',
+            'qty_batal' => 'required|integer|min:1',
+        ]);
+
+        $varian = ProdukVarian::findOrFail($request->produk_varian_id);
+        
+        if ($varian->stok_proses_dapur < $request->qty_batal) {
+            return back()->with('error', 'Jumlah yang dibatalkan melebihi stok yang sedang diproses!');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $lockedProduk = Produk::lockForUpdate()->find($varian->produk_id);
+            $lockedVarian = ProdukVarian::lockForUpdate()->find($varian->id);
+
+            $resepSorted = $varian->resep->sortBy('bahan_baku_id');
+            $yield = max(1, $varian->resep_yield ?? 1);
+            
+            // Lock bahan baku
+            $lockedBahanBakus = [];
+            foreach ($resepSorted as $resep) {
+                $bahanBaku = BahanBaku::lockForUpdate()->find($resep->bahan_baku_id);
+                $lockedBahanBakus[$resep->bahan_baku_id] = $bahanBaku;
+            }
+
+            // Refund bahan baku
+            foreach ($resepSorted as $resep) {
+                $qtyRefund = ($resep->qty_dipakai / $yield) * $request->qty_batal;
+                $bahanBaku = $lockedBahanBakus[$resep->bahan_baku_id];
+                
+                $bahanBaku->increment('stok', $qtyRefund);
+
+                StokBahanHistory::create([
+                    'bahan_baku_id' => $bahanBaku->id,
+                    'user_id' => auth()->id(),
+                    'tipe' => 'tambah',
+                    'qty' => $qtyRefund,
+                    'keterangan' => 'Refund Batal Produksi Dapur: ' . $request->qty_batal . ' ' . $varian->nama_varian
+                ]);
+            }
+
+            // Kurangi stok proses dapur
+            $lockedVarian->decrement('stok_proses_dapur', $request->qty_batal);
+            $lockedProduk->stok_proses_dapur = $lockedProduk->varians()->sum('stok_proses_dapur');
+            $lockedProduk->save();
+
+            DB::commit();
+            return back()->with('sukses', 'Berhasil membatalkan ' . $request->qty_batal . ' pcs produksi. Bahan baku telah dikembalikan ke gudang.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal membatalkan produksi: ' . $e->getMessage());
         }
     }
 }

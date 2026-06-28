@@ -250,6 +250,8 @@ Route::middleware(['auth', 'active.subscription', 'permission:akses_hpp'])->pref
     Route::get('/', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'index'])->name('dashboard.produksi.index');
     Route::post('/store', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'store'])->name('dashboard.produksi.store');
     Route::post('/validasi', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'validasiSelesai'])->name('dashboard.produksi.validasi');
+    Route::put('/update', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'update'])->name('dashboard.produksi.update');
+    Route::post('/batal', [\App\Http\Controllers\Dashboard\ProduksiController::class, 'batal'])->name('dashboard.produksi.batal');
 });
 
 // =============================================
@@ -287,6 +289,7 @@ Route::middleware(['auth', 'active.subscription'])->prefix('dashboard')->group(f
     Route::post('/shift/buka', [\App\Http\Controllers\Dashboard\ShiftController::class, 'buka'])->name('dashboard.shift.buka');
     Route::post('/shift/tutup', [\App\Http\Controllers\Dashboard\ShiftController::class, 'tutup'])->name('dashboard.shift.tutup');
     Route::post('/shift/pengeluaran', [\App\Http\Controllers\Dashboard\ShiftController::class, 'pengeluaranKasir'])->name('dashboard.shift.pengeluaran');
+    Route::post('/shift/penambahan', [\App\Http\Controllers\Dashboard\ShiftController::class, 'penambahanKasir'])->name('dashboard.shift.penambahan');
 
     // Buku Kas (Khusus admin / keuangan)
     Route::middleware(['permission:akses_kas'])->group(function () {

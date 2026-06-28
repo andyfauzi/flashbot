@@ -16,6 +16,7 @@ class Shift extends Model
         'waktu_tutup',
         'modal_awal',
         'pengeluaran_kasir',
+        'penambahan_kasir',
         'total_penjualan_tunai',
         'selisih_uang',
         'status',

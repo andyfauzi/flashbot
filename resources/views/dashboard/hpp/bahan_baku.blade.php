@@ -20,40 +20,63 @@
         </div>
     @endif
 
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form action="{{ route('dashboard.hpp.bahan.index') }}" method="GET" class="d-flex">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0" placeholder="Cari nama bahan baku..." value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary px-4">Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('dashboard.hpp.bahan.index') }}" class="btn btn-light border">Reset</a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4">No</th>
-                            <th>Nama Bahan</th>
-                            <th>Kategori</th>
-                            <th class="text-end text-primary">Stok Aktual</th>
-                            <th>Satuan Beli</th>
-                            <th class="text-end">Harga Beli</th>
-                            <th class="text-end">Qty Beli</th>
-                            <th class="text-end text-success">Harga / Satuan Terkecil</th>
-                            <th class="text-center pe-4">Aksi</th>
+                            <th rowspan="2" class="ps-4 align-middle border-end">No</th>
+                            <th rowspan="2" class="align-middle border-end">Nama Bahan</th>
+                            <th rowspan="2" class="align-middle border-end">Kategori</th>
+                            <th colspan="3" class="text-center bg-light border-end" style="border-bottom: 2px solid #dee2e6;">Data Master Pembelian</th>
+                            <th colspan="2" class="text-center bg-primary-subtle border-end" style="border-bottom: 2px solid #dee2e6;">Stok & HPP Gudang</th>
+                            <th rowspan="2" class="text-center pe-4 align-middle">Aksi</th>
+                        </tr>
+                        <tr>
+                            <th class="bg-light text-end">Harga Beli</th>
+                            <th class="bg-light text-end">Qty Beli</th>
+                            <th class="bg-light border-end">Satuan Beli</th>
+                            <th class="text-end text-primary bg-primary-subtle border-end">Stok Tersedia (Gudang)</th>
+                            <th class="text-end text-success bg-primary-subtle border-end">Harga / Satuan Terkecil</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($bahan as $index => $b)
                         <tr>
-                            <td class="ps-4">{{ $index + 1 }}</td>
-                            <td class="fw-bold">{{ $b->nama_bahan }}</td>
-                            <td>
+                            <td class="ps-4 border-end">{{ $bahan->firstItem() + $index }}</td>
+                            <td class="fw-bold border-end">{{ $b->nama_bahan }}</td>
+                            <td class="border-end">
                                 @if($b->kategori == 'packaging')
                                     <span class="badge bg-warning text-dark"><i class="fa-solid fa-box-open me-1"></i> Packaging</span>
                                 @else
                                     <span class="badge bg-primary text-white"><i class="fa-solid fa-leaf me-1"></i> Bahan Baku</span>
                                 @endif
                             </td>
-                            <td class="text-end fw-bold text-primary">{{ number_format($b->stok, 2, ',', '.') }} {{ $b->satuan }}</td>
-                            <td>{{ $b->satuan }}</td>
                             <td class="text-end">Rp {{ number_format($b->harga_beli, 0, ',', '.') }}</td>
-                            <td class="text-end">{{ $b->qty_beli }} {{ $b->satuan }}</td>
-                            <td class="text-end fw-bold text-success">Rp {{ number_format($b->harga_per_unit, 2, ',', '.') }} / {{ $b->satuan }}</td>
+                            <td class="text-end">{{ $b->qty_beli }}</td>
+                            <td class="border-end">{{ $b->satuan }}</td>
+                            <td class="text-end fw-bold text-primary border-end bg-light">
+                                {{ number_format($b->stok, 2, ',', '.') }} <span class="text-muted small">{{ $b->satuan }}</span>
+                            </td>
+                            <td class="text-end fw-bold text-success border-end bg-light">
+                                Rp {{ number_format($b->harga_per_unit, 2, ',', '.') }} <span class="text-muted small">/ {{ $b->satuan }}</span>
+                            </td>
                             <td class="text-center pe-4" style="min-width: 180px;">
                                 <button class="btn btn-sm btn-outline-info me-1" title="Koreksi Stok Awal" onclick="koreksiStok({{ $b->id }}, '{{ $b->nama_bahan }}', '{{ $b->satuan }}', {{ $b->stok }})">
                                     <i class="fa-solid fa-scale-balanced"></i>
@@ -88,6 +111,10 @@
                 </table>
             </div>
         </div>
+    </div>
+    
+    <div class="d-flex justify-content-end mt-4">
+        {{ $bahan->withQueryString()->links() }}
     </div>
 </div>
 
@@ -464,6 +491,18 @@
         // Remove disabled attribute from satuan before submitting form
         document.getElementById('formBahanBaku').addEventListener('submit', function() {
             document.getElementById('satuan').disabled = false;
+        });
+
+        // Search bar auto submit
+        const searchInput = document.querySelector('input[name="search"]');
+        const searchForm = searchInput.closest('form');
+        let searchTimer;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                searchForm.submit();
+            }, 500); // 500ms debounce
         });
     });
 </script>

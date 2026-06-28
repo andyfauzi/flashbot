@@ -43,6 +43,26 @@
                         </div>
                         @endif
 
+                        <div class="accordion-item mb-3 border rounded border-success">
+                            <h2 class="accordion-header" id="headingNewFeatures">
+                                <button class="accordion-button fw-bold text-success collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNewFeatures" aria-expanded="false" aria-controls="collapseNewFeatures">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Update Fitur Baru: Produksi, HPP, & Kasir
+                                </button>
+                            </h2>
+                            <div id="collapseNewFeatures" class="accordion-collapse collapse" aria-labelledby="headingNewFeatures" data-bs-parent="#accordionHelp">
+                                <div class="accordion-body text-muted">
+                                    <p class="mb-3">Berikut adalah daftar fitur-fitur baru yang telah kami kembangkan untuk meningkatkan produktivitas Anda:</p>
+                                    <ul class="mb-0">
+                                        <li class="mb-2"><strong>Master Bahan Baku & Satuan Konversi:</strong> Anda dapat mencatat bahan baku dengan satuan pembelian (contoh: Kg) dan sistem otomatis mengkonversinya ke satuan terkecil (contoh: Gram) untuk perhitungan HPP yang akurat.</li>
+                                        <li class="mb-2"><strong>Resep HPP & Manufaktur:</strong> Fitur untuk meracik resep produk jadi. Saat Anda melakukan <strong>Eksekusi Produksi Harian</strong>, stok bahan baku akan otomatis terpotong dari gudang sesuai takaran resep.</li>
+                                        <li class="mb-2"><strong>Validasi Dapur:</strong> Produk yang diproduksi akan masuk ke status "Sedang Diproses" terlebih dahulu. Setelah selesai, dapur melakukan validasi (Selesai/Waste) untuk memindahkan produk menjadi stok Siap Jual.</li>
+                                        <li class="mb-2"><strong>Tambah Uang Kasir (Cash In):</strong> Kasir kini memiliki tombol <strong>Tambah Kas</strong> untuk mencatat uang tambahan di laci (seperti uang receh/kembalian dari owner), terpisah dari laporan omset penjualan harian.</li>
+                                        <li class="mb-2"><strong>Dukungan Multi-Kasir:</strong> Sistem kini 100% mendukung penggunaan banyak kasir secara serentak di perangkat berbeda. Cukup buatkan masing-masing kasir akun pengguna tersendiri.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="accordion-item mb-3 border rounded border-primary">
                             <h2 class="accordion-header" id="headingFour">
                                 <button class="accordion-button fw-bold text-primary collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
