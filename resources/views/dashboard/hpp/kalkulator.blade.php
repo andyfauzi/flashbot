@@ -132,12 +132,15 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-light border w-100 mb-2 text-start" onclick="aturKonfigurasi({{ $v->id }}, {{ $v->overhead_cost }}, {{ $v->harga_kompetitor ?? 0 }}, {{ $v->target_margin }})">
+                                    <button class="btn btn-sm btn-light border w-100 mb-2 text-start" onclick="aturKonfigurasi({{ $v->id }}, {{ $v->overhead_cost }}, {{ $v->harga_kompetitor ?? 0 }}, {{ $v->target_margin }}, {{ $v->resep_yield ?? 1 }})">
                                         <i class="fa-solid fa-cog text-muted me-1"></i> Edit Konfigurasi
                                     </button>
                                     <div class="small text-muted">
                                         <div><i class="fa-solid fa-gas-pump fa-fw"></i> Overhead: Rp{{ number_format($v->overhead_cost,0,',','.') }}</div>
                                         <div><i class="fa-solid fa-store fa-fw"></i> Pesaing: Rp{{ number_format($v->harga_kompetitor,0,',','.') }}</div>
+                                        @if($v->resep_yield > 1)
+                                            <div><i class="fa-solid fa-boxes-stacked fa-fw text-primary"></i> Yield: {{ $v->resep_yield }} Porsi</div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -155,7 +158,7 @@
                                     </div>
                                     <div class="border-top my-1"></div>
                                     <div class="mb-1">
-                                        <span class="text-muted small">Total Modal:</span>
+                                        <span class="text-muted small">Total Modal {{ $v->resep_yield > 1 ? '(per Pcs)' : '' }}:</span>
                                         <strong class="float-end text-danger">Rp{{ number_format($v->hpp + $v->overhead_cost, 0, ',', '.') }}</strong>
                                     </div>
                                     <div class="mb-1">
@@ -261,6 +264,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label class="form-label fw-bold">Porsi Dihasilkan (Yield)</label>
+                        <input type="number" name="resep_yield" id="conf_yield" class="form-control" placeholder="1 resep jadi berapa porsi/pcs?" min="1">
+                        <small class="text-muted">Biarkan 1 jika produk *Made to Order* (seperti kopi).</small>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold">Biaya Overhead (Rp)</label>
                         <input type="number" name="overhead_cost" id="conf_overhead" class="form-control" placeholder="Biaya gas, listrik, kemasan dll per porsi" min="0">
                     </div>
@@ -291,11 +299,12 @@
         new bootstrap.Modal(document.getElementById('modalResep')).show();
     }
 
-    function aturKonfigurasi(varianId, overhead, kompetitor, margin) {
+    function aturKonfigurasi(varianId, overhead, kompetitor, margin, yield) {
         document.getElementById('formKonfigurasi').action = '/dashboard/hpp/kalkulator/' + varianId + '/konfigurasi';
         document.getElementById('conf_overhead').value = overhead;
         document.getElementById('conf_kompetitor').value = kompetitor;
         document.getElementById('conf_margin').value = margin;
+        document.getElementById('conf_yield').value = yield;
         new bootstrap.Modal(document.getElementById('modalKonfigurasi')).show();
     }
 </script>

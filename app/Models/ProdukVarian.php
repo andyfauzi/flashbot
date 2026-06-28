@@ -37,6 +37,7 @@ class ProdukVarian extends Model
         'harga',
         'hpp',
         'overhead_cost',
+        'resep_yield',
         'harga_kompetitor',
         'target_margin',
         'harga_rekomendasi'
@@ -47,6 +48,7 @@ class ProdukVarian extends Model
         'harga' => 'float',
         'hpp' => 'float',
         'overhead_cost' => 'float',
+        'resep_yield' => 'integer',
         'harga_kompetitor' => 'float',
         'target_margin' => 'float',
         'harga_rekomendasi' => 'float'
@@ -65,13 +67,19 @@ class ProdukVarian extends Model
     // Helper untuk hitung ulang HPP
     public function hitungHpp()
     {
-        $totalHpp = 0;
-        foreach ($this->resep as $item) {
-            if ($item->bahanBaku) {
-                $totalHpp += ($item->qty_dipakai * $item->bahanBaku->harga_per_unit);
+        // Hitung total modal bahan baku untuk 1x resep adonan
+        $totalModalResep = 0;
+        foreach ($this->resep as $r) {
+            $bahan = $r->bahanBaku;
+            if ($bahan && $bahan->harga_per_unit > 0) {
+                // Harga = qty yang dipakai * harga_per_unit
+                $totalModalResep += ($r->qty_dipakai * $bahan->harga_per_unit);
             }
         }
-        $this->hpp = $totalHpp;
+        
+        // HPP = Total modal resep dibagi dengan porsi yang dihasilkan (yield)
+        $yield = $this->resep_yield > 0 ? $this->resep_yield : 1;
+        $this->hpp = $totalModalResep / $yield;
         
         $totalCost = $this->hpp + $this->overhead_cost;
         if ($this->target_margin > 0) {

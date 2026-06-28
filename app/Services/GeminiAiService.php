@@ -700,6 +700,11 @@ class GeminiAiService
                 }
                 $subtotal = ($hargaSatuan + $addonsPrice) * $item->jumlah;
 
+                $hppSnapshot = 0;
+                if ($item->produkVarian) {
+                    $hppSnapshot = $item->produkVarian->hpp + $item->produkVarian->overhead_cost;
+                }
+
                 PesananItem::create([
                     'pesanan_id' => $pesanan->id,
                     'produk_id' => $item->produk_id,
@@ -707,6 +712,7 @@ class GeminiAiService
                     'jumlah' => $item->jumlah,
                     'harga_satuan' => $hargaSatuan + $addonsPrice,
                     'subtotal' => $subtotal,
+                    'hpp_snapshot' => $hppSnapshot,
                     'addons' => $item->addons,
                     'catatan' => $item->catatan
                 ]);
@@ -720,9 +726,11 @@ class GeminiAiService
                 if ($isMadeToOrder) {
                     // JIKA MADE-TO-ORDER: HANYA potong bahan baku
                     if ($item->produk_varian_id) {
+                        $varian = \App\Models\ProdukVarian::find($item->produk_varian_id);
+                        $yield = max(1, $varian ? $varian->resep_yield : 1);
                         $resep = \App\Models\ResepVarian::where('produk_varian_id', $item->produk_varian_id)->get();
                         foreach ($resep as $r) {
-                            $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                            $qtyDibutuhkan = ($r->qty_dipakai / $yield) * $item->jumlah;
                             $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
                             if ($lockedBahan) {
                                 $lockedBahan->decrement('stok', $qtyDibutuhkan);

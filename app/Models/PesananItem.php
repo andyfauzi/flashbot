@@ -19,6 +19,7 @@ class PesananItem extends Model
         'jumlah',
         'harga_satuan',
         'subtotal',
+        'hpp_snapshot',
         'addons',
         'catatan'
     ];
@@ -27,6 +28,7 @@ class PesananItem extends Model
         'jumlah' => 'integer',
         'harga_satuan' => 'float',
         'subtotal' => 'float',
+        'hpp_snapshot' => 'float',
         'addons' => 'array'
     ];
 

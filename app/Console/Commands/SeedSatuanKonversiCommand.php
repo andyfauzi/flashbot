@@ -34,10 +34,8 @@ class SeedSatuanKonversiCommand extends Command
 
         $konversis = [
             ['satuan_awal' => 'Kilogram', 'satuan_akhir' => 'Gram', 'nilai_konversi' => 1000],
-            ['satuan_awal' => 'Gram', 'satuan_akhir' => 'Kilogram', 'nilai_konversi' => 0.001],
             ['satuan_awal' => 'Liter', 'satuan_akhir' => 'ml', 'nilai_konversi' => 1000],
             ['satuan_awal' => 'Galon (19L)', 'satuan_akhir' => 'ml', 'nilai_konversi' => 19000],
-            ['satuan_awal' => 'ml', 'satuan_akhir' => 'Liter', 'nilai_konversi' => 0.001],
         ];
 
         foreach ($tenants as $tenant) {

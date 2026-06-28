@@ -298,11 +298,13 @@ class HppController extends Controller
     {
         $request->validate([
             'overhead_cost' => 'nullable|numeric|min:0',
+            'resep_yield' => 'nullable|integer|min:1',
             'harga_kompetitor' => 'nullable|numeric|min:0',
             'target_margin' => 'nullable|numeric|min:0|max:100'
         ]);
 
         $varian->overhead_cost = $request->overhead_cost ?: 0;
+        $varian->resep_yield = $request->resep_yield ?: 1;
         $varian->harga_kompetitor = $request->harga_kompetitor;
         $varian->target_margin = $request->target_margin ?: 0;
         $varian->save();

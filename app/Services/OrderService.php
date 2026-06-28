@@ -765,6 +765,12 @@ class OrderService
                     'status'             => 'pending_ongkir'
                 ]);
 
+                $hppSnapshot = 0;
+                $varian = \App\Models\ProdukVarian::find($session->produk_varian_id);
+                if ($varian) {
+                    $hppSnapshot = $varian->hpp + $varian->overhead_cost;
+                }
+
                 PesananItem::create([
                     'pesanan_id'       => $pesanan->id,
                     'produk_id'        => $session->produk_id,
@@ -772,6 +778,7 @@ class OrderService
                     'jumlah'           => $jumlah,
                     'harga_satuan'     => $hargaSatuan,
                     'subtotal'         => $biayaBarang,
+                    'hpp_snapshot'     => $hppSnapshot,
                     'addons'           => $addonsInfo
                 ]);
             });
@@ -897,6 +904,12 @@ class OrderService
                     'status'             => 'pending_payment'
                 ]);
 
+                $hppSnapshot = 0;
+                $varian = \App\Models\ProdukVarian::find($session->produk_varian_id);
+                if ($varian) {
+                    $hppSnapshot = $varian->hpp + $varian->overhead_cost;
+                }
+
                 PesananItem::create([
                     'pesanan_id'       => $pesanan->id,
                     'produk_id'        => $session->produk_id,
@@ -904,6 +917,7 @@ class OrderService
                     'jumlah'           => $jumlah,
                     'harga_satuan'     => $hargaSatuan,
                     'subtotal'         => $biayaBarang,
+                    'hpp_snapshot'     => $hppSnapshot,
                     'addons'           => $session->addons
                 ]);
             });
@@ -933,6 +947,12 @@ class OrderService
                     'status'             => 'pending_approval' // Menunggu disetujui admin untuk COD
                 ]);
 
+                $hppSnapshot = 0;
+                $varian = \App\Models\ProdukVarian::find($session->produk_varian_id);
+                if ($varian) {
+                    $hppSnapshot = $varian->hpp + $varian->overhead_cost;
+                }
+
                 PesananItem::create([
                     'pesanan_id'       => $pesanan->id,
                     'produk_id'        => $session->produk_id,
@@ -940,6 +960,7 @@ class OrderService
                     'jumlah'           => $jumlah,
                     'harga_satuan'     => $hargaSatuan,
                     'subtotal'         => $biayaBarang,
+                    'hpp_snapshot'     => $hppSnapshot,
                     'addons'           => $session->addons
                 ]);
             });

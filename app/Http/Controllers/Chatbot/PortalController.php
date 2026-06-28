@@ -174,6 +174,11 @@ class PortalController extends Controller
 
                 // Simpan Pesanan Item
                 foreach ($itemsData as $itemData) {
+                    $hppSnapshot = 0;
+                    if ($itemData['varian']) {
+                        $hppSnapshot = $itemData['varian']->hpp + $itemData['varian']->overhead_cost;
+                    }
+
                     PesananItem::create([
                         'pesanan_id'       => $pesanan->id,
                         'produk_id'        => $itemData['produk']->id,
@@ -181,6 +186,7 @@ class PortalController extends Controller
                         'jumlah'           => $itemData['qty'],
                         'harga_satuan'     => $itemData['harga_satuan'],
                         'subtotal'         => $itemData['subtotal'],
+                        'hpp_snapshot'     => $hppSnapshot,
                         'addons'           => $itemData['addons']
                     ]);
                 }

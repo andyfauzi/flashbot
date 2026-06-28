@@ -170,6 +170,11 @@ class CheckoutService
 
             // Simpan Pesanan Item & Kurangi Stok
             foreach ($itemsData as $itemData) {
+                $hppSnapshot = 0;
+                if ($itemData['varian']) {
+                    $hppSnapshot = $itemData['varian']->hpp + $itemData['varian']->overhead_cost;
+                }
+                
                 PesananItem::create([
                     'pesanan_id' => $pesanan->id,
                     'produk_id' => $itemData['produk']->id,
@@ -177,6 +182,7 @@ class CheckoutService
                     'jumlah' => $itemData['qty'],
                     'harga_satuan' => $itemData['harga_satuan'],
                     'subtotal' => $itemData['subtotal'],
+                    'hpp_snapshot' => $hppSnapshot,
                     'addons' => $itemData['addons']
                 ]);
 
@@ -186,9 +192,10 @@ class CheckoutService
                 if ($isMadeToOrder) {
                     // JIKA MADE-TO-ORDER: HANYA potong bahan baku
                     if ($itemData['varian']) {
+                        $yield = max(1, $itemData['varian']->resep_yield ?? 1);
                         $resep = \App\Models\ResepVarian::where('produk_varian_id', $itemData['varian']->id)->get();
                         foreach ($resep as $r) {
-                            $qtyDibutuhkan = $r->qty_dipakai * $itemData['qty'];
+                            $qtyDibutuhkan = ($r->qty_dipakai / $yield) * $itemData['qty'];
                             // 3. Lock Bahan Baku
                             $bahanBaku = BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
                             if ($bahanBaku) {
