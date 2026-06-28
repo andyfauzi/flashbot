@@ -152,6 +152,13 @@
                         <label class="form-label fw-bold">Harga Beli (Total)</label>
                         <input type="number" name="harga_beli" id="harga_beli" class="form-control" placeholder="Contoh: 15000" required min="0">
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_stok_awal" id="is_stok_awal" class="form-check-input" value="1">
+                        <label class="form-check-label fw-bold text-info" for="is_stok_awal">
+                            Ini adalah Stok Awal / Migrasi (Jangan potong Uang Kas)
+                        </label>
+                        <small class="d-block text-muted">Centang ini jika barang sudah ada di gudang sebelum menggunakan Flashbot, sehingga pengeluaran tidak dicatat hari ini.</small>
+                    </div>
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>

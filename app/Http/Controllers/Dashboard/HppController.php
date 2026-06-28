@@ -59,20 +59,27 @@ class HppController extends Controller
                 'keterangan' => 'Pembelian Awal Master Bahan Baku'
             ]);
 
-            // Catat Pengeluaran ke CashFlow
-            $shift = Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
-            CashFlow::create([
-                'user_id' => auth()->id(),
-                'shift_id' => $shift ? $shift->id : null,
-                'tanggal' => now()->toDateString(),
-                'tipe' => 'out',
-                'kategori' => 'Belanja Bahan Baku',
-                'nominal' => $request->harga_beli,
-                'keterangan' => 'Beli ' . $bahan->nama_bahan . ' sejumlah ' . $request->qty_beli . ' ' . $bahan->satuan,
-            ]);
+            // Catat Pengeluaran ke CashFlow (Kecuali jika ini Stok Awal)
+            if (!$request->has('is_stok_awal')) {
+                $shift = Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+                CashFlow::create([
+                    'user_id' => auth()->id(),
+                    'shift_id' => $shift ? $shift->id : null,
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'out',
+                    'kategori' => 'Belanja Bahan Baku',
+                    'nominal' => $request->harga_beli,
+                    'keterangan' => 'Beli ' . $bahan->nama_bahan . ' sejumlah ' . $request->qty_beli . ' ' . $bahan->satuan,
+                ]);
+            }
 
             DB::commit();
-            return back()->with('sukses', 'Bahan baku berhasil ditambahkan & Pengeluaran kas telah dicatat otomatis.');
+            
+            $msg = $request->has('is_stok_awal') 
+                ? 'Bahan baku (Stok Awal) berhasil ditambahkan tanpa memotong kas.'
+                : 'Bahan baku berhasil ditambahkan & Pengeluaran kas telah dicatat otomatis.';
+                
+            return back()->with('sukses', $msg);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal menambahkan bahan baku: ' . $e->getMessage());
