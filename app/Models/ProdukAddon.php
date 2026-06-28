@@ -22,4 +22,22 @@ class ProdukAddon extends Model
     {
         return $this->belongsTo(Produk::class);
     }
+
+    public function reseps()
+    {
+        return $this->hasMany(ResepAddon::class);
+    }
+
+    public function getHppAttribute()
+    {
+        $hpp = 0;
+        if ($this->relationLoaded('reseps')) {
+            foreach ($this->reseps as $resep) {
+                if ($resep->relationLoaded('bahanBaku') && $resep->bahanBaku) {
+                    $hpp += $resep->bahanBaku->harga_satuan * $resep->qty_dipakai;
+                }
+            }
+        }
+        return $hpp;
+    }
 }

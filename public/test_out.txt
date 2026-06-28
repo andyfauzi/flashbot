@@ -1,0 +1,16 @@
+
+   Error 
+
+  Class "App\Models\ProdukKategori" not found
+
+  at C:\xampp\htdocs\flashbot\public\test_edit.php:11
+      7▕ if ($tenant) {
+      8▕     \App\Services\TenantManager::switchToTenant($tenant);
+      9▕     $produk = \App\Models\Produk::with(['varians', 'addons', 'bundleItems'])->find(2);
+     10▕     
+  ➜  11▕     $kategoris = \App\Models\ProdukKategori::all();
+     12▕     $allVarians = \App\Models\ProdukVarian::with('produk')->get();
+     13▕     
+     14▕     // Simulate View Rendering
+     15▕     try {
+

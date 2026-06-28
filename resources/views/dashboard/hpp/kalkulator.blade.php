@@ -206,6 +206,89 @@
                                 </td>
                             </tr>
                             @endforeach
+
+                            @foreach($produk->addons as $a)
+                            <tr class="bg-light">
+                                <td>
+                                    <strong><span class="badge bg-secondary me-1">Add-on</span> {{ $a->nama_addon }}</strong>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-info w-100" onclick="tambahResepAddon({{ $a->id }}, '{{ addslashes($produk->nama . ' - Addon: ' . $a->nama_addon) }}')">
+                                            <i class="fa-solid fa-plus"></i> Tambah Bahan Add-on
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    @php
+                                        $resepBahan = $a->reseps->filter(fn($r) => optional($r->bahanBaku)->kategori !== 'packaging');
+                                        $resepPackaging = $a->reseps->filter(fn($r) => optional($r->bahanBaku)->kategori === 'packaging');
+                                    @endphp
+
+                                    @if($resepBahan->count() > 0)
+                                        <div class="fw-bold text-info small mb-1"><i class="fa-solid fa-leaf me-1"></i> Bahan Baku Add-on</div>
+                                        <ul class="list-unstyled mb-2 small">
+                                            @foreach($resepBahan as $r)
+                                            <li class="mb-1 d-flex justify-content-between align-items-center">
+                                                <span>{{ $r->qty_dipakai }} {{ $r->bahanBaku->satuan ?? '?' }} {{ $r->bahanBaku->nama_bahan ?? 'Bahan Dihapus' }}</span>
+                                                <form action="{{ route('dashboard.hpp.resep_addon.destroy', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus bahan ini dari resep Add-on?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0"><i class="fa-solid fa-times"></i></button>
+                                                </form>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if($resepPackaging->count() > 0)
+                                        <div class="fw-bold text-warning small mb-1 mt-2"><i class="fa-solid fa-box-open me-1"></i> Packaging</div>
+                                        <ul class="list-unstyled mb-0 small">
+                                            @foreach($resepPackaging as $r)
+                                            <li class="mb-1 d-flex justify-content-between align-items-center">
+                                                <span>{{ $r->qty_dipakai }} {{ $r->bahanBaku->satuan ?? '?' }} {{ $r->bahanBaku->nama_bahan ?? 'Bahan Dihapus' }}</span>
+                                                <form action="{{ route('dashboard.hpp.resep_addon.destroy', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus bahan ini dari resep Add-on?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0"><i class="fa-solid fa-times"></i></button>
+                                                </form>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if($a->reseps->count() == 0)
+                                        <span class="text-muted small fst-italic">Belum ada resep Add-on.</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="text-muted small fst-italic">Konfigurasi Overhead / Yield tidak berlaku untuk Add-on.</span>
+                                </td>
+                                <td>
+                                    <div class="mb-1">
+                                        <span class="text-muted small">Total Modal (HPP):</span>
+                                        <strong class="float-end text-danger">Rp{{ number_format($a->hpp, 0, ',', '.') }}</strong>
+                                    </div>
+                                </td>
+                                <td class="text-center bg-white">
+                                    <div class="mb-2 text-start">
+                                        <span class="text-muted d-block small">Harga Jual Add-on:</span>
+                                        <span class="fw-bold fs-5 text-dark">Rp{{ number_format($a->harga, 0, ',', '.') }}</span>
+                                    </div>
+
+                                    @php
+                                        $marginAktual = 0;
+                                        if($a->hpp > 0) {
+                                            $marginAktual = (($a->harga - $a->hpp) / $a->hpp) * 100;
+                                        }
+                                    @endphp
+                                    
+                                    <div class="mb-3 text-start">
+                                        <span class="badge {{ $marginAktual >= 30 ? 'bg-success' : 'bg-warning text-dark' }}">
+                                            Margin Aktual: {{ round($marginAktual, 1) }}%
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -296,6 +379,12 @@
     function tambahResep(varianId, namaLengkap) {
         document.getElementById('formResep').action = '/dashboard/hpp/kalkulator/' + varianId + '/resep';
         document.getElementById('resepSubtitle').innerText = 'Varian: ' + namaLengkap;
+        new bootstrap.Modal(document.getElementById('modalResep')).show();
+    }
+
+    function tambahResepAddon(addonId, namaLengkap) {
+        document.getElementById('formResep').action = '/dashboard/hpp/kalkulator/addon/' + addonId + '/resep';
+        document.getElementById('resepSubtitle').innerText = 'Add-on: ' + namaLengkap;
         new bootstrap.Modal(document.getElementById('modalResep')).show();
     }
 

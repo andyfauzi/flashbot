@@ -381,6 +381,35 @@ class GeminiAiService
                         }
                     }
                 }
+
+                // Kembalikan Stok Add-ons
+                if (!empty($item->addon_details)) {
+                    $addonsList = is_string($item->addon_details) ? json_decode($item->addon_details, true) : $item->addon_details;
+                    if (is_array($addonsList)) {
+                        foreach ($addonsList as $addonInfo) {
+                            $addonId = $addonInfo['id'] ?? null;
+                            if ($addonId) {
+                                $addon = \App\Models\ProdukAddon::find($addonId);
+                                if ($addon && $addon->reseps) {
+                                    foreach ($addon->reseps as $r) {
+                                        $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                        $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                        if ($lockedBahan) {
+                                            $lockedBahan->increment('stok', $qtyDibutuhkan);
+                                            \App\Models\StokBahanHistory::create([
+                                                'bahan_baku_id' => $lockedBahan->id,
+                                                'user_id' => null,
+                                                'tipe' => 'koreksi',
+                                                'qty' => $qtyDibutuhkan,
+                                                'keterangan' => 'Batal Otomatis via AI Chatbot (Add-on) Struk #' . $pesanan->nomor_order
+                                            ]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
             $pesanan->status = 'cancelled';
@@ -752,6 +781,35 @@ class GeminiAiService
                     } else {
                         $lockedProduk = \App\Models\Produk::lockForUpdate()->find($item->produk_id);
                         if ($lockedProduk) $lockedProduk->decrement('stok', $item->jumlah);
+                    }
+                }
+
+                // Potong Stok Add-ons
+                if (!empty($item->addons)) {
+                    $addonsList = is_string($item->addons) ? json_decode($item->addons, true) : $item->addons;
+                    if (is_array($addonsList)) {
+                        foreach ($addonsList as $addonInfo) {
+                            $addonId = $addonInfo['id'] ?? null;
+                            if ($addonId) {
+                                $addon = \App\Models\ProdukAddon::find($addonId);
+                                if ($addon && $addon->reseps) {
+                                    foreach ($addon->reseps as $r) {
+                                        $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                        $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                        if ($lockedBahan) {
+                                            $lockedBahan->decrement('stok', $qtyDibutuhkan);
+                                            \App\Models\StokBahanHistory::create([
+                                                'bahan_baku_id' => $lockedBahan->id,
+                                                'user_id' => null,
+                                                'tipe' => 'produksi',
+                                                'qty' => $qtyDibutuhkan,
+                                                'keterangan' => 'Terjual via AI Chatbot (Add-on) Struk #' . $pesanan->nomor_order
+                                            ]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

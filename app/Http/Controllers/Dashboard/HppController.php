@@ -270,15 +270,39 @@ class HppController extends Controller
     // ==========================================
     public function indexKalkulator()
     {
-        // Ambil produk yang punya varian
-        $produks = Produk::with(['varians.resep.bahanBaku', 'kategori'])
-                    ->whereHas('varians')
+        // Ambil produk yang punya varian atau addons
+        $produks = Produk::with(['varians.resep.bahanBaku', 'addons.reseps.bahanBaku', 'kategori'])
+                    ->where(function($q) {
+                        $q->whereHas('varians')->orWhereHas('addons');
+                    })
                     ->orderBy('nama')
                     ->get();
         
         $semuaBahan = BahanBaku::orderBy('nama_bahan')->get();
 
         return view('dashboard.hpp.kalkulator', compact('produks', 'semuaBahan'));
+    }
+
+    public function simpanResepAddon(Request $request, \App\Models\ProdukAddon $addon)
+    {
+        $request->validate([
+            'bahan_baku_id' => 'required|exists:'.\App\Services\TenantManager::getTenantConnection().'.bahan_bakus,id',
+            'qty_dipakai' => 'required|numeric|min:0.01'
+        ]);
+
+        \App\Models\ResepAddon::create([
+            'produk_addon_id' => $addon->id,
+            'bahan_baku_id' => $request->bahan_baku_id,
+            'qty_dipakai' => $request->qty_dipakai
+        ]);
+
+        return back()->with('sukses', 'Resep Add-on berhasil ditambahkan.');
+    }
+
+    public function hapusResepAddon(\App\Models\ResepAddon $resep)
+    {
+        $resep->delete();
+        return back()->with('sukses', 'Bahan resep Add-on dihapus.');
     }
 
     public function simpanResep(Request $request, ProdukVarian $varian)

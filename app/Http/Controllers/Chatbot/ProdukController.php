@@ -220,10 +220,14 @@ class ProdukController extends Controller
             }
 
             // Update Addons
+            \Illuminate\Support\Facades\Log::info('Addons Data Dump', [
+                'has_addons' => $request->has('addons'),
+                'addons_data' => $request->addons
+            ]);
             $addonIdsKept = [];
             if ($request->has('addons')) {
                 foreach ($request->addons as $addonData) {
-                    if (isset($addonData['id'])) {
+                    if (isset($addonData['id']) && $addonData['id']) {
                         $addon = $produk->addons()->find($addonData['id']);
                         if ($addon) {
                             $addon->update([
@@ -250,7 +254,7 @@ class ProdukController extends Controller
                 $bundleIdsKept = [];
                 if ($request->has('bundle_items')) {
                     foreach ($request->bundle_items as $bItem) {
-                        if (isset($bItem['id'])) {
+                        if (isset($bItem['id']) && $bItem['id']) {
                             $bundle = $produk->bundleItems()->find($bItem['id']);
                             if ($bundle) {
                                 $bundle->update([

@@ -58,6 +58,14 @@
         height: auto !important;
         margin-bottom: 0 !important;
     }
+    
+    /* Fix for nested modals (Addon modal over Category modal) */
+    #modalOpsi {
+        z-index: 1060 !important;
+    }
+    .modal-backdrop:nth-of-type(2) {
+        z-index: 1059 !important;
+    }
 </style>
 @endsection
 
@@ -781,11 +789,14 @@
 
         if (count > 0) {
             cartList.innerHTML = html;
-            emptyCart.style.display = 'none';
             btnBayar.disabled = false;
         } else {
-            cartList.innerHTML = emptyCart.outerHTML;
-            document.getElementById('emptyCart').style.display = 'block';
+            cartList.innerHTML = `
+                <div class="text-center text-muted mt-5" id="emptyCart">
+                    <i class="fa-solid fa-basket-shopping fs-1 mb-2"></i>
+                    <p>Keranjang kosong</p>
+                </div>
+            `;
             btnBayar.disabled = true;
         }
     }

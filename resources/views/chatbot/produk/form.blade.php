@@ -282,7 +282,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
 
                 <hr class="my-4">
 

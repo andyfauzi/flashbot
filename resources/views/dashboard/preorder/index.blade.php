@@ -8,6 +8,9 @@
         <h2 class="fw-bold text-dark mb-0" style="font-family: var(--font-heading);">
             <i class="fa-solid fa-list-check me-2"></i> Daftar Pesanan (Kitchen)
         </h2>
+        <button type="button" class="btn btn-primary shadow-sm rounded-pill fw-bold px-4" data-bs-toggle="modal" data-bs-target="#modalManualPO">
+            <i class="fa-solid fa-plus me-1"></i> Tambah PO
+        </button>
     </div>
 
     @if(session('sukses'))
@@ -27,6 +30,7 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form action="{{ route('dashboard.preorder.index') }}" method="GET" class="row g-3 align-items-center">
+                <input type="hidden" name="status" value="{{ $status ?? 'aktif' }}">
                 <div class="col-auto">
                     <label class="form-label fw-bold mb-0">Tanggal Pengambilan:</label>
                 </div>
@@ -42,6 +46,34 @@
             </form>
         </div>
     </div>
+
+    @php
+        $currentStatus = request('status', 'aktif');
+    @endphp
+    <div class="d-flex flex-nowrap overflow-auto mb-3 pb-2 filter-tabs-container" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'semua']) }}" 
+           class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'semua' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+            Semua Pesanan
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'aktif']) }}" 
+           class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'aktif' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+            <i class="fa-solid fa-fire me-1" style="{{ $currentStatus === 'aktif' ? 'color: #ffc107;' : 'display:none;' }}"></i>Aktif / Proses
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'selesai']) }}" 
+           class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'selesai' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+            Selesai / Lunas
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'batal']) }}" 
+           class="btn rounded-pill px-4 flex-shrink-0 {{ $currentStatus === 'batal' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+            Dibatalkan
+        </a>
+    </div>
+
+    <style>
+        .filter-tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -369,4 +401,7 @@
         modal.show();
     }
 </script>
+
+@include('dashboard.preorder.modal_manual')
+
 @endsection

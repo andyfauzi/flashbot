@@ -248,6 +248,29 @@ class CheckoutService
                         $itemData['produk']->decrement('stok', $itemData['qty']);
                     }
                 }
+
+                // Potong Stok Add-ons
+                if (!empty($itemData['addons'])) {
+                    foreach ($itemData['addons'] as $addonInfo) {
+                        $addon = \App\Models\ProdukAddon::find($addonInfo['id']);
+                        if ($addon && $addon->reseps) {
+                            foreach ($addon->reseps as $r) {
+                                $qtyDibutuhkan = $r->qty_dipakai * $itemData['qty'];
+                                $bahanBaku = BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                if ($bahanBaku) {
+                                    $bahanBaku->decrement('stok', $qtyDibutuhkan);
+                                    StokBahanHistory::create([
+                                        'bahan_baku_id' => $bahanBaku->id,
+                                        'user_id' => $userId,
+                                        'tipe' => 'produksi',
+                                        'qty' => $qtyDibutuhkan,
+                                        'keterangan' => 'Terjual di POS (Add-on) Struk #' . $pesanan->nomor_order . ' - ' . $addon->nama_addon
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // --- INTEGRASI ARUS KAS & SHIFT ---

@@ -14,11 +14,25 @@ class PreOrderController extends Controller
         $tanggal = $request->input('tanggal', date('Y-m-d'));
         $search = $request->input('search');
 
+        $status = $request->input('status', 'aktif'); // Default to aktif for Kitchen
+
         // Ambil pesanan yang belum selesai/dibatalkan pada tanggal tersebut
         $query = Pesanan::with(['items.produk', 'kurir', 'meja'])
             ->whereNotNull('tanggal_diambil')
-            ->whereDate('tanggal_diambil', $tanggal)
-            ->whereNotIn('status', ['cancelled']);
+            ->whereDate('tanggal_diambil', $tanggal);
+            
+        if ($status === 'aktif') {
+            // Di kitchen, lunas/paid belum tentu selesai dimasak, jadi masih masuk aktif.
+            $query->whereNotIn('status', ['completed', 'selesai', 'dikirim', 'cancelled', 'batal', 'dibatalkan']);
+        } elseif ($status === 'selesai') {
+            // Selesai hanya jika benar-benar completed/selesai (sudah menekan tombol selesai)
+            $query->whereIn('status', ['completed', 'selesai', 'dikirim']);
+        } elseif ($status === 'batal') {
+            $query->whereIn('status', ['cancelled', 'batal', 'dibatalkan']);
+        } else {
+            // 'semua'
+            $query->whereNotIn('status', ['cancelled', 'batal', 'dibatalkan']); // usually hide cancelled from all
+        }
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -33,7 +47,12 @@ class PreOrderController extends Controller
         $kurirs = \App\Models\Kurir::orderBy('nama', 'asc')->get();
         $identitas = \App\Models\IdentitasToko::first();
 
-        return view('dashboard.preorder.index', compact('pesanans', 'tanggal', 'kurirs', 'search', 'identitas'));
+        // Ambil semua produk aktif beserta varian dan addon untuk form PO Manual
+        $semuaProduk = \App\Models\Produk::with(['varians', 'addons'])
+            ->where('aktif', true)
+            ->get();
+
+        return view('dashboard.preorder.index', compact('pesanans', 'tanggal', 'kurirs', 'search', 'identitas', 'status', 'semuaProduk'));
     }
 
     public function setDp(Request $request, Pesanan $pesanan)
@@ -312,15 +331,67 @@ class PreOrderController extends Controller
 
             // 2. Kembalikan (restock) jumlah barang
             foreach ($pesanan->items as $item) {
-                if ($item->produk_varian_id) {
-                    $varian = \App\Models\ProdukVarian::lockForUpdate()->find($item->produk_varian_id);
-                    if ($varian) {
-                        $varian->increment('stok', $item->jumlah);
+                $isMadeToOrder = $item->produk ? $item->produk->is_made_to_order : false;
+
+                if ($isMadeToOrder) {
+                    // JIKA MADE-TO-ORDER: Kembalikan bahan baku
+                    if ($item->produk_varian_id) {
+                        $resep = \App\Models\ResepVarian::where('produk_varian_id', $item->produk_varian_id)->get();
+                        foreach ($resep as $r) {
+                            $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                            $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                            if ($lockedBahan) {
+                                $lockedBahan->increment('stok', $qtyDibutuhkan);
+                                \App\Models\StokBahanHistory::create([
+                                    'bahan_baku_id' => $lockedBahan->id,
+                                    'user_id' => auth()->id() ?? null,
+                                    'tipe' => 'koreksi',
+                                    'qty' => $qtyDibutuhkan,
+                                    'keterangan' => 'Batal PO (Made-to-Order) Struk #' . $pesanan->nomor_order
+                                ]);
+                            }
+                        }
                     }
                 } else {
-                    $produk = \App\Models\Produk::lockForUpdate()->find($item->produk_id);
-                    if ($produk) {
-                        $produk->increment('stok', $item->jumlah);
+                    if ($item->produk_varian_id) {
+                        $varian = \App\Models\ProdukVarian::lockForUpdate()->find($item->produk_varian_id);
+                        if ($varian) {
+                            $varian->increment('stok', $item->jumlah);
+                        }
+                    } else {
+                        $produk = \App\Models\Produk::lockForUpdate()->find($item->produk_id);
+                        if ($produk) {
+                            $produk->increment('stok', $item->jumlah);
+                        }
+                    }
+                }
+
+                // Kembalikan Stok Add-ons
+                if (!empty($item->addon_details)) {
+                    $addonsList = is_string($item->addon_details) ? json_decode($item->addon_details, true) : $item->addon_details;
+                    if (is_array($addonsList)) {
+                        foreach ($addonsList as $addonInfo) {
+                            $addonId = $addonInfo['id'] ?? null;
+                            if ($addonId) {
+                                $addon = \App\Models\ProdukAddon::find($addonId);
+                                if ($addon && $addon->reseps) {
+                                    foreach ($addon->reseps as $r) {
+                                        $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                        $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                        if ($lockedBahan) {
+                                            $lockedBahan->increment('stok', $qtyDibutuhkan);
+                                            \App\Models\StokBahanHistory::create([
+                                                'bahan_baku_id' => $lockedBahan->id,
+                                                'user_id' => auth()->id() ?? null,
+                                                'tipe' => 'koreksi',
+                                                'qty' => $qtyDibutuhkan,
+                                                'keterangan' => 'Batal PO (Add-on) Struk #' . $pesanan->nomor_order
+                                            ]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -433,6 +504,129 @@ class PreOrderController extends Controller
 
         return back()->with('sukses', 'Notifikasi pesanan siap beserta Struk PDF telah dikirim ke WhatsApp pelanggan.');
     }
+
+    public function storeManual(Request $request)
+    {
+        $request->validate([
+            'nama_penerima' => 'required|string|max:150',
+            'nomor_wa' => 'nullable|string|max:25',
+            'tanggal_diambil' => 'required|date',
+            'jam_diambil' => 'required|string',
+            'tipe_pengiriman' => 'required|in:ambil_sendiri,kurir_toko',
+            'alamat_penerima' => 'nullable|string',
+            'uang_muka' => 'nullable|numeric|min:0',
+            'items' => 'required|array|min:1',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $nomorOrder = 'PO-' . strtoupper(substr(uniqid(), -6));
+            $tanggalDiambil = $request->tanggal_diambil . ' ' . $request->jam_diambil . ':00';
+            
+            $uangMuka = (float)($request->uang_muka ?? 0);
+
+            $pesanan = Pesanan::create([
+                'nomor_order' => $nomorOrder,
+                'nama_penerima' => $request->nama_penerima,
+                'nomor_wa' => $request->nomor_wa ?? '-',
+                'tanggal_diambil' => $tanggalDiambil,
+                'tipe_pengiriman' => $request->tipe_pengiriman,
+                'alamat_penerima' => $request->tipe_pengiriman === 'ambil_sendiri' ? 'Ambil Sendiri' : $request->alamat_penerima,
+                'biaya_pengantaran' => 0, // bisa di set nanti via setOngkir
+                'uang_muka' => $uangMuka,
+                'metode_pembayaran' => 'tunai', // default tunai untuk manual input
+                'status' => $uangMuka > 0 ? 'paid_sebagian' : 'pending_payment',
+                'source' => 'manual',
+            ]);
+
+            $totalBiayaBarang = 0;
+
+            foreach ($request->items as $itemData) {
+                $itemData = json_decode($itemData, true); // Since it comes from a hidden input array of JSON strings
+                if (!$itemData) continue;
+                
+                $produkId = $itemData['produk_id'];
+                $varianId = $itemData['varian_id'] ?? null;
+                $qty = (int)$itemData['qty'];
+                $catatan = $itemData['catatan'] ?? null;
+                
+                $produk = \App\Models\Produk::find($produkId);
+                if (!$produk) continue;
+
+                $harga = (float)($produk->harga ?? 0);
+                $namaVarian = null;
+
+                if ($varianId) {
+                    $varian = \App\Models\ProdukVarian::find($varianId);
+                    if ($varian) {
+                        $harga = ($varian->harga > 0) ? (float)$varian->harga : $harga;
+                        $namaVarian = $varian->nama_varian;
+                    }
+                }
+
+                $subtotal = $harga * $qty;
+                $totalBiayaBarang += $subtotal;
+
+                // Hitung addon
+                $addonList = [];
+                if (!empty($itemData['addons'])) {
+                    foreach ($itemData['addons'] as $addonId) {
+                        $addon = \App\Models\ProdukAddon::find($addonId);
+                        if ($addon) {
+                            $addonList[] = [
+                                'id' => $addon->id,
+                                'nama' => $addon->nama_addon,
+                                'harga' => $addon->harga_tambahan
+                            ];
+                            $subtotal += ($addon->harga_tambahan * $qty);
+                            $totalBiayaBarang += ($addon->harga_tambahan * $qty);
+                        }
+                    }
+                }
+
+                \App\Models\PesananItem::create([
+                    'pesanan_id' => $pesanan->id,
+                    'produk_id' => $produk->id,
+                    'produk_varian_id' => $varianId,
+                    'jumlah' => $qty,
+                    'harga_satuan' => $harga,
+                    'subtotal' => $subtotal,
+                    'catatan' => $catatan,
+                    'addon_details' => empty($addonList) ? null : json_encode($addonList)
+                ]);
+            }
+
+            $pesanan->update([
+                'biaya_barang' => $totalBiayaBarang,
+                'total_biaya' => $totalBiayaBarang
+            ]);
+
+            // Jika ada DP, catat ke CashFlow
+            if ($uangMuka > 0 && config('flashbot.features.finance')) {
+                $shift = \App\Models\Shift::where('user_id', auth()->id())->where('status', 'aktif')->first();
+                \App\Models\CashFlow::create([
+                    'user_id' => auth()->id(),
+                    'shift_id' => $shift ? $shift->id : null,
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'in',
+                    'kategori' => 'DP Pre-Order',
+                    'nominal' => $uangMuka,
+                    'keterangan' => 'DP PO Manual #' . $pesanan->nomor_order,
+                ]);
+                if ($shift) {
+                    $shift->increment('total_penjualan_tunai', $uangMuka);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('sukses', 'Pesanan PO Manual berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menambahkan pesanan: ' . $e->getMessage());
+        }
+    }
+
     public function syncXendit(Pesanan $pesanan)
     {
         if (!in_array($pesanan->status, ['pending_payment', 'pending_approval'])) {

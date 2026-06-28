@@ -1136,6 +1136,35 @@ class GrupService
                                 if ($lockedProduk) $lockedProduk->decrement('stok', $item->jumlah);
                             }
                         }
+
+                        // Potong Stok Add-ons
+                        if (!empty($item->addon_details)) {
+                            $addonsList = is_string($item->addon_details) ? json_decode($item->addon_details, true) : $item->addon_details;
+                            if (is_array($addonsList)) {
+                                foreach ($addonsList as $addonInfo) {
+                                    $addonId = $addonInfo['id'] ?? null;
+                                    if ($addonId) {
+                                        $addon = \App\Models\ProdukAddon::find($addonId);
+                                        if ($addon && $addon->reseps) {
+                                            foreach ($addon->reseps as $r) {
+                                                $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                                $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                                if ($lockedBahan) {
+                                                    $lockedBahan->decrement('stok', $qtyDibutuhkan);
+                                                    \App\Models\StokBahanHistory::create([
+                                                        'bahan_baku_id' => $lockedBahan->id,
+                                                        'user_id' => null,
+                                                        'tipe' => 'produksi',
+                                                        'qty' => $qtyDibutuhkan,
+                                                        'keterangan' => 'Terjual via Chatbot (Add-on) Struk #' . $order->nomor_order
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     $order->update(['status' => 'paid']);
@@ -1217,6 +1246,35 @@ class GrupService
                                 if ($lockedProduk) $lockedProduk->decrement('stok', $item->jumlah);
                             }
                         }
+
+                        // Potong Stok Add-ons
+                        if (!empty($item->addon_details)) {
+                            $addonsList = is_string($item->addon_details) ? json_decode($item->addon_details, true) : $item->addon_details;
+                            if (is_array($addonsList)) {
+                                foreach ($addonsList as $addonInfo) {
+                                    $addonId = $addonInfo['id'] ?? null;
+                                    if ($addonId) {
+                                        $addon = \App\Models\ProdukAddon::find($addonId);
+                                        if ($addon && $addon->reseps) {
+                                            foreach ($addon->reseps as $r) {
+                                                $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                                $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                                if ($lockedBahan) {
+                                                    $lockedBahan->decrement('stok', $qtyDibutuhkan);
+                                                    \App\Models\StokBahanHistory::create([
+                                                        'bahan_baku_id' => $lockedBahan->id,
+                                                        'user_id' => null,
+                                                        'tipe' => 'produksi',
+                                                        'qty' => $qtyDibutuhkan,
+                                                        'keterangan' => 'Terjual via Chatbot (Add-on) Struk #' . $order->nomor_order
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     $order->update(['status' => 'approved']);
@@ -1261,12 +1319,64 @@ class GrupService
                     // Kembalikan Stok jika statusnya sebelumnya sudah memotong stok
                     if (in_array($order->status, ['paid', 'approved', 'processed', 'completed'])) {
                         foreach ($order->items as $item) {
-                            if ($item->produkVarian) {
-                                $lockedVarian = \App\Models\ProdukVarian::lockForUpdate()->find($item->produk_varian_id);
-                                if ($lockedVarian) $lockedVarian->increment('stok', $item->jumlah);
-                            } elseif ($item->produk) {
-                                $lockedProduk = \App\Models\Produk::lockForUpdate()->find($item->produk_id);
-                                if ($lockedProduk) $lockedProduk->increment('stok', $item->jumlah);
+                            $isMadeToOrder = $item->produk ? $item->produk->is_made_to_order : false;
+
+                            if ($isMadeToOrder) {
+                                // JIKA MADE-TO-ORDER: Kembalikan bahan baku
+                                if ($item->produk_varian_id) {
+                                    $resep = \App\Models\ResepVarian::where('produk_varian_id', $item->produk_varian_id)->get();
+                                    foreach ($resep as $r) {
+                                        $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                        $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                        if ($lockedBahan) {
+                                            $lockedBahan->increment('stok', $qtyDibutuhkan);
+                                            \App\Models\StokBahanHistory::create([
+                                                'bahan_baku_id' => $lockedBahan->id,
+                                                'user_id' => null,
+                                                'tipe' => 'koreksi',
+                                                'qty' => $qtyDibutuhkan,
+                                                'keterangan' => 'Batal Otomatis via AI Chatbot (Made-to-Order) Struk #' . $order->nomor_order
+                                            ]);
+                                        }
+                                    }
+                                }
+                            } else {
+                                if ($item->produkVarian) {
+                                    $lockedVarian = \App\Models\ProdukVarian::lockForUpdate()->find($item->produk_varian_id);
+                                    if ($lockedVarian) $lockedVarian->increment('stok', $item->jumlah);
+                                } elseif ($item->produk) {
+                                    $lockedProduk = \App\Models\Produk::lockForUpdate()->find($item->produk_id);
+                                    if ($lockedProduk) $lockedProduk->increment('stok', $item->jumlah);
+                                }
+                            }
+
+                            // Kembalikan Stok Add-ons
+                            if (!empty($item->addon_details)) {
+                                $addonsList = is_string($item->addon_details) ? json_decode($item->addon_details, true) : $item->addon_details;
+                                if (is_array($addonsList)) {
+                                    foreach ($addonsList as $addonInfo) {
+                                        $addonId = $addonInfo['id'] ?? null;
+                                        if ($addonId) {
+                                            $addon = \App\Models\ProdukAddon::find($addonId);
+                                            if ($addon && $addon->reseps) {
+                                                foreach ($addon->reseps as $r) {
+                                                    $qtyDibutuhkan = $r->qty_dipakai * $item->jumlah;
+                                                    $lockedBahan = \App\Models\BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                                    if ($lockedBahan) {
+                                                        $lockedBahan->increment('stok', $qtyDibutuhkan);
+                                                        \App\Models\StokBahanHistory::create([
+                                                            'bahan_baku_id' => $lockedBahan->id,
+                                                            'user_id' => null,
+                                                            'tipe' => 'koreksi',
+                                                            'qty' => $qtyDibutuhkan,
+                                                            'keterangan' => 'Batal Otomatis via AI Chatbot (Add-on) Struk #' . $order->nomor_order
+                                                        ]);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

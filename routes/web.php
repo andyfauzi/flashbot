@@ -234,6 +234,7 @@ Route::middleware(['auth', 'active.subscription', 'permission:akses_pos'])->pref
 // =============================================
 Route::middleware(['auth', 'active.subscription', 'permission:akses_pos'])->prefix('dashboard/preorder')->group(function () {
     Route::get('/', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'index'])->name('dashboard.preorder.index');
+    Route::post('/manual', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'storeManual'])->name('dashboard.preorder.store_manual');
     Route::put('/{pesanan}/ongkir', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'setOngkir'])->name('dashboard.preorder.ongkir');
     Route::put('/{pesanan}/dp', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'setDp'])->name('dashboard.preorder.dp');
     Route::put('/{pesanan}/lunas', [\App\Http\Controllers\Dashboard\PreOrderController::class, 'lunas'])->name('dashboard.preorder.lunas');
@@ -271,6 +272,8 @@ Route::middleware(['auth', 'active.subscription', 'permission:akses_hpp'])->pref
     Route::get('/kalkulator', [\App\Http\Controllers\Dashboard\HppController::class, 'indexKalkulator'])->name('dashboard.hpp.kalkulator.index');
     Route::post('/kalkulator/{varian}/resep', [\App\Http\Controllers\Dashboard\HppController::class, 'simpanResep'])->name('dashboard.hpp.resep.store');
     Route::delete('/kalkulator/resep/{resep}', [\App\Http\Controllers\Dashboard\HppController::class, 'hapusResep'])->name('dashboard.hpp.resep.destroy');
+    Route::post('/kalkulator/addon/{addon}/resep', [\App\Http\Controllers\Dashboard\HppController::class, 'simpanResepAddon'])->name('dashboard.hpp.resep_addon.store');
+    Route::delete('/resep-addon/{resep}', [\App\Http\Controllers\Dashboard\HppController::class, 'hapusResepAddon'])->name('dashboard.hpp.resep_addon.destroy');
     Route::put('/kalkulator/{varian}/konfigurasi', [\App\Http\Controllers\Dashboard\HppController::class, 'updateKonfigurasiHarga'])->name('dashboard.hpp.konfigurasi');
     Route::put('/kalkulator/{varian}/rekomendasi', [\App\Http\Controllers\Dashboard\HppController::class, 'terapkanHargaRekomendasi'])->name('dashboard.hpp.rekomendasi');
 

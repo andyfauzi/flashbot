@@ -128,6 +128,35 @@ class TransaksiController extends Controller
                                 Produk::where('id', $produk->id)->increment('stok', $item->jumlah);
                             }
                         }
+
+                        // Kembalikan Stok Add-ons
+                        if (!empty($item->addons)) {
+                            $addonsList = is_string($item->addons) ? json_decode($item->addons, true) : $item->addons;
+                            if (is_array($addonsList)) {
+                                foreach ($addonsList as $addonInfo) {
+                                    $addonId = $addonInfo['id'] ?? null;
+                                    if ($addonId) {
+                                        $addon = \App\Models\ProdukAddon::find($addonId);
+                                        if ($addon && $addon->reseps) {
+                                            foreach ($addon->reseps as $r) {
+                                                $qtyKembali = $r->qty_dipakai * $item->jumlah;
+                                                $bahanBaku = BahanBaku::lockForUpdate()->find($r->bahan_baku_id);
+                                                if ($bahanBaku) {
+                                                    $bahanBaku->increment('stok', $qtyKembali);
+                                                    StokBahanHistory::create([
+                                                        'bahan_baku_id' => $bahanBaku->id,
+                                                        'user_id' => $userId,
+                                                        'tipe' => 'penyesuaian',
+                                                        'qty' => $qtyKembali,
+                                                        'keterangan' => 'Pengembalian Batal Add-on (Restock) Struk #' . $pesanan->nomor_order
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
