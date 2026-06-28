@@ -29,6 +29,17 @@ class TransaksiController extends Controller
                   ->orWhere('nomor_wa', 'like', '%' . $search . '%');
             });
         }
+        
+        $status = $request->input('status', 'semua');
+        if ($status !== 'semua') {
+            if ($status === 'aktif') {
+                $query->whereNotIn('status', ['completed', 'lunas', 'selesai', 'dikirim', 'paid', 'cancelled', 'batal', 'dibatalkan']);
+            } elseif ($status === 'selesai') {
+                $query->whereIn('status', ['completed', 'lunas', 'selesai', 'dikirim', 'paid']);
+            } elseif ($status === 'batal') {
+                $query->whereIn('status', ['cancelled', 'batal', 'dibatalkan']);
+            }
+        }
 
         $transaksis = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
         
@@ -61,7 +72,7 @@ class TransaksiController extends Controller
             return (object) ['tanggal' => $tanggal, 'total' => $total];
         })->values();
 
-        return view('dashboard.transaksi.index', compact('transaksis', 'search', 'statistik', 'grafikPenjualan', 'range'));
+        return view('dashboard.transaksi.index', compact('transaksis', 'search', 'statistik', 'grafikPenjualan', 'range', 'status'));
     }
 
     public function cancel(Request $request, $id)

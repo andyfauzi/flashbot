@@ -79,6 +79,35 @@
 </div>
 @endif
 
+@php
+    $currentStatus = request('status', 'semua');
+@endphp
+<div class="d-flex flex-nowrap overflow-auto mb-3 pb-2 filter-tabs-container" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'semua']) }}" 
+       class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'semua' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+        Semua Pesanan
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'aktif']) }}" 
+       class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'aktif' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+        <i class="fa-solid fa-spinner fa-spin me-1" style="{{ $currentStatus === 'aktif' ? '' : 'display:none;' }}"></i>Aktif / Proses
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'selesai']) }}" 
+       class="btn rounded-pill px-4 me-2 flex-shrink-0 {{ $currentStatus === 'selesai' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+        Selesai / Lunas
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'batal']) }}" 
+       class="btn rounded-pill px-4 flex-shrink-0 {{ $currentStatus === 'batal' ? 'btn-primary fw-bold' : 'btn-white bg-white border text-secondary' }}">
+        Dibatalkan
+    </a>
+</div>
+
+<style>
+    /* Hide scrollbar for the tabs but keep functionality */
+    .filter-tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-0">
         <div class="table-responsive">

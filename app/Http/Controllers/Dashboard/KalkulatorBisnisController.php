@@ -12,32 +12,58 @@ class KalkulatorBisnisController extends Controller
 {
     public function index()
     {
-        // 1. Get average selling price
-        $avgHargaJual = Produk::where('aktif', true)->avg('harga') ?? 0;
-        
-        // 2. Get average HPP (from varians if available, otherwise 0 or a fallback)
-        $avgHpp = ProdukVarian::where('hpp', '>', 0)->avg('hpp') ?? 0;
-        
-        // If no HPP data exists, fallback to an estimate (e.g., 40% of selling price)
-        if ($avgHpp == 0) {
-            $avgHpp = $avgHargaJual * 0.4;
+        $produksAktif = Produk::where('aktif', true)->get();
+        if ($produksAktif->isEmpty()) {
+            return view('dashboard.kalkulator.index', [
+                'produks' => []
+            ]);
         }
         
-        $produks = Produk::with('varians')->where('aktif', true)->get()->map(function($p) {
+        $pesananItems = \App\Models\PesananItem::whereHas('pesanan', function($q) {
+            $q->whereIn('status', ['selesai', 'lunas'])
+              ->whereMonth('created_at', now()->month)
+              ->whereYear('created_at', now()->year);
+        })
+        ->join('pesanans', 'pesanan_items.pesanan_id', '=', 'pesanans.id')
+        ->select('pesanan_items.produk_id', DB::raw('DATE(pesanans.created_at) as date'), DB::raw('SUM(pesanan_items.jumlah) as total_terjual'))
+        ->groupBy('pesanan_items.produk_id', DB::raw('DATE(pesanans.created_at)'))
+        ->get();
+        
+        $salesDataByDate = [];
+        $soldThisMonth = [];
+        
+        foreach($pesananItems as $item) {
+            $date = $item->date;
+            $pid = $item->produk_id;
+            $qty = (int) $item->total_terjual;
+            
+            if(!isset($salesDataByDate[$date])) {
+                $salesDataByDate[$date] = [];
+            }
+            $salesDataByDate[$date][$pid] = $qty;
+            $soldThisMonth[$pid] = ($soldThisMonth[$pid] ?? 0) + $qty;
+        }
+        
+        $produks = Produk::with('varians')->where('aktif', true)->get()->map(function($p) use ($soldThisMonth) {
             $avgVarianHpp = $p->varians->where('hpp', '>', 0)->avg('hpp');
             if (!$avgVarianHpp || $avgVarianHpp == 0) {
                 $avgVarianHpp = $p->harga * 0.4; // fallback
             }
             return [
+                'id' => $p->id,
                 'nama' => $p->nama,
                 'harga' => $p->harga,
                 'hpp' => $avgVarianHpp,
-                'margin' => $p->harga - $avgVarianHpp
+                'margin' => $p->harga - $avgVarianHpp,
+                'terjual' => $soldThisMonth[$p->id] ?? 0
             ];
         })->filter(function($p) {
             return $p['harga'] > 0;
         })->values();
         
-        return view('dashboard.kalkulator.index', compact('avgHargaJual', 'avgHpp', 'produks'));
+        return view('dashboard.kalkulator.index', [
+            'produks' => array_values($produks->toArray()),
+            'salesDataByDate' => $salesDataByDate
+        ]);
     }
 }

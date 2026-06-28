@@ -8,47 +8,35 @@
         <h3 class="fw-bold m-0"><i class="fa-solid fa-calculator me-2 text-primary"></i>Kalkulator Bisnis & BEP</h3>
     </div>
 
-    <div class="row g-4">
+    <div class="row mb-4">
         <!-- Input Parameter -->
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
                     <h5 class="fw-bold m-0 text-primary">Parameter Simulasi</h5>
                 </div>
                 <div class="card-body">
-                    <form id="kalkulatorForm">
-                        <div class="mb-3">
+                    <form id="kalkulatorForm" class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Target Profit Bulanan (Rp)</label>
                             <input type="number" id="targetProfit" class="form-control form-control-lg" value="5000000" min="0">
                             <small class="text-muted">Berapa laba bersih yang ingin Anda capai bulan ini?</small>
                         </div>
                         
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">Total Biaya Tetap (Fixed Cost) Bulanan</label>
                             <input type="number" id="fixedCost" class="form-control form-control-lg" value="2000000" min="0">
                             <small class="text-muted">Contoh: Sewa tempat, Gaji karyawan tetap, Wifi bulanan.</small>
-                        </div>
-                        
-                        <hr>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Rata-rata Harga Jual per Porsi (Rp)</label>
-                            <input type="number" id="avgHargaJual" class="form-control form-control-lg" value="{{ round($avgHargaJual) }}">
-                            <small class="text-muted">Diambil dari rata-rata harga menu Anda.</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Rata-rata Modal / HPP per Porsi (Rp)</label>
-                            <input type="number" id="avgHpp" class="form-control form-control-lg text-danger" value="{{ round($avgHpp) }}">
-                            <small class="text-muted">Diambil dari estimasi HPP resep bahan baku.</small>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        
+    </div>
+    
+    <div class="row">
         <!-- Hasil Simulasi -->
-        <div class="col-md-7">
+        <div class="col-12">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="fw-bold m-0 text-success">Hasil Simulasi Target</h5>
@@ -99,8 +87,17 @@
             </div>
             
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="fw-bold m-0 text-primary"><i class="fa-solid fa-bullseye me-2"></i>Breakdown Target Penjualan (Asumsi Terjual Rata)</h5>
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap">
+                    <h5 class="fw-bold m-0 text-primary mb-2 mb-md-0"><i class="fa-solid fa-bullseye me-2"></i>Breakdown Target Penjualan</h5>
+                    
+                    <div class="d-flex align-items-center">
+                        <label class="fw-bold me-2 text-muted small mb-0">Filter Aktual:</label>
+                        <div class="input-group input-group-sm w-auto shadow-sm">
+                            <span class="input-group-text bg-white border-end-0 text-primary"><i class="fa-regular fa-calendar"></i></span>
+                            <input type="date" id="dateFilter" class="form-control border-start-0 fw-bold text-primary" onchange="triggerRecalculate()" value="">
+                            <button class="btn btn-primary" type="button" onclick="document.getElementById('dateFilter').value=''; triggerRecalculate();">Total Bulan Ini</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -109,14 +106,24 @@
                                 <tr>
                                     <th>Menu / Produk</th>
                                     <th>Margin/Porsi</th>
-                                    <th class="text-center">Target /Bulan</th>
+                                    <th class="text-center" style="width: 150px;">Target /Bulan</th>
                                     <th class="text-center">Target /Hari</th>
+                                    <th class="text-center">Aktual Terjual</th>
                                     <th class="text-end">Potensi Omset</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Diisi via JS -->
                             </tbody>
+                            <tfoot class="bg-light fw-bold" id="tableBreakdownFoot">
+                                <tr>
+                                    <td colspan="2" class="text-end">TOTAL KESELURUHAN:</td>
+                                    <td class="text-center text-primary" id="tfootTotalBulan">0</td>
+                                    <td class="text-center text-info" id="tfootTotalHari">0</td>
+                                    <td class="text-center" id="tfootTotalAktual">0</td>
+                                    <td class="text-end text-muted" id="tfootTotalOmset">Rp 0</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -130,6 +137,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let bepChart;
+    const globalProduks = @json($produks ?? []);
+    const salesDataByDate = @json($salesDataByDate ?? []);
+    let manualTargets = {}; // { index: qty }
 
     function formatRp(angka) {
         return 'Rp ' + Math.round(angka).toLocaleString('id-ID');
@@ -138,10 +148,25 @@
     function hitungSimulasi() {
         const profit = parseFloat(document.getElementById('targetProfit').value) || 0;
         const fixedCost = parseFloat(document.getElementById('fixedCost').value) || 0;
-        const harga = parseFloat(document.getElementById('avgHargaJual').value) || 0;
-        const hpp = parseFloat(document.getElementById('avgHpp').value) || 0;
         
-        // 1. Margin per porsi
+        let sumHarga = 0;
+        let sumHpp = 0;
+        let productCount = globalProduks.length;
+        
+        if (productCount === 0) {
+            document.getElementById('resMarginPorsi').innerText = 'Tidak ada produk';
+            return;
+        }
+        
+        globalProduks.forEach(p => {
+            sumHarga += parseFloat(p.harga);
+            sumHpp += parseFloat(p.hpp);
+        });
+        
+        const harga = sumHarga / productCount;
+        const hpp = sumHpp / productCount;
+        
+        // 1. Margin rata-rata per porsi
         const margin = harga - hpp;
         
         if (margin <= 0) {
@@ -150,7 +175,7 @@
             return;
         }
         
-        document.getElementById('resMarginPorsi').innerText = formatRp(margin);
+        document.getElementById('resMarginPorsi').innerText = formatRp(margin) + ' (Rata-rata)';
         document.getElementById('resMarginPorsi').className = 'fw-bold text-success mb-0';
         
         // 2. BEP Unit (Balik Modal)
@@ -172,35 +197,169 @@
         document.getElementById('resOmset').innerText = formatRp(totalOmset);
         
         updateChart(bepUnit, targetUnit, fixedCost, margin, harga);
-        updateBreakdownTable(targetUnit);
+        
+        // Pass total margin required to the dynamic table function
+        const totalRequiredMargin = fixedCost + profit;
+        updateDynamicBreakdownTable(totalRequiredMargin);
     }
     
-    function updateBreakdownTable(totalTargetUnit) {
-        const produks = @json($produks ?? []);
+    function triggerRecalculate() {
+        const profit = parseFloat(document.getElementById('targetProfit').value) || 0;
+        const fixedCost = parseFloat(document.getElementById('fixedCost').value) || 0;
+        updateDynamicBreakdownTable(fixedCost + profit);
+    }
+
+    function setManualTarget(index, value) {
+        if (value === '' || isNaN(value)) {
+            delete manualTargets[index];
+        } else {
+            manualTargets[index] = parseFloat(value);
+            if (manualTargets[index] < 0) manualTargets[index] = 0;
+        }
+        triggerRecalculate();
+    }
+    
+    function resetManualTarget(index) {
+        delete manualTargets[index];
+        triggerRecalculate();
+    }
+    
+    function updateDynamicBreakdownTable(totalRequiredMargin) {
         const tbody = document.querySelector('#tableBreakdown tbody');
         tbody.innerHTML = '';
         
-        if (produks.length === 0) {
+        if (globalProduks.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Belum ada data produk aktif.</td></tr>';
             return;
         }
         
-        // Asumsi terjual rata (merata ke semua produk aktif)
-        const targetPerProduk = Math.ceil(totalTargetUnit / produks.length);
-        const targetHarian = Math.ceil(targetPerProduk / 30);
+        // 1. Hitung margin yang sudah dikunci oleh manual input
+        let lockedMargin = 0;
+        let lockedCount = 0;
         
-        produks.forEach(p => {
-            const potensiOmset = targetPerProduk * parseFloat(p.harga);
+        globalProduks.forEach((p, idx) => {
+            if (manualTargets[idx] !== undefined) {
+                lockedMargin += (manualTargets[idx] * p.margin);
+                lockedCount++;
+            }
+        });
+        
+        // 2. Sisa margin yang harus dibagi ke produk yang belum dilock
+        let remainingMargin = totalRequiredMargin - lockedMargin;
+        if (remainingMargin < 0) remainingMargin = 0;
+        
+        const unlockedCount = globalProduks.length - lockedCount;
+        
+        // 3. Hitung target per produk yang unlocked
+        let targetPerUnlocked = 0;
+        if (unlockedCount > 0) {
+            let sumUnlockedMargin = 0;
+            globalProduks.forEach((p, idx) => {
+                if (manualTargets[idx] === undefined) {
+                    sumUnlockedMargin += p.margin;
+                }
+            });
+            
+            if (sumUnlockedMargin > 0) {
+                targetPerUnlocked = Math.ceil(remainingMargin / sumUnlockedMargin);
+            }
+        }
+        
+        const filterDate = document.getElementById('dateFilter').value;
+        const isDaily = filterDate !== '';
+        
+        let totalTargetBulan = 0;
+        let totalTargetHari = 0;
+        let totalAktual = 0;
+        let totalPotensiOmset = 0;
+        let totalMarginGained = 0;
+        
+        globalProduks.forEach((p, idx) => {
+            const isLocked = manualTargets[idx] !== undefined;
+            const targetBulan = isLocked ? manualTargets[idx] : targetPerUnlocked;
+            const targetHarian = Math.ceil(targetBulan / 30);
+            
+            let aktual = 0;
+            if (isDaily) {
+                aktual = (salesDataByDate[filterDate] && salesDataByDate[filterDate][p.id]) ? salesDataByDate[filterDate][p.id] : 0;
+            } else {
+                aktual = p.terjual || 0;
+            }
+            
+            const targetCompare = isDaily ? targetHarian : targetBulan;
+            const potensiOmset = targetBulan * parseFloat(p.harga);
+            
+            totalTargetBulan += targetBulan;
+            totalTargetHari += targetHarian;
+            totalAktual += aktual;
+            totalPotensiOmset += potensiOmset;
+            totalMarginGained += (targetBulan * p.margin);
+            
             const tr = document.createElement('tr');
+            if (isLocked) {
+                tr.className = 'table-primary bg-opacity-10'; // highlight if locked
+            }
+            
+            let statusBadge = '';
+            let targetInputClass = '';
+            
+            if (aktual >= targetCompare) {
+                statusBadge = `<span class="badge bg-success w-100 p-2"><i class="fa-solid fa-circle-check me-1"></i> ${aktual} Porsi</span>`;
+                targetInputClass = 'text-success'; 
+            } else {
+                statusBadge = `<span class="badge bg-danger w-100 p-2"><i class="fa-solid fa-circle-xmark me-1"></i> ${aktual} Porsi</span><div class="text-muted small mt-1">Kurang ${targetCompare - aktual}</div>`;
+                targetInputClass = 'text-danger'; 
+            }
+            
+            // Override input color if viewing daily, just keep it blue/gray since input is for monthly target
+            if (isDaily) targetInputClass = isLocked ? 'text-primary' : 'text-muted';
+            
             tr.innerHTML = `
-                <td class="fw-bold">${p.nama}</td>
-                <td class="text-success">${formatRp(p.margin)}</td>
-                <td class="text-center fw-bold text-primary">${targetPerProduk.toLocaleString('id-ID')}</td>
-                <td class="text-center">${targetHarian.toLocaleString('id-ID')}</td>
-                <td class="text-end text-muted">${formatRp(potensiOmset)}</td>
+                <td class="fw-bold align-middle">
+                    ${p.nama}
+                    ${isLocked ? '<span class="badge bg-primary ms-2" style="font-size:0.6rem"><i class="fa-solid fa-lock"></i> Fixed</span>' : ''}
+                </td>
+                <td class="text-success align-middle">${formatRp(p.margin)}</td>
+                <td class="align-middle">
+                    <div class="input-group input-group-sm">
+                        <input type="number" class="form-control text-center fw-bold ${targetInputClass}" 
+                               value="${targetBulan}" min="0" onchange="setManualTarget(${idx}, this.value)" onkeyup="if(event.key==='Enter') setManualTarget(${idx}, this.value)">
+                        ${isLocked ? `<button class="btn btn-outline-danger" type="button" onclick="resetManualTarget(${idx})" title="Buka Kunci"><i class="fa-solid fa-unlock"></i></button>` : ''}
+                    </div>
+                </td>
+                <td class="text-center align-middle fw-bold text-info">${targetHarian.toLocaleString('id-ID')}</td>
+                <td class="text-center align-middle">${statusBadge}</td>
+                <td class="text-end text-muted align-middle">${formatRp(potensiOmset)}</td>
             `;
             tbody.appendChild(tr);
         });
+        
+        const targetTotalCompare = isDaily ? totalTargetHari : totalTargetBulan;
+        
+        // Update footer totals
+        document.getElementById('tfootTotalBulan').innerText = totalTargetBulan.toLocaleString('id-ID');
+        document.getElementById('tfootTotalHari').innerText = totalTargetHari.toLocaleString('id-ID');
+        document.getElementById('tfootTotalAktual').innerHTML = `<span class="${totalAktual >= targetTotalCompare ? 'text-success' : 'text-danger'}">${totalAktual.toLocaleString('id-ID')}</span>`;
+        document.getElementById('tfootTotalOmset').innerText = formatRp(totalPotensiOmset);
+        
+        // Sync Top Cards to reflect manual targets!
+        const fixedCost = parseFloat(document.getElementById('fixedCost').value) || 0;
+        const projectedProfit = totalMarginGained - fixedCost;
+        
+        const resSumProfitEl = document.getElementById('resSumProfit');
+        if (resSumProfitEl) resSumProfitEl.innerText = formatRp(projectedProfit);
+        
+        const resTargetUnitEl = document.getElementById('resTargetUnit');
+        if (resTargetUnitEl) resTargetUnitEl.innerText = totalTargetBulan.toLocaleString('id-ID') + ' Porsi';
+        
+        const resSumTargetEl = document.getElementById('resSumTarget');
+        if (resSumTargetEl) resSumTargetEl.innerText = totalTargetBulan.toLocaleString('id-ID');
+        
+        const resSumTargetDayEl = document.getElementById('resSumTargetDay');
+        if (resSumTargetDayEl) resSumTargetDayEl.innerText = Math.ceil(totalTargetBulan / 30).toLocaleString('id-ID');
+        
+        const resOmsetEl = document.getElementById('resOmset');
+        if (resOmsetEl) resOmsetEl.innerText = formatRp(totalPotensiOmset);
     }
     
     function updateChart(bep, target, fc, margin, harga) {
