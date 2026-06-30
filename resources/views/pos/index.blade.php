@@ -101,7 +101,10 @@
         <!-- Kolom Kiri: Produk & Kategori -->
         <div class="col-md-8">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                <h4 class="fw-bold mb-2 mb-md-0" id="mainTitle"><i class="fa-solid fa-tags me-2"></i>Pilih Kategori</h4>
+                <h4 class="fw-bold mb-2 mb-md-0 d-flex align-items-center" id="mainTitle">
+                    <i class="fa-solid fa-tags me-2"></i>Pilih Kategori
+                    <span id="networkBadge" class="badge bg-success ms-3" style="font-size: 0.5em; vertical-align: middle;">Online</span>
+                </h4>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-secondary btn-sm d-none" id="btnBackToCategory" onclick="showCategories()">
                         <i class="fa-solid fa-arrow-left me-1"></i> Kembali
@@ -375,7 +378,69 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
 <script>
+    // Inisialisasi Service Worker & Network Listener
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+
+    function updateNetworkStatus() {
+        const badge = document.getElementById('networkBadge');
+        if (navigator.onLine) {
+            badge.className = 'badge bg-success ms-3';
+            badge.innerText = 'Online';
+            syncOfflineOrders();
+        } else {
+            badge.className = 'badge bg-danger ms-3';
+            badge.innerText = 'Offline Mode';
+        }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    
+    // Inisialisasi LocalForage untuk antrian offline
+    localforage.config({
+        name: 'FlashbotPOS',
+        storeName: 'offline_orders'
+    });
+
+    async function syncOfflineOrders() {
+        const keys = await localforage.keys();
+        if (keys.length === 0) return;
+        
+        console.log('Syncing ' + keys.length + ' offline orders...');
+        for (let key of keys) {
+            const orderData = await localforage.getItem(key);
+            if (orderData) {
+                try {
+                    const response = await fetch("{{ route('pos.store') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+                    
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        await localforage.removeItem(key);
+                        console.log('Synced order: ' + key);
+                    }
+                } catch (e) {
+                    console.error('Failed to sync order: ' + key, e);
+                }
+            }
+        }
+    }
     let cart = {};
     let modalVarian;
     let currentTotal = 0;
@@ -412,6 +477,9 @@
             cart = {};
             localStorage.removeItem('pos_cart');
         }
+
+        // Jalankan pengecekan status jaringan saat pertama dimuat
+        updateNetworkStatus();
 
         @if(isset($editOrder) && $editOrder)
             // Auto-fill cart from Voided Order
@@ -838,27 +906,49 @@
         btnBayar.disabled = true;
         btnBayar.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> MEMPROSES...';
 
+        const payloadData = {
+            nama_penerima: nama,
+            nomor_wa: nomor_wa,
+            metode_pembayaran: metode,
+            is_preorder: is_preorder,
+            tanggal_diambil: tanggal_diambil,
+            uang_muka: uang_muka,
+            meja_id: meja_id,
+            gunakan_dp: !document.getElementById('dpContainer').classList.contains('d-none') && document.getElementById('gunakan_dp').checked,
+            cart: cartArray
+        };
+
+        if (!navigator.onLine) {
+            // Mode Offline: Simpan ke IndexedDB
+            const orderId = 'OFFLINE-' + Date.now();
+            localforage.setItem(orderId, payloadData).then(() => {
+                Swal.fire('Disimpan Offline', 'Anda sedang offline. Pesanan disimpan secara lokal dan akan disinkronisasi saat online.', 'info').then(() => {
+                    cart = {};
+                    saveCart();
+                    window.location.reload();
+                });
+            }).catch((err) => {
+                Swal.fire('Error', 'Gagal menyimpan pesanan secara offline.', 'error');
+                btnBayar.disabled = false;
+                btnBayar.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i> BAYAR SEKARANG';
+            });
+            return;
+        }
+
         fetch("{{ route('pos.store') }}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({
-                nama_penerima: nama,
-                nomor_wa: nomor_wa,
-                metode_pembayaran: metode,
-                is_preorder: is_preorder,
-                tanggal_diambil: tanggal_diambil,
-                uang_muka: uang_muka,
-                meja_id: meja_id,
-                gunakan_dp: !document.getElementById('dpContainer').classList.contains('d-none') && document.getElementById('gunakan_dp').checked,
-                cart: cartArray
-            })
+            body: JSON.stringify(payloadData)
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
+                // Hapus keranjang karena sukses
+                cart = {};
+                saveCart();
                 // Tampilkan struk dalam Modal (Pop up)
                 document.getElementById('printIframe').src = "{{ url('pos/print') }}/" + data.pesanan_id;
                 var printModal = new bootstrap.Modal(document.getElementById('printModal'));
@@ -870,9 +960,19 @@
             }
         })
         .catch(err => {
-            Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
-            btnBayar.disabled = false;
-            btnBayar.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i> BAYAR SEKARANG';
+            // Jika fetch gagal (karena masalah jaringan/DevTools offline), simpan pesanan ke offline
+            const orderId = 'OFFLINE-' + Date.now();
+            localforage.setItem(orderId, payloadData).then(() => {
+                Swal.fire('Disimpan Offline', 'Gagal terhubung ke server. Pesanan disimpan secara lokal dan akan disinkronisasi otomatis.', 'info').then(() => {
+                    cart = {};
+                    saveCart();
+                    window.location.reload();
+                });
+            }).catch(() => {
+                Swal.fire('Error', 'Terjadi kesalahan jaringan dan gagal menyimpan data lokal.', 'error');
+                btnBayar.disabled = false;
+                btnBayar.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i> BAYAR SEKARANG';
+            });
         });
     }
 

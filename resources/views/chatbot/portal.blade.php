@@ -6,6 +6,7 @@
     <title>Portal Pemesanan Mandiri - {{ $identitas->nama_toko ?? 'Toko NINSKY' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         :root {
             @if(isset($identitas->tema_portal) && $identitas->tema_portal === 'warm')
@@ -565,6 +566,15 @@
         .add-to-cart-btn:hover {
             background: var(--primary-dark);
             transform: scale(1.1);
+        }
+
+        @keyframes cartBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .bounce-animation {
+            animation: cartBounce 0.4s ease;
         }
 
         /* products-list Layout overrides */
@@ -1527,6 +1537,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- Cloudflare Turnstile -->
+                <div class="form-group" style="margin-top: 16px;">
+                    <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY', '1x00000000000000000000AA') }}"></div>
+                </div>
             </form>
             <div class="checkout-modal-footer">
                 <button type="button" class="btn btn-cancel" onclick="closeCheckoutModal()">Batal</button>
@@ -1611,6 +1625,10 @@
                 <div class="form-group">
                     <label for="resCatatan">Catatan Tambahan</label>
                     <textarea class="form-control" id="resCatatan" placeholder="Contoh: Kursi bayi, dekat jendela, ulang tahun..."></textarea>
+                </div>
+                <!-- Cloudflare Turnstile -->
+                <div class="form-group" style="margin-top: 16px;">
+                    <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY', '1x00000000000000000000AA') }}"></div>
                 </div>
             </form>
             <div class="checkout-modal-footer">
@@ -1785,7 +1803,13 @@
 
         // Add to Cart Action
         function addToCart(productId, productName, basePrice, imageUrl) {
-            const parentCard = event.target.closest('.product-card');
+            const btnElement = event.target;
+            btnElement.classList.add('bounce-animation');
+            setTimeout(() => {
+                btnElement.classList.remove('bounce-animation');
+            }, 400);
+
+            const parentCard = btnElement.closest('.product-card');
             const variantSelect = parentCard.querySelector('.variant-select');
             
             let varianId = null;
@@ -2033,6 +2057,7 @@
             const tanggalInput = document.getElementById('inputTanggal');
             const alamatInput = document.getElementById('inputAlamat');
             
+            const turnstileResponse = document.querySelector('#checkoutForm [name="cf-turnstile-response"]')?.value || '';
             const payload = {
                 nama_penerima: document.getElementById('inputName').value,
                 nomor_wa: document.getElementById('inputPhone').value,
@@ -2041,10 +2066,11 @@
                 tanggal_diambil: tanggalInput ? tanggalInput.value : null,
                 metode_pembayaran: metodePembayaran,
                 meja_id: mejaIdInput ? mejaIdInput.value : null,
-                cart: cart
+                cart: cart,
+                'cf-turnstile-response': turnstileResponse
             };
 
-            fetch('/portal/order', {
+            fetch('{{ route("portal.checkout", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2293,6 +2319,7 @@
                 return;
             }
 
+            const turnstileResponse = document.querySelector('#reservasiForm [name="cf-turnstile-response"]')?.value || '';
             const payload = {
                 nama_pelanggan: document.getElementById('resName').value,
                 nomor_telepon: document.getElementById('resPhone').value,
@@ -2300,7 +2327,8 @@
                 jumlah_orang: document.getElementById('resPax').value,
                 meja_id: document.getElementById('resMejaId').value || null,
                 catatan: document.getElementById('resCatatan').value,
-                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'cf-turnstile-response': turnstileResponse
             };
 
             fetch('{{ route("portal.reservasi", ["nama_toko_slug" => request()->route("nama_toko_slug")]) }}', {

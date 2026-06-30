@@ -9,9 +9,13 @@ module.exports = {
       max_memory_restart: "1G", // Otomatis restart proses jika menggunakan RAM lebih dari 1GB
       env: {
         NODE_ENV: "development",
+        APP_URL: "http://127.0.0.1:8082",
+        LARAVEL_WEBHOOK_URL: "http://127.0.0.1:8082/webhook/whatsapp",
       },
       env_production: {
         NODE_ENV: "production",
+        APP_URL: "http://127.0.0.1:8082",
+        LARAVEL_WEBHOOK_URL: "http://127.0.0.1:8082/webhook/whatsapp",
       },
       // Error handling dan logs
       error_file: "../storage/logs/baileys-error.log",

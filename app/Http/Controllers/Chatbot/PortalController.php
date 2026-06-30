@@ -57,6 +57,24 @@ class PortalController extends Controller
     {
         $tenant = $this->requireTenant();
 
+        // Validasi Turnstile
+        $turnstileResponse = $request->input('cf-turnstile-response');
+        $secretKey = env('TURNSTILE_SECRET_KEY', '1x0000000000000000000000000000000AA');
+
+        if (!$turnstileResponse) {
+            return response()->json(['status' => 'error', 'message' => 'Validasi keamanan (Turnstile) diperlukan.'], 403);
+        }
+
+        $verifyResponse = \Illuminate\Support\Facades\Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret' => $secretKey,
+            'response' => $turnstileResponse,
+            'remoteip' => $request->ip()
+        ]);
+
+        if (!$verifyResponse->successful() || !($verifyResponse->json()['success'] ?? false)) {
+            return response()->json(['status' => 'error', 'message' => 'Verifikasi keamanan gagal. Anda terdeteksi sebagai bot.'], 403);
+        }
+
         $validated = $request->validate([
             'nama_penerima'     => 'required|string|max:100',
             'nomor_wa'          => 'nullable|string|max:20', // nomor wa optional untuk dine-in
@@ -294,6 +312,24 @@ class PortalController extends Controller
     {
         $tenant = $this->requireTenant();
         
+        // Validasi Turnstile
+        $turnstileResponse = $request->input('cf-turnstile-response');
+        $secretKey = env('TURNSTILE_SECRET_KEY', '1x0000000000000000000000000000000AA');
+
+        if (!$turnstileResponse) {
+            return response()->json(['status' => 'error', 'message' => 'Validasi keamanan (Turnstile) diperlukan.'], 403);
+        }
+
+        $verifyResponse = \Illuminate\Support\Facades\Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret' => $secretKey,
+            'response' => $turnstileResponse,
+            'remoteip' => $request->ip()
+        ]);
+
+        if (!$verifyResponse->successful() || !($verifyResponse->json()['success'] ?? false)) {
+            return response()->json(['status' => 'error', 'message' => 'Verifikasi keamanan gagal. Anda terdeteksi sebagai bot.'], 403);
+        }
+
         $validated = $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
             'nomor_telepon'  => 'required|string|max:50',
