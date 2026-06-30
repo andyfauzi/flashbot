@@ -873,6 +873,103 @@
         localStorage.setItem('pos_cart', JSON.stringify(cart));
     }
 
+    function showOfflineReceipt(orderId, payloadData, infoMessage) {
+        let receiptHtml = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Offline - ${orderId}</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #000; padding: 10px; width: 100%; max-width: 300px; margin: 0 auto; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .fw-bold { font-weight: bold; }
+        .border-top { border-top: 1px dashed #000; }
+        .border-bottom { border-bottom: 1px dashed #000; }
+        .my-2 { margin-top: 10px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { vertical-align: top; padding: 2px 0; }
+        .print-btn { color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-family: Arial, sans-serif; width: 100%; font-size: 14px; font-weight: bold; background-color: #3b82f6; }
+        .btn-close { background-color: #6c757d; }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="print-btn" onclick="window.print()">🖨️ Cetak (Offline)</button>
+        <button class="print-btn btn-close" onclick="if(window.parent && typeof window.parent.closePrintModal === 'function') { window.parent.closePrintModal(); } else { window.parent.location.reload(); }">❌ Tutup</button>
+        <hr style="margin-bottom: 20px; border-top: 1px solid #ccc;">
+    </div>
+    <div class="text-center mb-2">
+        <h2 class="fw-bold my-2" style="font-size: 16px;">TENANTA POS (OFFLINE)</h2>
+        <div>Mode Luring - Belum Tersinkronisasi</div>
+    </div>
+    <div class="border-top border-bottom my-2" style="padding: 5px 0;">
+        <table style="font-size: 11px;">
+            <tr><td>No. Order</td><td>:</td><td>${orderId}</td></tr>
+            <tr><td>Pelanggan</td><td>:</td><td>${payloadData.nama_penerima || '-'}</td></tr>
+        </table>
+    </div>
+    <div class="mb-2">
+        <table style="font-size: 11px;">`;
+        let totalBelanja = 0;
+        Object.values(cart).forEach(item => {
+            let sub = item.qty * item.harga;
+            totalBelanja += sub;
+            receiptHtml += `
+            <tr><td colspan="3" class="fw-bold">${item.nama}</td></tr>
+            <tr>
+                <td width="20%">${item.qty}x</td>
+                <td width="40%">Rp ${item.harga.toLocaleString('id-ID')}</td>
+                <td width="40%" class="text-right">Rp ${sub.toLocaleString('id-ID')}</td>
+            </tr>`;
+        });
+        receiptHtml += `
+        </table>
+    </div>
+    <div class="border-top my-2" style="padding-top: 5px;">
+        <table style="font-size: 11px;">
+            <tr>
+                <td class="fw-bold" style="font-size: 12px;">TOTAL BAYAR</td>
+                <td class="fw-bold text-right" style="font-size: 12px;">Rp ${totalBelanja.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr><td>Pembayaran</td><td class="text-right">${payloadData.metode_pembayaran.toUpperCase()}</td></tr>
+        </table>
+    </div>
+    <div class="text-center border-top my-2" style="padding-top: 10px; font-size:11px;">
+        <div>--- Transaksi Offline ---</div>
+    </div>
+    <script>
+        // Override parent function if needed
+        if(window.parent) {
+            window.parent.closePrintModal = function() {
+                var modal = window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('printModal'));
+                if(modal) modal.hide();
+                window.parent.location.reload();
+            };
+        }
+    <\/script>
+</body>
+</html>`;
+
+        Swal.fire('Disimpan Offline', infoMessage, 'info').then(() => {
+            const iframe = document.getElementById('printIframe');
+            iframe.removeAttribute('src'); 
+            iframe.srcdoc = receiptHtml;
+            var printModal = new bootstrap.Modal(document.getElementById('printModal'));
+            printModal.show();
+            
+            document.getElementById('printModal').addEventListener('hidden.bs.modal', function () {
+                window.location.reload();
+            }, { once: true });
+            
+            cart = {};
+            saveCart();
+        });
+    }
+
     function prosesPembayaran() {
         if (Object.keys(cart).length === 0) return;
 
@@ -922,11 +1019,7 @@
             // Mode Offline: Simpan ke IndexedDB
             const orderId = 'OFFLINE-' + Date.now();
             localforage.setItem(orderId, payloadData).then(() => {
-                Swal.fire('Disimpan Offline', 'Anda sedang offline. Pesanan disimpan secara lokal dan akan disinkronisasi saat online.', 'info').then(() => {
-                    cart = {};
-                    saveCart();
-                    window.location.reload();
-                });
+                showOfflineReceipt(orderId, payloadData, 'Anda sedang offline. Pesanan disimpan secara lokal dan akan disinkronisasi saat online.');
             }).catch((err) => {
                 Swal.fire('Error', 'Gagal menyimpan pesanan secara offline.', 'error');
                 btnBayar.disabled = false;
@@ -963,11 +1056,7 @@
             // Jika fetch gagal (karena masalah jaringan/DevTools offline), simpan pesanan ke offline
             const orderId = 'OFFLINE-' + Date.now();
             localforage.setItem(orderId, payloadData).then(() => {
-                Swal.fire('Disimpan Offline', 'Gagal terhubung ke server. Pesanan disimpan secara lokal dan akan disinkronisasi otomatis.', 'info').then(() => {
-                    cart = {};
-                    saveCart();
-                    window.location.reload();
-                });
+                showOfflineReceipt(orderId, payloadData, 'Gagal terhubung ke server. Pesanan disimpan secara lokal dan akan disinkronisasi otomatis.');
             }).catch(() => {
                 Swal.fire('Error', 'Terjadi kesalahan jaringan dan gagal menyimpan data lokal.', 'error');
                 btnBayar.disabled = false;

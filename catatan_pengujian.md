@@ -15,7 +15,7 @@ Pengujian ini bertujuan untuk memastikan fitur kasir dapat berjalan dengan baik 
   - [x] Memastikan produk bisa ditambahkan ke keranjang.
   - [ ] Memastikan kalkulasi harga, diskon, dan pajak (jika ada) berjalan akurat.
   - [x] Memastikan pembayaran bisa diproses dan transaksi berhasil disimpan secara lokal.
-- [ ] **Pencetakan Struk**: Memastikan struk pembayaran dapat dicetak ke printer kasir lokal meskipun offline.
+- [x] **Pencetakan Struk**: Memastikan struk pembayaran dapat dicetak ke printer kasir lokal meskipun offline.
 - [ ] **Sinkronisasi Transaksi (Online Kembali)**: Memastikan semua transaksi yang terjadi saat offline otomatis dikirim ke server pusat (tersinkronisasi) setelah koneksi internet kembali pulih.
 
 ---
