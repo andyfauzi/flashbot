@@ -16,18 +16,17 @@ Pengujian ini bertujuan untuk memastikan fitur kasir dapat berjalan dengan baik 
   - [ ] Memastikan kalkulasi harga, diskon, dan pajak (jika ada) berjalan akurat.
   - [x] Memastikan pembayaran bisa diproses dan transaksi berhasil disimpan secara lokal.
 - [x] **Pencetakan Struk**: Memastikan struk pembayaran dapat dicetak ke printer kasir lokal meskipun offline.
-- [ ] **Sinkronisasi Transaksi (Online Kembali)**: Memastikan semua transaksi yang terjadi saat offline otomatis dikirim ke server pusat (tersinkronisasi) setelah koneksi internet kembali pulih.
+- [x] **Sinkronisasi Transaksi (Online Kembali)**: Memastikan semua transaksi yang terjadi saat offline otomatis dikirim ke server pusat (tersinkronisasi) setelah koneksi internet kembali pulih.
 
 ---
 
-## 2. Pengujian Cloudflare (Tugas Berikutnya)
+## 2. Pengujian Cloudflare Turnstile
 
-Pengujian ini akan dilakukan pada tahap selanjutnya untuk memastikan aplikasi dapat diakses secara publik dan aman menggunakan jaringan Cloudflare.
+Pengujian ini memastikan sistem keamanan anti-bot dari Cloudflare (Turnstile) telah terpasang dan berfungsi dengan baik pada formulir yang rawan diserang bot (misal: halaman Reservasi/Pemesanan).
 
-### Skenario Uji Cloudflare:
+### Skenario Uji Cloudflare Turnstile:
 
-- [ ] **Setup Cloudflare Tunnel / DNS**: Memastikan konfigurasi tunnel atau DNS dari server lokal/hosting ke Cloudflare berjalan tanpa masalah.
-- [ ] **Aksesibilitas Eksternal**: Memastikan aplikasi Flashbot dapat diakses dari internet luar melalui domain yang dikelola Cloudflare.
-- [ ] **Pengujian SSL/HTTPS**: Memastikan semua lalu lintas web terenkripsi dengan aman dan sertifikat SSL dari Cloudflare aktif.
-- [ ] **Uji Kinerja & Caching**: Memastikan aset-aset statis (gambar, CSS, JS) di-cache secara efisien oleh Edge Network Cloudflare.
-- [ ] **Fungsi Web Socket (Opsional)**: Jika aplikasi kasir memerlukan sinkronisasi real-time via WebSocket, pastikan lalu lintas WebSocket diizinkan dan berjalan lancar melalui proksi Cloudflare.
+- [x] **Tampilan Widget**: Memastikan widget Turnstile (kotak verifikasi "Verify you are human") muncul dengan sempurna di halaman formulir pemesanan.
+- [x] **Validasi Gagal (Bot)**: Memastikan formulir tidak dapat dikirim (atau ditolak oleh backend) jika *challenge* dari Turnstile diabaikan atau gagal.
+- [x] **Validasi Sukses (Manusia)**: Memastikan proses *checkout* atau pemesanan berhasil dikirim ke server ketika widget Turnstile telah sukses diverifikasi (centang hijau).
+- [x] **Integrasi Localhost**: Memastikan Turnstile dapat digunakan untuk proses pengetesan di lingkungan *development* (`localhost`) dengan menggunakan *dummy key* atau pengakuan *hostname* lokal.

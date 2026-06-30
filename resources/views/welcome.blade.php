@@ -291,7 +291,7 @@
                 <!-- Starter Plan -->
                 <div class="col-lg-4 col-md-6">
                     <div class="pricing-card">
-                        <h4 class="fw-bold text-success mb-3">Starter</h4>
+                        <h4 class="fw-bold text-success mb-3">Starter <span style="font-size: 0.6em; color: #6c757d; font-weight: normal;">(POS & Chatbot)</span></h4>
                         <div class="price-amount mb-0">{{ $settings['price_starter'] ?? 'Rp 99.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
                             $discount_percent_starter = (float)(\App\Models\LandlordSetting::get('discount_yearly_starter', 20));
@@ -361,7 +361,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="pricing-card popular">
                         <div class="popular-badge">Paling Populer</div>
-                        <h4 class="fw-bold text-primary mb-3">Pro</h4>
+                        <h4 class="fw-bold text-primary mb-3">Pro <span style="font-size: 0.6em; color: #6c757d; font-weight: normal;">(POS & Chatbot)</span></h4>
                         <div class="price-amount mb-0">{{ $settings['price_pro'] ?? 'Rp 199.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
                             $discount_percent_pro = (float)(\App\Models\LandlordSetting::get('discount_yearly_pro', 20));
@@ -430,7 +430,7 @@
                 <!-- Business Plan -->
                 <div class="col-lg-4 col-md-6">
                     <div class="pricing-card border-dark border-opacity-10">
-                        <h4 class="fw-bold text-dark mb-3">Business</h4>
+                        <h4 class="fw-bold text-dark mb-3">Business <span style="font-size: 0.6em; color: #6c757d; font-weight: normal;">(POS & Chatbot)</span></h4>
                         <div class="price-amount mb-0">{{ $settings['price_business'] ?? 'Rp 499.000' }} <span class="fs-6 text-muted fw-normal">/bulan</span></div>
                         @php
                             $discount_percent_business = (float)(\App\Models\LandlordSetting::get('discount_yearly_business', 20));

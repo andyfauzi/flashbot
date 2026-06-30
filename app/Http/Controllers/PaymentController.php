@@ -49,12 +49,13 @@ class PaymentController extends Controller
         return null;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $tenant = $this->resolveTenant($request);
+
         // Pastikan kita di landlord context sebelum query
         TenantManager::switchToLandlord();
 
-        $tenant = $this->resolveTenant();
         if (!$tenant) {
             abort(403, 'Toko tidak ditemukan. Pastikan Anda login dengan email yang benar.');
         }
@@ -109,10 +110,15 @@ class PaymentController extends Controller
     {
         $request->validate([
             'voucher_code' => 'required|string',
-            'plan' => 'required|in:starter,pro,business',
+            'plan' => 'required|in:starter,pro,business'
         ]);
 
+        $tenant = $this->resolveTenant($request);
         TenantManager::switchToLandlord();
+
+        if (!$tenant) {
+            return response()->json(['error' => 'Toko tidak ditemukan.'], 403);
+        }
 
         $voucher = SalesVoucher::where('kode_voucher', strtoupper($request->voucher_code))
             ->where('is_active', true)
@@ -155,11 +161,12 @@ class PaymentController extends Controller
 
         $duration = $request->input('duration', 'monthly');
 
+        // Resolve tenant dengan metode yang aman sebelum switch context
+        $tenant = $this->resolveTenant($request);
+
         // Pastikan kita di landlord context sebelum query apapun
         TenantManager::switchToLandlord();
 
-        // Resolve tenant dengan metode yang aman
-        $tenant = $this->resolveTenant($request);
         if (!$tenant) {
             Log::error('Billing checkout: Tenant tidak ditemukan.', [
                 'user_email' => auth()->user()->email ?? 'unknown',
@@ -255,6 +262,14 @@ class PaymentController extends Controller
             'transaction_details' => [
                 'order_id'     => $orderId,
                 'gross_amount' => $amount,
+            ],
+            'item_details' => [
+                [
+                    'id'       => 'PLAN-' . strtoupper($request->plan) . '-' . $duration,
+                    'price'    => $amount,
+                    'quantity' => 1,
+                    'name'     => 'Langganan Tenanta POS & Chatbot - Paket ' . ucfirst($request->plan) . ' (' . $duration . ' Bulan)',
+                ]
             ],
             'customer_details' => [
                 'first_name' => $tenant->name,
