@@ -111,22 +111,22 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Gratis</label>
-                        <input type="number" class="form-control" name="limit_karyawan_gratis" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_gratis', 1) }}" min="1">
+                        <input type="number" class="form-control" name="limit_karyawan_gratis" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_gratis', 1) }}" min="0">
                         <small class="text-muted">Misal: 1 (Hanya Owner)</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Starter</label>
-                        <input type="number" class="form-control" name="limit_karyawan_starter" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_starter', 2) }}" min="1">
+                        <input type="number" class="form-control" name="limit_karyawan_starter" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_starter', 2) }}" min="0">
                         <small class="text-muted">Misal: 2</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Pro</label>
-                        <input type="number" class="form-control" name="limit_karyawan_pro" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_pro', 10) }}" min="1">
+                        <input type="number" class="form-control" name="limit_karyawan_pro" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_pro', 10) }}" min="0">
                         <small class="text-muted">Misal: 10</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Business</label>
-                        <input type="number" class="form-control" name="limit_karyawan_business" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_business', 999) }}" min="1">
+                        <input type="number" class="form-control" name="limit_karyawan_business" value="{{ \App\Models\LandlordSetting::get('limit_karyawan_business', 999) }}" min="0">
                         <small class="text-muted">Isi angka besar (999) untuk Unlimited</small>
                     </div>
                 </div>
@@ -179,22 +179,22 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Gratis</label>
-                        <input type="number" class="form-control" name="limit_device_gratis" value="{{ \App\Models\LandlordSetting::get('limit_device_gratis', 1) }}" min="1">
+                        <input type="number" class="form-control" name="limit_device_gratis" value="{{ \App\Models\LandlordSetting::get('limit_device_gratis', 1) }}" min="0">
                         <small class="text-muted">Misal: 1</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Starter</label>
-                        <input type="number" class="form-control" name="limit_device_starter" value="{{ \App\Models\LandlordSetting::get('limit_device_starter', 1) }}" min="1">
+                        <input type="number" class="form-control" name="limit_device_starter" value="{{ \App\Models\LandlordSetting::get('limit_device_starter', 1) }}" min="0">
                         <small class="text-muted">Misal: 1</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Pro</label>
-                        <input type="number" class="form-control" name="limit_device_pro" value="{{ \App\Models\LandlordSetting::get('limit_device_pro', 3) }}" min="1">
+                        <input type="number" class="form-control" name="limit_device_pro" value="{{ \App\Models\LandlordSetting::get('limit_device_pro', 3) }}" min="0">
                         <small class="text-muted">Misal: 3</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Paket Business</label>
-                        <input type="number" class="form-control" name="limit_device_business" value="{{ \App\Models\LandlordSetting::get('limit_device_business', 10) }}" min="1">
+                        <input type="number" class="form-control" name="limit_device_business" value="{{ \App\Models\LandlordSetting::get('limit_device_business', 10) }}" min="0">
                         <small class="text-muted">Misal: 10</small>
                     </div>
                 </div>
