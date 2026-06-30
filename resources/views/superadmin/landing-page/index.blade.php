@@ -213,7 +213,13 @@
                 <div class="mb-3">
                     <label class="form-label">Detail Rekening Bank / Pembayaran</label>
                     <textarea class="form-control" name="payment_instructions" rows="4" placeholder="Contoh: BCA 123456789 a/n PT Tenanta">{{ $settings['payment_instructions'] ?? "BCA: 1234567890\nMandiri: 0987654321\nA.n PT Tenanta Inovasi" }}</textarea>
-                    <div class="form-text">Instruksi ini akan ditampilkan di halaman langganan tenant.</div>
+                    <div class="form-text mb-3">Instruksi ini akan ditampilkan di halaman langganan tenant.</div>
+                    
+                    <div class="form-check form-switch mt-2">
+                        <input type="hidden" name="show_payment_info_on_landing_page" value="0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="show_payment_info_on_landing_page" name="show_payment_info_on_landing_page" value="1" {{ ($settings['show_payment_info_on_landing_page'] ?? '1') == '1' ? 'checked' : '' }}>
+                        <label class="form-check-label fw-bold" for="show_payment_info_on_landing_page">Tampilkan Informasi Pembayaran di Footer Landing Page</label>
+                    </div>
                 </div>
             </div>
 

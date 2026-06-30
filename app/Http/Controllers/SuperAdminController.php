@@ -477,15 +477,17 @@ class SuperAdminController extends Controller
             'starter_enabled' => false,
             'pro_enabled' => false,
             'business_enabled' => false,
+            'show_on_landing_page' => false,
         ]);
 
-        $plans = ['gratis', 'starter', 'pro', 'business'];
+        $plans = ['gratis', 'starter', 'pro', 'business', 'landing'];
 
         foreach ($plans as $plan) {
             if ($request->has($plan) && is_array($request->$plan)) {
                 $menuKeys = array_keys($request->$plan);
+                $field = $plan === 'landing' ? 'show_on_landing_page' : "{$plan}_enabled";
                 \App\Models\PackageMenu::whereIn('menu_key', $menuKeys)->update([
-                    "{$plan}_enabled" => true
+                    $field => true
                 ]);
             }
         }
@@ -551,6 +553,11 @@ class SuperAdminController extends Controller
 
         // Save Show Package Menus
         \App\Models\LandlordSetting::set('show_package_menus_on_pricing', $request->has('show_package_menus_on_pricing') ? '1' : '0');
+
+        // Save Show Limits on Landing Page (Individual)
+        \App\Models\LandlordSetting::set('show_limit_karyawan', $request->has('show_limit_karyawan') ? '1' : '0');
+        \App\Models\LandlordSetting::set('show_limit_wa', $request->has('show_limit_wa') ? '1' : '0');
+        \App\Models\LandlordSetting::set('show_limit_device', $request->has('show_limit_device') ? '1' : '0');
 
         // Save Fallback Payment
         if ($request->has('payment_instructions_fallback')) {

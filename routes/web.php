@@ -12,6 +12,16 @@ Route::get('/debug-php', function () {
     return response()->json(get_loaded_extensions());
 });
 
+Route::get('/run-migration', function () {
+    if (!\Illuminate\Support\Facades\Schema::connection('landlord')->hasColumn('package_menus', 'show_on_landing_page')) {
+        \Illuminate\Support\Facades\Schema::connection('landlord')->table('package_menus', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->boolean('show_on_landing_page')->default(true)->after('business_enabled');
+        });
+        return "Column added.";
+    }
+    return "Column already exists.";
+});
+
 Route::get('/', function () {
     if (app()->has('current_tenant')) {
         return redirect()->route('portal.index', ['nama_toko_slug' => app('current_tenant')->subdomain]);

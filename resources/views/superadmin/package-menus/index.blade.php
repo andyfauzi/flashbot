@@ -21,12 +21,13 @@
                             <th class="text-center" style="width: 15%">Starter</th>
                             <th class="text-center" style="width: 15%">Pro</th>
                             <th class="text-center" style="width: 15%">Business</th>
+                            <th class="text-center" style="width: 15%">Tampil di<br>Landing Page</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($menus as $category => $items)
                             <tr class="table-active">
-                                <td colspan="5" class="fw-bold">
+                                <td colspan="6" class="fw-bold">
                                     <i data-lucide="folder" class="me-2" style="width: 18px; height: 18px;"></i>
                                     {{ $category ?: 'Lainnya' }}
                                 </td>
@@ -55,6 +56,11 @@
                                         <input class="form-check-input category-toggle" type="checkbox" data-category="{{ Str::slug($category) }}" data-plan="business">
                                     </div>
                                 </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-flex justify-content-center">
+                                        <input class="form-check-input category-toggle" type="checkbox" data-category="{{ Str::slug($category) }}" data-plan="landing">
+                                    </div>
+                                </td>
                             </tr>
 
                             @foreach($items as $menu)
@@ -80,6 +86,11 @@
                                             <input class="form-check-input checkbox-{{ Str::slug($category) }}-business" type="checkbox" name="business[{{ $menu->menu_key }}]" value="1" {{ $menu->business_enabled ? 'checked' : '' }}>
                                         </div>
                                     </td>
+                                    <td class="text-center bg-light">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            <input class="form-check-input checkbox-{{ Str::slug($category) }}-landing" type="checkbox" name="landing[{{ $menu->menu_key }}]" value="1" {{ $menu->show_on_landing_page ? 'checked' : '' }}>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endforeach
@@ -89,7 +100,13 @@
 
             <!-- Tambahan: Batas Maksimal Karyawan -->
             <div class="mt-5 mb-4">
-                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-users-gear me-2"></i> Pengaturan Batas Maksimal Karyawan</h5>
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-users-gear me-2"></i> Pengaturan Batas Maksimal Karyawan</h5>
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="show_limit_karyawan" name="show_limit_karyawan" value="1" {{ \App\Models\LandlordSetting::get('show_limit_karyawan', '1') == '1' ? 'checked' : '' }}>
+                        <label class="form-check-label text-muted small" for="show_limit_karyawan">Tampil di Landing Page</label>
+                    </div>
+                </div>
                 <p class="text-muted small">Tentukan berapa banyak akun karyawan (kasir/manajer) yang bisa dibuat oleh tenant berdasarkan paket langganannya.</p>
                 <div class="row g-3">
                     <div class="col-md-3">
@@ -115,9 +132,15 @@
                 </div>
             </div>
 
-            <!-- Tambahan: Rate Limiting / Kuota Bot WA -->
+            <!-- Tambahan: Kuota Balasan Bot WA -->
             <div class="mt-5 mb-4">
-                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-robot me-2"></i> Pengaturan Kuota Balasan Bot WA (Per Bulan)</h5>
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-robot me-2"></i> Pengaturan Kuota Balasan Bot WA (Per Bulan)</h5>
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="show_limit_wa" name="show_limit_wa" value="1" {{ \App\Models\LandlordSetting::get('show_limit_wa', '1') == '1' ? 'checked' : '' }}>
+                        <label class="form-check-label text-muted small" for="show_limit_wa">Tampil di Landing Page</label>
+                    </div>
+                </div>
                 <p class="text-muted small">Tentukan berapa maksimal pesan bot yang dapat dikirim oleh tenant setiap bulan.</p>
                 <div class="row g-3">
                     <div class="col-md-3">
@@ -145,7 +168,13 @@
 
             <!-- Tambahan: Batas Device / Koneksi WA -->
             <div class="mt-5 mb-4">
-                <h5 class="fw-bold text-primary border-bottom pb-2"><i class="fa-solid fa-mobile-screen me-2"></i> Pengaturan Batas Maksimal Device WA</h5>
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-mobile-screen me-2"></i> Pengaturan Batas Maksimal Device WA</h5>
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="show_limit_device" name="show_limit_device" value="1" {{ \App\Models\LandlordSetting::get('show_limit_device', '1') == '1' ? 'checked' : '' }}>
+                        <label class="form-check-label text-muted small" for="show_limit_device">Tampil di Landing Page</label>
+                    </div>
+                </div>
                 <p class="text-muted small">Tentukan berapa banyak nomor/koneksi WhatsApp (Device) yang bisa ditambahkan oleh tenant.</p>
                 <div class="row g-3">
                     <div class="col-md-3">
@@ -179,7 +208,7 @@
                     <div class="col-md-6">
                         <div class="form-check form-switch mt-2">
                             <input class="form-check-input" type="checkbox" role="switch" id="show_package_menus_on_pricing" name="show_package_menus_on_pricing" value="1" {{ \App\Models\LandlordSetting::get('show_package_menus_on_pricing', '1') == '1' ? 'checked' : '' }}>
-                            <label class="form-check-label fw-bold" for="show_package_menus_on_pricing">Tampilkan Detail Hak Akses Menu</label>
+                            <label class="form-check-label fw-bold" for="show_package_menus_on_pricing">Tampilkan Fitur Paket (Collapse Menu) pada Kartu Harga</label>
                         </div>
                     </div>
                 </div>
