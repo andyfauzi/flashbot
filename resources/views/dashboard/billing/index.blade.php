@@ -103,9 +103,7 @@
                                         Tahunan: Rp {{ number_format($priceStarterYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentStarter }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        @foreach($featuresStarter as $feature)
-                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
-                                        @endforeach
+
 
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">
@@ -133,9 +131,7 @@
                                         Tahunan: Rp {{ number_format($priceProYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentPro }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        @foreach($featuresPro as $feature)
-                                        <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
-                                        @endforeach
+
 
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">
@@ -174,9 +170,7 @@
                                         Tahunan: Rp {{ number_format($priceBusinessYearly, 0, ',', '.') }} /thn (Hemat {{ $discountPercentBusiness }}%)
                                     </div>
                                     <ul class="list-unstyled text-start small mb-4">
-                                        @foreach($featuresBusiness as $feature)
-                                        <li class="mb-2"><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
-                                        @endforeach
+
 
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">

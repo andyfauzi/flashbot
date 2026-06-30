@@ -408,14 +408,7 @@
                             @endif
                         </div>
                         <hr class="text-muted opacity-25">
-                        <ul class="feature-list">
-                            @foreach(explode("\n", $settings['features_starter'] ?? "1 Cabang Toko\nFitur Kasir Dasar\nLaporan Standar") as $feature)
-                                @if(trim($feature))
-                                    <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
-                                @endif
-                            @endforeach
 
-                        </ul>
                     </div>
                 </div>
 
@@ -441,14 +434,7 @@
                             @endif
                         </div>
                         <hr class="text-muted opacity-25">
-                        <ul class="feature-list">
-                            @foreach(explode("\n", $settings['features_pro'] ?? "5 Cabang Toko\nFitur Manufaktur\nBot WhatsApp") as $feature)
-                                @if(trim($feature))
-                                    <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
-                                @endif
-                            @endforeach
 
-                        </ul>
                     </div>
                 </div>
 
@@ -473,14 +459,7 @@
                             @endif
                         </div>
                         <hr class="text-muted opacity-25">
-                        <ul class="feature-list">
-                            @foreach(explode("\n", $settings['features_business'] ?? "Unlimited Cabang\nPrioritas Support\nWhite Label") as $feature)
-                                @if(trim($feature))
-                                    <li><i class="fa-solid fa-check-circle"></i> {{ trim($feature) }}</li>
-                                @endif
-                            @endforeach
 
-                        </ul>
                     </div>
                 </div>
             </div>
