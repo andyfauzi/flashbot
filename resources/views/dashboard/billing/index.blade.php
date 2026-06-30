@@ -106,44 +106,7 @@
                                         @foreach($featuresStarter as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
-                                            <div class="collapse" id="collapseStarterMenus">
-                                                <ul class="list-unstyled text-start small mb-2">
-                                                @foreach($packageMenus as $menu)
-                                                    <li class="mb-2">
-                                                        @if($menu->starter_enabled)
-                                                            <i class="fa-solid fa-check text-success me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                        @else
-                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
-                                                </ul>
-                                            </div>
-                                            <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseStarterMenus" role="button" aria-expanded="false" aria-controls="collapseStarterMenus" class="text-success text-decoration-none fw-bold small collapse-toggle-btn">
-                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
-                                                </a>
-                                            </div>
-                                        @endif
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-users text-success me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_karyawan_starter'] ?? 2) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_starter'] ?? 2) }} Akun Karyawan
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-robot text-success me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_wa_starter'] ?? 1000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_starter'] ?? 1000), 0, ',', '.') }} Pesan Bot WA/bln
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-mobile-screen text-success me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_device_starter'] ?? 1) >= 999 ? 'Unlimited' : ($settings['limit_device_starter'] ?? 1) }} Device WA
-                                            </span>
-                                        </li>
+
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">
                                         <button class="btn btn-outline-success w-100 rounded-pill btn-upgrade fw-bold" data-plan="starter" data-duration="monthly">
@@ -173,44 +136,7 @@
                                         @foreach($featuresPro as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
-                                            <div class="collapse" id="collapseProMenus">
-                                                <ul class="list-unstyled text-start small mb-2">
-                                                @foreach($packageMenus as $menu)
-                                                    <li class="mb-2">
-                                                        @if($menu->pro_enabled)
-                                                            <i class="fa-solid fa-check text-primary me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                        @else
-                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
-                                                </ul>
-                                            </div>
-                                            <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseProMenus" role="button" aria-expanded="false" aria-controls="collapseProMenus" class="text-primary text-decoration-none fw-bold small collapse-toggle-btn">
-                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
-                                                </a>
-                                            </div>
-                                        @endif
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-users text-primary me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_karyawan_pro'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_pro'] ?? 10) }} Akun Karyawan
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-robot text-primary me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_wa_pro'] ?? 5000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_pro'] ?? 5000), 0, ',', '.') }} Pesan Bot WA/bln
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-mobile-screen text-primary me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_device_pro'] ?? 3) >= 999 ? 'Unlimited' : ($settings['limit_device_pro'] ?? 3) }} Device WA
-                                            </span>
-                                        </li>
+
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">
                                         <button class="btn btn-outline-primary w-100 rounded-pill btn-upgrade fw-bold" data-plan="pro" data-duration="monthly">
@@ -251,44 +177,7 @@
                                         @foreach($featuresBusiness as $feature)
                                         <li class="mb-2"><i class="fa-solid fa-check text-dark me-2"></i>{{ $feature }}</li>
                                         @endforeach
-                                        @if(($settings['show_package_menus_on_pricing'] ?? '1') == '1' && isset($packageMenus))
-                                            <div class="collapse" id="collapseBusinessMenus">
-                                                <ul class="list-unstyled text-start small mb-2">
-                                                @foreach($packageMenus as $menu)
-                                                    <li class="mb-2">
-                                                        @if($menu->business_enabled)
-                                                            <i class="fa-solid fa-check text-dark me-2"></i> <span class="text-dark">{{ $menu->menu_label }}</span>
-                                                        @else
-                                                            <i class="fa-solid fa-xmark text-muted me-2"></i> <span class="text-muted text-decoration-line-through">{{ $menu->menu_label }}</span>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
-                                                </ul>
-                                            </div>
-                                            <div class="text-center mb-3">
-                                                <a data-bs-toggle="collapse" href="#collapseBusinessMenus" role="button" aria-expanded="false" aria-controls="collapseBusinessMenus" class="text-dark text-decoration-none fw-bold small collapse-toggle-btn">
-                                                    Lihat Semua Fitur <i class="fa-solid fa-chevron-down"></i>
-                                                </a>
-                                            </div>
-                                        @endif
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-users text-dark me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_karyawan_business'] ?? 999) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_business'] ?? 999) }} Akun Karyawan
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-robot text-dark me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_wa_business'] ?? 999999) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_business'] ?? 999999), 0, ',', '.') }} Pesan Bot WA/bln
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fa-solid fa-mobile-screen text-dark me-2"></i> 
-                                            <span class="text-dark">
-                                                {{ ($settings['limit_device_business'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_device_business'] ?? 10) }} Device WA
-                                            </span>
-                                        </li>
+
                                     </ul>
                                     <div class="d-flex flex-column gap-2 mt-auto pt-3">
                                         <button class="btn btn-outline-dark w-100 rounded-pill btn-upgrade fw-bold" data-plan="business" data-duration="monthly">
@@ -302,6 +191,102 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Comparison Table for Billing Page -->
+                    @if(isset($packageMenus) && count($packageMenus) > 0)
+                    <div class="row mt-5 mb-3">
+                        <div class="col-12">
+                            <h5 class="fw-bold text-muted mb-3">Bandingkan Semua Fitur</h5>
+                            <div class="table-responsive bg-white rounded-4 shadow-sm border">
+                                <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                                    <thead>
+                                        <tr class="bg-light">
+                                            <th class="py-3 px-4 w-40 border-0 fw-semibold text-secondary" style="position: sticky; left: 0; background-color: #f8fafc; z-index: 2;">Fitur Utama</th>
+                                            <th class="text-center py-3 px-4 w-20 border-0 text-success fw-bold">Starter</th>
+                                            <th class="text-center py-3 px-4 w-20 border-0 text-primary fw-bold">Pro</th>
+                                            <th class="text-center py-3 px-4 w-20 border-0 text-dark fw-bold">Business</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Limit Karyawan -->
+                                        @if(($settings['show_limit_karyawan'] ?? '1') == '1')
+                                        <tr>
+                                            <td class="py-3 px-4 fw-medium" style="position: sticky; left: 0; background-color: #fff; z-index: 1;"><i class="fa-solid fa-users text-muted me-2"></i> Limit Karyawan</td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_karyawan_starter'] ?? 2) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_karyawan_starter'] ?? 2) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_starter'] ?? 2) }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_karyawan_pro'] ?? 10) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_karyawan_pro'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_pro'] ?? 10) }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_karyawan_business'] ?? 999) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_karyawan_business'] ?? 999) >= 999 ? 'Unlimited' : ($settings['limit_karyawan_business'] ?? 999) }} @endif
+                                            </td>
+                                        </tr>
+                                        @endif
+                                        
+                                        <!-- Limit Bot WA -->
+                                        @if(($settings['show_limit_wa'] ?? '1') == '1')
+                                        <tr>
+                                            <td class="py-3 px-4 fw-medium" style="position: sticky; left: 0; background-color: #fff; z-index: 1;"><i class="fa-solid fa-robot text-muted me-2"></i> Pesan Bot WA/bln</td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_wa_starter'] ?? 1000) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_wa_starter'] ?? 1000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_starter'] ?? 1000), 0, ',', '.') }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_wa_pro'] ?? 5000) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_wa_pro'] ?? 5000) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_pro'] ?? 5000), 0, ',', '.') }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold">
+                                                @if(($settings['limit_wa_business'] ?? 999999) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_wa_business'] ?? 999999) >= 999999 ? 'Unlimited' : number_format((int)($settings['limit_wa_business'] ?? 999999), 0, ',', '.') }} @endif
+                                            </td>
+                                        </tr>
+                                        @endif
+                                        
+                                        <!-- Limit Device WA -->
+                                        @if(($settings['show_limit_device'] ?? '1') == '1')
+                                        <tr>
+                                            <td class="py-3 px-4 fw-medium border-bottom-0" style="position: sticky; left: 0; background-color: #fff; z-index: 1;"><i class="fa-solid fa-mobile-screen text-muted me-2"></i> Device WA Terhubung</td>
+                                            <td class="text-center py-3 px-4 fw-bold border-bottom-0">
+                                                @if(($settings['limit_device_starter'] ?? 1) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_device_starter'] ?? 1) >= 999 ? 'Unlimited' : ($settings['limit_device_starter'] ?? 1) }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold border-bottom-0">
+                                                @if(($settings['limit_device_pro'] ?? 3) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_device_pro'] ?? 3) >= 999 ? 'Unlimited' : ($settings['limit_device_pro'] ?? 3) }} @endif
+                                            </td>
+                                            <td class="text-center py-3 px-4 fw-bold border-bottom-0">
+                                                @if(($settings['limit_device_business'] ?? 10) == 0) <i class="fa-solid fa-xmark text-muted opacity-50 fs-5"></i>
+                                                @else {{ ($settings['limit_device_business'] ?? 10) >= 999 ? 'Unlimited' : ($settings['limit_device_business'] ?? 10) }} @endif
+                                            </td>
+                                        </tr>
+                                        @endif
+                                        
+                                        <tr><td colspan="4" class="bg-light py-2 px-4 text-muted small fw-semibold text-uppercase">Rincian Fitur Modul</td></tr>
+
+                                        @foreach($packageMenus as $menu)
+                                            <tr>
+                                                <td class="py-3 px-4 fw-medium" style="position: sticky; left: 0; background-color: #fff; z-index: 1;">{{ $menu->menu_label }}</td>
+                                                <td class="text-center py-3 px-4">
+                                                    @if($menu->starter_enabled) <i class="fa-solid fa-check text-success fs-5"></i> @else <i class="fa-solid fa-xmark text-muted opacity-50"></i> @endif
+                                                </td>
+                                                <td class="text-center py-3 px-4">
+                                                    @if($menu->pro_enabled) <i class="fa-solid fa-check text-primary fs-5"></i> @else <i class="fa-solid fa-xmark text-muted opacity-50"></i> @endif
+                                                </td>
+                                                <td class="text-center py-3 px-4">
+                                                    @if($menu->business_enabled) <i class="fa-solid fa-check text-dark fs-5"></i> @else <i class="fa-solid fa-xmark text-muted opacity-50"></i> @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
