@@ -315,6 +315,7 @@
                         <tr><td colspan="4" class="bg-light py-2 px-4 text-muted small fw-semibold text-uppercase">Rincian Fitur Modul</td></tr>
 
                         @foreach($packageMenus as $menu)
+                            @if($menu->show_on_landing_page)
                             <tr>
                                 <td class="py-3 px-4 fw-medium" style="position: sticky; left: 0; background-color: #fff; z-index: 1;">{{ $menu->menu_label }}</td>
                                 <td class="text-center py-3 px-4">
@@ -327,6 +328,7 @@
                                     @if($menu->business_enabled) <i class="fa-solid fa-check text-dark fs-5"></i> @else <i class="fa-solid fa-xmark text-muted opacity-50"></i> @endif
                                 </td>
                             </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
