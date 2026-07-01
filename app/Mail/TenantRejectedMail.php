@@ -30,7 +30,7 @@ class TenantRejectedMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Informasi Pendaftaran Toko - Flashbot')
+        return $this->subject('Informasi Pendaftaran Toko - Tenanta.id')
                     ->view('emails.tenant.rejected');
     }
 }

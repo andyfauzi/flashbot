@@ -30,7 +30,7 @@ class TenantRegistrationReceivedMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pendaftaran Toko Anda Sedang Diproses - Flashbot')
+        return $this->subject('Pendaftaran Toko Anda Sedang Diproses - Tenanta.id')
                     ->view('emails.tenant.registration_received');
     }
 }

@@ -92,7 +92,7 @@
         <div style="text-align: center;">
             @php
                 $protocol = request()->isSecure() ? 'https://' : 'http://';
-                $appDomain = env('APP_DOMAIN', 'flashbot.id');
+                $appDomain = env('APP_DOMAIN', 'tenanta.id');
                 $dashboardUrl = $protocol . $tenant->subdomain . '.' . $appDomain;
             @endphp
             <a href="{{ $dashboardUrl }}" class="btn">Buka Dashboard Toko</a>

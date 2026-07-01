@@ -35,7 +35,7 @@ class TenantApprovedMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pendaftaran Toko Anda Telah Disetujui! - Flashbot')
+        return $this->subject('Pendaftaran Toko Anda Telah Disetujui! - Tenanta.id')
                     ->view('emails.tenant.approved');
     }
 }
